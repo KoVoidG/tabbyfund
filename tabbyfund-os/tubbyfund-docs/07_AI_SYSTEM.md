@@ -1,0 +1,1148 @@
+\# TABBYFUND MASTER PROMPT
+
+\## Part 7 — AI Integration, AI Behavior \& Prompt Engineering
+
+
+
+\# Philosophy
+
+
+
+Artificial Intelligence is an assistant.
+
+
+
+It is never the final decision maker.
+
+
+
+Medical decisions always belong to verified veterinarians.
+
+
+
+The purpose of AI is to:
+
+
+
+• reduce response time
+
+
+
+• prioritize rescue cases
+
+
+
+• educate community members
+
+
+
+• assist administrators
+
+
+
+• improve user experience
+
+
+
+AI should never:
+
+
+
+Diagnose diseases.
+
+
+
+Guarantee medical conditions.
+
+
+
+Replace veterinary professionals.
+
+
+
+Recommend medications.
+
+
+
+Promise treatment outcomes.
+
+
+
+Generate false confidence.
+
+
+
+When uncertain,
+
+
+
+AI should clearly admit uncertainty.
+
+
+
+\---
+
+
+
+\# AI Architecture
+
+
+
+All AI requests must happen server-side.
+
+
+
+Never expose API keys.
+
+
+
+Never call Gemini directly from the browser.
+
+
+
+Architecture
+
+
+
+Client
+
+
+
+↓
+
+
+
+Next.js Server Action
+
+
+
+↓
+
+
+
+Gemini Service
+
+
+
+↓
+
+
+
+Structured JSON
+
+
+
+↓
+
+
+
+Validation
+
+
+
+↓
+
+
+
+Database
+
+
+
+↓
+
+
+
+UI
+
+
+
+Never allow raw AI responses directly into the UI.
+
+
+
+\---
+
+
+
+\# AI Provider
+
+
+
+Primary
+
+
+
+Google Gemini Flash
+
+
+
+Future
+
+
+
+Allow replacement with:
+
+
+
+Gemini Pro
+
+
+
+GPT
+
+
+
+Claude
+
+
+
+Open-source models
+
+
+
+The rest of the application should never depend directly on Gemini.
+
+
+
+Always communicate through an AI Service Layer.
+
+
+
+\---
+
+
+
+\# AI Responsibilities
+
+
+
+The MVP AI performs only four responsibilities.
+
+
+
+1\.
+
+
+
+Severity Assessment
+
+
+
+2\.
+
+
+
+Visible Condition Classification
+
+
+
+3\.
+
+
+
+Basic Rescue Guidance
+
+
+
+4\.
+
+
+
+Natural Language Explanation
+
+
+
+Everything else is future work.
+
+
+
+\---
+
+
+
+\# AI Feature 1 — Severity Assessment
+
+
+
+Input
+
+
+
+Cat Image
+
+
+
+Reporter Description
+
+
+
+Output
+
+
+
+LOW
+
+
+
+MEDIUM
+
+
+
+HIGH
+
+
+
+CRITICAL
+
+
+
+Confidence
+
+
+
+0–100%
+
+
+
+Reasoning
+
+
+
+Human-readable explanation
+
+
+
+Purpose
+
+
+
+Prioritize rescue cases.
+
+
+
+Never guarantee correctness.
+
+
+
+\---
+
+
+
+\# Severity Guidelines
+
+
+
+LOW
+
+
+
+Small scratches
+
+
+
+Healthy appearance
+
+
+
+Walking normally
+
+
+
+\---
+
+
+
+MEDIUM
+
+
+
+Visible limping
+
+
+
+Minor wounds
+
+
+
+Mild bleeding
+
+
+
+\---
+
+
+
+HIGH
+
+
+
+Large wounds
+
+
+
+Heavy limping
+
+
+
+Unable to move comfortably
+
+
+
+Large swelling
+
+
+
+\---
+
+
+
+CRITICAL
+
+
+
+Heavy bleeding
+
+
+
+Unconscious
+
+
+
+Difficulty breathing
+
+
+
+Major trauma
+
+
+
+Visible fractures
+
+
+
+Possible hit by vehicle
+
+
+
+These are guidance examples only.
+
+
+
+The AI should always explain why.
+
+
+
+\---
+
+
+
+\# AI Feature 2 — Condition Classification
+
+
+
+Possible Categories
+
+
+
+Open Wound
+
+
+
+Fracture
+
+
+
+Bleeding
+
+
+
+Eye Injury
+
+
+
+Malnutrition
+
+
+
+Skin Condition
+
+
+
+Road Accident
+
+
+
+Unknown
+
+
+
+The AI should avoid over-specific classifications.
+
+
+
+When uncertain:
+
+
+
+Return UNKNOWN.
+
+
+
+\---
+
+
+
+\# AI Feature 3 — Rescue Guidance
+
+
+
+Purpose
+
+
+
+Help reporters remain calm.
+
+
+
+Provide only safe first aid.
+
+
+
+Examples
+
+
+
+Keep the cat warm.
+
+
+
+Avoid chasing.
+
+
+
+Provide water if safe.
+
+
+
+Avoid feeding if severe injuries exist.
+
+
+
+Place in quiet area.
+
+
+
+Contact transporter.
+
+
+
+Never recommend medication.
+
+
+
+Never recommend surgery.
+
+
+
+Never encourage dangerous handling.
+
+
+
+\---
+
+
+
+\# AI Feature 4 — Explanation
+
+
+
+The AI should explain
+
+
+
+why
+
+
+
+it selected the severity.
+
+
+
+Example
+
+
+
+"The cat appears unable to stand and has visible bleeding near its hind leg.
+
+
+
+These observations suggest the case should receive urgent veterinary attention.
+
+
+
+Confidence: 81%."
+
+
+
+Never exaggerate certainty.
+
+
+
+\---
+
+
+
+\# AI Prompt Engineering
+
+
+
+The system prompt should emphasize:
+
+
+
+You are assisting a community rescue platform.
+
+
+
+You are NOT a veterinarian.
+
+
+
+Never diagnose.
+
+
+
+Never prescribe medicine.
+
+
+
+Never claim certainty.
+
+
+
+Return structured JSON only.
+
+
+
+Explain your reasoning simply.
+
+
+
+Prioritize safety.
+
+
+
+\---
+
+
+
+\# Expected JSON Response
+
+
+
+The AI must always return the following structure.
+
+
+
+{
+
+&#x20; "severity": "HIGH",
+
+&#x20; "confidence": 82,
+
+&#x20; "condition": "Open Wound",
+
+&#x20; "reasoning": "...",
+
+&#x20; "firstAid": \[
+
+&#x20;   "...",
+
+&#x20;   "...",
+
+&#x20;   "..."
+
+&#x20; ]
+
+}
+
+
+
+Never return Markdown.
+
+
+
+Never return plain paragraphs.
+
+
+
+Always return valid JSON.
+
+
+
+\---
+
+
+
+\# JSON Validation
+
+
+
+Validate using Zod.
+
+
+
+Reject responses that are missing:
+
+
+
+severity
+
+
+
+confidence
+
+
+
+condition
+
+
+
+reasoning
+
+
+
+firstAid
+
+
+
+If validation fails
+
+
+
+Retry once.
+
+
+
+If still invalid
+
+
+
+Mark AI unavailable.
+
+
+
+Never crash the application.
+
+
+
+\---
+
+
+
+\# AI Failure Handling
+
+
+
+If Gemini cannot respond
+
+
+
+Still create the rescue case.
+
+
+
+Store
+
+
+
+AI Status
+
+
+
+FAILED
+
+
+
+Display
+
+
+
+"AI analysis is currently unavailable.
+
+
+
+Your rescue report has still been submitted successfully."
+
+
+
+The rescue process must never stop because AI failed.
+
+
+
+\---
+
+
+
+\# Confidence Rules
+
+
+
+Above 85%
+
+
+
+Display
+
+
+
+High Confidence
+
+
+
+70–85%
+
+
+
+Display
+
+
+
+Moderate Confidence
+
+
+
+Below 70%
+
+
+
+Display
+
+
+
+Low Confidence
+
+
+
+Encourage veterinary review.
+
+
+
+\---
+
+
+
+\# AI Transparency
+
+
+
+Every AI-generated result should display
+
+
+
+"Generated by AI.
+
+
+
+Not a medical diagnosis.
+
+
+
+Final decisions belong to verified veterinarians."
+
+
+
+Transparency builds trust.
+
+
+
+\---
+
+
+
+\# AI Prioritization Logic
+
+
+
+The rescue feed should primarily sort by:
+
+
+
+Severity
+
+
+
+↓
+
+
+
+Report Time
+
+
+
+↓
+
+
+
+Distance
+
+
+
+↓
+
+
+
+Funding Status
+
+
+
+AI influences priority.
+
+
+
+It never hides cases.
+
+
+
+\---
+
+
+
+\# Future AI Features (Do Not Build for MVP)
+
+
+
+Breed detection
+
+
+
+Age estimation
+
+
+
+Body condition scoring
+
+
+
+Weight estimation
+
+
+
+Disease prediction
+
+
+
+Medical history analysis
+
+
+
+Vaccination recommendations
+
+
+
+Lost pet recognition
+
+
+
+Duplicate report detection using image similarity
+
+
+
+Shelter recommendation
+
+
+
+Volunteer matching
+
+
+
+Fraud detection
+
+
+
+Donation prediction
+
+
+
+Automatic multilingual translation
+
+
+
+These are intentionally excluded from the hackathon MVP.
+
+
+
+\---
+
+
+
+\# AI Security
+
+
+
+Never expose prompts.
+
+
+
+Never expose API keys.
+
+
+
+Never trust AI output.
+
+
+
+Validate every response.
+
+
+
+Escape all text before rendering.
+
+
+
+Log AI failures.
+
+
+
+Rate-limit requests.
+
+
+
+Prevent prompt injection by never allowing user instructions to directly modify the system prompt.
+
+
+
+\---
+
+
+
+\# AI Performance
+
+
+
+Cache identical image analyses when appropriate.
+
+
+
+Compress images before upload.
+
+
+
+Limit upload size.
+
+
+
+Avoid repeated analysis for the same case.
+
+
+
+Use asynchronous processing where possible.
+
+
+
+Show loading progress during analysis.
+
+
+
+\---
+
+
+
+\# AI Service Layer
+
+
+
+Create a dedicated AI service.
+
+
+
+Responsibilities
+
+
+
+Build prompts.
+
+
+
+Call Gemini.
+
+
+
+Validate JSON.
+
+
+
+Handle retries.
+
+
+
+Log errors.
+
+
+
+Return typed responses.
+
+
+
+No other part of the application should communicate directly with Gemini.
+
+
+
+\---
+
+
+
+\# AI Development Rules
+
+
+
+When implementing AI:
+
+
+
+Always separate prompt generation from API calls.
+
+
+
+Always validate responses.
+
+
+
+Always type responses.
+
+
+
+Never hardcode AI text into components.
+
+
+
+Keep prompt templates reusable.
+
+
+
+Document every prompt clearly.
+
+
+
+\---
+
+
+
+\# Demo Mode
+
+
+
+For hackathon demonstrations,
+
+
+
+provide a fallback mock AI response if the API is unavailable.
+
+
+
+The demo should always function even without an internet connection or AI service.
+
+
+
+This fallback should clearly indicate that it is simulated while preserving the same JSON structure used in production.
+
