@@ -100,7 +100,7 @@ export async function requireRole(
 
   // Step 5: Verification check (primarily for vets)
   if (options.requireVerified && !profile.is_verified) {
-    redirect("/vet-pending");
+    redirect("/vet");
   }
 
   return profile;

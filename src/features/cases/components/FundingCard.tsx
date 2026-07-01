@@ -5,14 +5,14 @@ import { HandCoins, Users, PartyPopper } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 import { DonationSheet } from "@/features/donation/components/DonationSheet";
-import type { DonationCase } from "@/features/donation/mock-data";
+import type { DonationSheetCaseData } from "@/features/donation/components/DonationSheet";
 
 interface FundingCardProps {
   goal: number;
   raised: number;
   donors: number;
   /** Optional case data to enable inline donation flow */
-  caseData?: DonationCase;
+  caseData?: DonationSheetCaseData;
 }
 
 /**

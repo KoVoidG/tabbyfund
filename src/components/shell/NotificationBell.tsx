@@ -1,62 +1,39 @@
 "use client";
 
-import { Bell, Truck, Stethoscope, HandCoins, Heart, CircleCheck } from "lucide-react";
+import { Bell, Truck, Stethoscope, HandCoins, Heart, Info } from "lucide-react";
+import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-/**
- * Mock notification data for demo purposes.
- * Will be replaced with real data from the notifications table later.
- */
-const mockNotifications = [
-  {
-    id: "1",
-    icon: Truck,
-    title: "Transport claimed",
-    message: "Prawit C. is transporting the cat from Sukhumvit.",
-    time: "2 hours ago",
-    read: false,
-  },
-  {
-    id: "2",
-    icon: Stethoscope,
-    title: "Vet quote submitted",
-    message: "Dr. Siriporn quoted ฿4,500 for treatment.",
-    time: "5 hours ago",
-    read: false,
-  },
-  {
-    id: "3",
-    icon: HandCoins,
-    title: "Donation received",
-    message: "Someone donated ฿500 to your rescue case.",
-    time: "1 day ago",
-    read: true,
-  },
-  {
-    id: "4",
-    icon: CircleCheck,
-    title: "Treatment completed",
-    message: "The tabby from Thonglor has fully recovered!",
-    time: "2 days ago",
-    read: true,
-  },
-  {
-    id: "5",
-    icon: Heart,
-    title: "Adoption request",
-    message: "Kannika W. wants to adopt the orange tabby.",
-    time: "3 days ago",
-    read: true,
-  },
-];
+const typeIcons: Record<string, typeof Bell> = {
+  TRANSPORT_CLAIMED: Truck,
+  QUOTE_SUBMITTED: Stethoscope,
+  FUNDING_OPENED: HandCoins,
+  FUNDING_COMPLETED: HandCoins,
+  TREATMENT_UPDATED: Stethoscope,
+  TREATMENT_COMPLETED: Stethoscope,
+  ADOPTION_REQUEST: Heart,
+  SYSTEM: Info,
+};
+
+export interface NotificationPreview {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  timeAgo: string;
+}
+
+interface NotificationBellProps {
+  unreadCount: number;
+  recentNotifications: NotificationPreview[];
+}
 
 /**
- * NotificationBell — popover panel showing recent notifications.
- * Uses mock data for demo. Will connect to real notifications table later.
+ * NotificationBell — popover dropdown with recent notifications.
+ * Real data passed from server (Topbar).
  */
-export function NotificationBell() {
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
-
+export function NotificationBell({ unreadCount, recentNotifications }: NotificationBellProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -64,7 +41,7 @@ export function NotificationBell() {
           <Bell size={20} strokeWidth={1.5} />
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#6C5CE7] text-[9px] font-bold text-white">
-              {unreadCount}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
@@ -84,40 +61,46 @@ export function NotificationBell() {
         </div>
 
         {/* List */}
-        <div className="max-h-80 overflow-y-auto">
-          {mockNotifications.map((n) => (
-            <div
-              key={n.id}
-              className={`flex gap-3 px-4 py-3 border-b border-[#A788FA]/5 last:border-0 transition-colors hover:bg-[#F7F7FB] ${
-                !n.read ? "bg-[#6C5CE7]/[0.02]" : ""
-              }`}
-            >
-              <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                !n.read ? "bg-[#6C5CE7]/10" : "bg-[#F7F7FB]"
-              }`}>
-                <n.icon size={14} strokeWidth={1.5} className={!n.read ? "text-[#6C5CE7]" : "text-[#2D3748]/40"} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className={`text-xs leading-tight ${!n.read ? "font-semibold text-[#2D3748]" : "font-medium text-[#2D3748]/70"}`}>
-                  {n.title}
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#2D3748]/50 line-clamp-1">
-                  {n.message}
-                </p>
-                <p className="mt-1 text-[10px] text-[#2D3748]/40">{n.time}</p>
-              </div>
-              {!n.read && (
-                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#6C5CE7]" />
-              )}
+        <div className="max-h-72 overflow-y-auto">
+          {recentNotifications.length === 0 ? (
+            <div className="flex flex-col items-center py-8 text-center px-4">
+              <Bell size={24} strokeWidth={1} className="text-[#A788FA]/30 mb-2" />
+              <p className="text-xs text-[#2D3748]/50">No notifications yet</p>
             </div>
-          ))}
+          ) : (
+            recentNotifications.map((n) => {
+              const Icon = typeIcons[n.type] ?? Info;
+              return (
+                <div
+                  key={n.id}
+                  className={`flex gap-3 px-4 py-3 border-b border-[#A788FA]/5 last:border-0 ${
+                    !n.is_read ? "bg-[#6C5CE7]/[0.02]" : ""
+                  }`}
+                >
+                  <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                    !n.is_read ? "bg-[#6C5CE7]/10" : "bg-[#F7F7FB]"
+                  }`}>
+                    <Icon size={12} strokeWidth={1.5} className={!n.is_read ? "text-[#6C5CE7]" : "text-[#2D3748]/40"} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-[11px] leading-tight ${!n.is_read ? "font-semibold text-[#2D3748]" : "text-[#2D3748]/70"}`}>
+                      {n.title}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#2D3748]/50 line-clamp-1">{n.message}</p>
+                    <p className="mt-0.5 text-[9px] text-[#2D3748]/40">{n.timeAgo}</p>
+                  </div>
+                  {!n.is_read && <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#6C5CE7]" />}
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Footer */}
         <div className="border-t border-[#A788FA]/10 px-4 py-2.5 text-center">
-          <a href="/notifications" className="text-xs font-medium text-[#6C5CE7] hover:text-[#A788FA] transition-colors">
-            View all notifications
-          </a>
+          <Link href="/notifications" className="text-xs font-medium text-[#6C5CE7] hover:text-[#A788FA] transition-colors">
+            See all notifications
+          </Link>
         </div>
       </PopoverContent>
     </Popover>

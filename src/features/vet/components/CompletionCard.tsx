@@ -1,20 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { CircleCheck, ShieldCheck, Heart } from "lucide-react";
+import { useState, useTransition } from "react";
+import { CircleCheck, ShieldCheck, Heart, LoaderCircle } from "lucide-react";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
+import { completeTreatment } from "../actions";
+
+interface CompletionCardProps {
+  caseId: string;
+}
 
 /**
  * CompletionCard — treatment completion + adoption readiness approval.
  * Vet confirms recovery outcome AND approves for adoption (medical clearance).
  */
-export function CompletionCard() {
-  const [outcome, setOutcome] = useState("RECOVERED");
+export function CompletionCard({ caseId }: CompletionCardProps) {
+  const [outcome, setOutcome] = useState<"RECOVERED" | "DECEASED" | "REFERRED">("RECOVERED");
   const [vaccination, setVaccination] = useState("complete");
   const [neutered, setNeutered] = useState(true);
   const [specialNeeds, setSpecialNeeds] = useState("");
   const [readyForAdoption, setReadyForAdoption] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleConfirm() {
+    setError(null);
+    startTransition(async () => {
+      const result = await completeTreatment({
+        caseId,
+        outcome,
+        vaccinationStatus: vaccination,
+        isNeutered: neutered,
+        specialNeeds,
+        readyForAdoption,
+      });
+
+      if (result.success) {
+        setConfirmed(true);
+      } else {
+        setError(result.error ?? "Failed to complete treatment.");
+      }
+    });
+  }
 
   if (confirmed) {
     return (
@@ -25,7 +52,7 @@ export function CompletionCard() {
           Escrow funds will be released to your account.
         </p>
         <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600">
-          <ShieldCheck size={14} strokeWidth={1.5} /> Funds released: ฿22,000
+          <ShieldCheck size={14} strokeWidth={1.5} /> Treatment confirmed
         </div>
         {readyForAdoption && (
           <div className="flex items-center justify-center gap-1.5 text-xs text-[#6C5CE7]">
@@ -46,7 +73,7 @@ export function CompletionCard() {
         {/* Outcome */}
         <div>
           <label className="mb-1.5 block text-sm font-medium text-[#2D3748]">Treatment Outcome</label>
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className="h-11 w-full rounded-[12px] border border-[#A788FA]/20 bg-white px-4 text-sm text-[#2D3748] focus:border-[#6C5CE7] focus:outline-none">
+          <select value={outcome} onChange={(e) => setOutcome(e.target.value as typeof outcome)} className="h-11 w-full rounded-[12px] border border-[#A788FA]/20 bg-white px-4 text-sm text-[#2D3748] focus:border-[#6C5CE7] focus:outline-none">
             <option value="RECOVERED">Recovered</option>
             <option value="REFERRED">Referred to Specialist</option>
             <option value="DECEASED">Deceased</option>
@@ -97,12 +124,27 @@ export function CompletionCard() {
         <div className="rounded-[10px] bg-[#6C5CE7]/5 p-3">
           <p className="flex items-start gap-1.5 text-[11px] text-[#6C5CE7]">
             <ShieldCheck size={12} strokeWidth={1.5} className="mt-0.5 shrink-0" />
-            Confirming completion will release escrow funds (฿22,000) to your account.
+            Confirming completion will release escrow funds to your account.
           </p>
         </div>
 
-        <button onClick={() => setConfirmed(true)} className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700">
-          <CircleCheck size={16} strokeWidth={1.5} /> Confirm Completion
+        {/* Error */}
+        {error && (
+          <div className="rounded-[10px] bg-red-50 border border-red-200 p-3">
+            <p className="text-xs text-red-700">{error}</p>
+          </div>
+        )}
+
+        <button
+          onClick={handleConfirm}
+          disabled={isPending}
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isPending ? (
+            <><LoaderCircle size={16} strokeWidth={2} className="animate-spin" /> Completing...</>
+          ) : (
+            <><CircleCheck size={16} strokeWidth={1.5} /> Confirm Completion</>
+          )}
         </button>
       </div>
     </div>

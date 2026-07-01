@@ -1,5 +1,5 @@
 import { PawPrint, Truck, Stethoscope, DollarSign, HeartPulse, Home, Heart, CircleCheck } from "lucide-react";
-import type { CaseStatus } from "../mock-data";
+import type { CaseStatus } from "../types";
 
 interface TimelineEvent {
   icon: React.ElementType;

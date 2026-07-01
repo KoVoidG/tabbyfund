@@ -23,10 +23,11 @@ interface SidebarProps {
 const communityLinks = [
   { href: "/dashboard", icon: House, label: "Dashboard" },
   { href: "/cases", icon: PawPrint, label: "Rescue Feed" },
+  { href: "/volunteer", icon: Heart, label: "Volunteer" },
   { href: "/report", icon: Plus, label: "Report" },
   { href: "/donate", icon: HandCoins, label: "Donate" },
+  { href: "/foster", icon: Home, label: "My Foster" },
   { href: "/adopt", icon: Heart, label: "Adopt" },
-  { href: "/foster", icon: Home, label: "Foster" },
 ];
 
 const vetLinks = [
@@ -43,7 +44,7 @@ const adminLinks = [
  */
 export function Sidebar({ profile }: SidebarProps) {
   const pathname = usePathname();
-  const showVet = profile.role === "vet" && profile.is_verified;
+  const showVet = profile.role === "vet";
   const showAdmin = profile.role === "admin";
 
   function isActive(href: string) {

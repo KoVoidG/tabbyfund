@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
 import { WizardProgress } from "./WizardProgress";
 import { PhotoUploader } from "./PhotoUploader";
 import { AIAnalysisPreview } from "./AIAnalysisPreview";
@@ -10,6 +10,7 @@ import { RescueDetailsForm } from "./RescueDetailsForm";
 import { ReviewCard } from "./ReviewCard";
 import { SubmitSuccess } from "./SubmitSuccess";
 import { useRescueDraft } from "../hooks/useRescueDraft";
+import { submitRescueReport } from "../actions";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 
 const TOTAL_STEPS = 5;
@@ -22,6 +23,9 @@ export function RescueWizard() {
   const { draft, saveDraft, clearDraft, hasSavedDraft, isLoaded, discardDraft } = useRescueDraft();
   const [step, setStep] = useState(draft.currentStep);
   const [submitted, setSubmitted] = useState(false);
+  const [createdCaseId, setCreatedCaseId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [showDraftPrompt, setShowDraftPrompt] = useState(true);
 
   // Wait for localStorage to load
@@ -73,7 +77,7 @@ export function RescueWizard() {
 
   // Submitted success
   if (submitted) {
-    return <SubmitSuccess />;
+    return <SubmitSuccess caseId={createdCaseId} />;
   }
 
   function goNext() {
@@ -94,14 +98,36 @@ export function RescueWizard() {
   }
 
   function handleSubmit() {
-    clearDraft();
-    setSubmitted(true);
+    setSubmitError(null);
+    startTransition(async () => {
+      if (!draft.photoUrl || !draft.aiResult || !draft.location || !draft.details) {
+        setSubmitError("Missing required information. Please go back and complete all steps.");
+        return;
+      }
+
+      const result = await submitRescueReport({
+        photoUrl: draft.photoUrl,
+        storagePath: draft.storagePath ?? "",
+        aiResult: draft.aiResult,
+        location: draft.location,
+        details: draft.details,
+        canTransport: draft.canTransport ?? false,
+      });
+
+      if (result.success && result.caseId) {
+        clearDraft();
+        setCreatedCaseId(result.caseId);
+        setSubmitted(true);
+      } else {
+        setSubmitError(result.error ?? "Something went wrong. Please try again.");
+      }
+    });
   }
 
   // Validation per step
   function canProceed(): boolean {
     switch (step) {
-      case 0: return !!draft.photoDataUrl;
+      case 0: return !!draft.photoUrl;
       case 1: return !!draft.aiResult;
       case 2: return !!draft.location;
       case 3: return !!draft.details?.notes;
@@ -119,13 +145,21 @@ export function RescueWizard() {
       <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
         {step === 0 && (
           <PhotoUploader
-            photoDataUrl={draft.photoDataUrl}
-            onPhotoChange={(url) => saveDraft({ photoDataUrl: url })}
+            photoUrl={draft.photoUrl}
+            storagePath={draft.storagePath}
+            previewUrl={draft.previewUrl}
+            onPhotoUploaded={(data) => {
+              if (data) {
+                saveDraft({ photoUrl: data.photoUrl, storagePath: data.storagePath, previewUrl: data.previewUrl });
+              } else {
+                saveDraft({ photoUrl: undefined, storagePath: undefined, previewUrl: undefined });
+              }
+            }}
           />
         )}
         {step === 1 && (
           <AIAnalysisPreview
-            photoDataUrl={draft.photoDataUrl}
+            photoDataUrl={draft.previewUrl ?? draft.photoUrl}
             aiResult={draft.aiResult}
             onAnalysisComplete={(result) => saveDraft({ aiResult: result })}
           />
@@ -140,6 +174,8 @@ export function RescueWizard() {
           <RescueDetailsForm
             details={draft.details}
             onDetailsChange={(d) => saveDraft({ details: d })}
+            canTransport={draft.canTransport}
+            onCanTransportChange={(v) => saveDraft({ canTransport: v })}
           />
         )}
         {step === 4 && (
@@ -171,12 +207,26 @@ export function RescueWizard() {
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex items-center gap-1.5 rounded-[12px] bg-[#6C5CE7] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#A788FA]"
+            disabled={isPending}
+            className="flex items-center gap-1.5 rounded-[12px] bg-[#6C5CE7] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#A788FA] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Submit Rescue
+            {isPending ? (
+              <>
+                <LoaderCircle size={16} strokeWidth={2} className="animate-spin" /> Submitting...
+              </>
+            ) : (
+              "Submit Rescue"
+            )}
           </button>
         )}
       </div>
+
+      {/* Error message */}
+      {submitError && (
+        <div className="rounded-[10px] bg-red-50 border border-red-200 p-3">
+          <p className="text-xs text-red-700">{submitError}</p>
+        </div>
+      )}
     </div>
   );
 }

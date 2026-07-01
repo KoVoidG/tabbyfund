@@ -1,6 +1,6 @@
 import { ShieldCheck } from "lucide-react";
 import { TabbyMascot, type MascotVariant } from "@/components/branding/TabbyMascot";
-import type { Severity } from "../mock-data";
+import type { Severity } from "../types";
 
 interface AIAnalysisCardProps {
   condition: string;

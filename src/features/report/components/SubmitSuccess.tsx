@@ -2,10 +2,15 @@ import Link from "next/link";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 import { Heart, ArrowRight } from "lucide-react";
 
+interface SubmitSuccessProps {
+  caseId?: string | null;
+}
+
 /**
  * SubmitSuccess — shown after successful rescue report submission.
+ * Links to the created case if available, otherwise to the feed.
  */
-export function SubmitSuccess() {
+export function SubmitSuccess({ caseId }: SubmitSuccessProps) {
   return (
     <div className="mx-auto max-w-md space-y-6 text-center py-8">
       <TabbyMascot variant="celebrate" size="xl" className="mx-auto" />
@@ -21,17 +26,26 @@ export function SubmitSuccess() {
 
       <div className="rounded-[12px] bg-[#6C5CE7]/5 p-4">
         <p className="text-xs text-[#6C5CE7] leading-relaxed">
-          Your report has been submitted. Our AI will assess the situation and volunteers will be notified. You&apos;ll receive updates on this rescue.
+          Your report has been submitted. Our AI has assessed the situation and volunteers will be notified. You&apos;ll receive updates on this rescue.
         </p>
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <Link
-          href="/cases"
-          className="flex h-11 items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA]"
-        >
-          View Rescue Feed <ArrowRight size={16} strokeWidth={1.5} />
-        </Link>
+        {caseId ? (
+          <Link
+            href={`/cases/${caseId}`}
+            className="flex h-11 items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA]"
+          >
+            View Your Case <ArrowRight size={16} strokeWidth={1.5} />
+          </Link>
+        ) : (
+          <Link
+            href="/cases"
+            className="flex h-11 items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA]"
+          >
+            View Rescue Feed <ArrowRight size={16} strokeWidth={1.5} />
+          </Link>
+        )}
         <Link
           href="/dashboard"
           className="flex h-11 items-center justify-center rounded-[12px] border border-[#A788FA]/20 text-sm font-medium text-[#6C5CE7] transition hover:bg-[#6C5CE7]/5"

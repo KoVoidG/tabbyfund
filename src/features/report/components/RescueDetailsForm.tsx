@@ -1,5 +1,7 @@
 "use client";
 
+import { Truck } from "lucide-react";
+
 interface DetailsData {
   notes: string;
   approximateAge: string;
@@ -10,13 +12,15 @@ interface DetailsData {
 interface RescueDetailsFormProps {
   details?: DetailsData;
   onDetailsChange: (details: DetailsData) => void;
+  canTransport?: boolean;
+  onCanTransportChange: (value: boolean) => void;
 }
 
 /**
  * RescueDetailsForm — Step 4 of the rescue wizard.
  * Short friendly form: notes, age, injuries, behaviour.
  */
-export function RescueDetailsForm({ details, onDetailsChange }: RescueDetailsFormProps) {
+export function RescueDetailsForm({ details, onDetailsChange, canTransport, onCanTransportChange }: RescueDetailsFormProps) {
   const current: DetailsData = details ?? {
     notes: "",
     approximateAge: "",
@@ -106,6 +110,26 @@ export function RescueDetailsForm({ details, onDetailsChange }: RescueDetailsFor
           <option value="aggressive">Aggressive / hissing</option>
           <option value="lethargic">Lethargic / weak</option>
         </select>
+      </div>
+
+      {/* Transport availability */}
+      <div className="rounded-[12px] border border-[#6C5CE7]/15 bg-[#6C5CE7]/[0.03] p-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={canTransport ?? false}
+            onChange={(e) => onCanTransportChange(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-[#A788FA]/30 text-[#6C5CE7] focus:ring-[#6C5CE7]"
+          />
+          <div>
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-[#6C5CE7]">
+              <Truck size={14} strokeWidth={1.5} /> I can transport this cat to the vet
+            </p>
+            <p className="text-[11px] text-[#2D3748]/60 mt-0.5">
+              If unchecked, the case will wait for another community volunteer to claim transport.
+            </p>
+          </div>
+        </label>
       </div>
     </div>
   );

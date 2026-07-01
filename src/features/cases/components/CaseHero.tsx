@@ -1,5 +1,7 @@
+"use client";
+
 import { MapPin, Clock, User, CircleAlert, TriangleAlert, Info, CircleCheck, HandCoins, Share2, Flag } from "lucide-react";
-import type { CaseStatus, Severity } from "../mock-data";
+import type { CaseStatus, Severity } from "../types";
 
 const severityConfig = {
   CRITICAL: { bg: "bg-red-600", text: "text-white", icon: CircleAlert, label: "Critical" },
@@ -14,6 +16,8 @@ const statusLabels: Record<string, string> = {
   FUNDING_OPEN: "Funding Open", FUNDED: "Funded", IN_TREATMENT: "In Treatment",
   TREATED: "Treated", FUNDS_RELEASED: "Funds Released",
   IN_FOSTER: "In Foster", ADOPTED: "Adopted",
+  SHELTERED: "Sheltered", REUNITED: "Reunited",
+  CANCELLED: "Cancelled", LOST_CONTACT: "Lost Contact", DECEASED: "Deceased",
 };
 
 interface CaseHeroProps {
@@ -25,13 +29,15 @@ interface CaseHeroProps {
   location: string;
   reporter: string;
   reportedAgo: string;
+  /** Whether the case is currently accepting donations */
+  isFundable?: boolean;
 }
 
 /**
  * CaseHero — compact, informative header for case detail page.
  * Shows photo (reduced), cat name/condition, badges, meta, and quick actions.
  */
-export function CaseHero({ photo, description, status, severity, condition, location, reporter, reportedAgo }: CaseHeroProps) {
+export function CaseHero({ photo, description, status, severity, condition, location, reporter, reportedAgo, isFundable }: CaseHeroProps) {
   const sev = severityConfig[severity];
   const SevIcon = sev.icon;
 
@@ -72,13 +78,32 @@ export function CaseHero({ photo, description, status, severity, condition, loca
 
           {/* Quick Actions */}
           <div className="mt-4 flex flex-wrap gap-2">
-            <button className="flex items-center gap-1.5 rounded-[10px] bg-[#6C5CE7] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#A788FA]">
-              <HandCoins size={14} strokeWidth={1.5} /> Donate
-            </button>
-            <button className="flex items-center gap-1.5 rounded-[10px] border border-[#A788FA]/30 px-3.5 py-2 text-xs font-medium text-[#6C5CE7] transition hover:bg-[#6C5CE7]/5">
+            {isFundable && (
+              <button
+                onClick={() => {
+                  document.getElementById("section-funding")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="flex items-center gap-1.5 rounded-[10px] bg-[#6C5CE7] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#A788FA]"
+              >
+                <HandCoins size={14} strokeWidth={1.5} /> Donate
+              </button>
+            )}
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: condition, url: window.location.href }).catch(() => {});
+                } else {
+                  navigator.clipboard.writeText(window.location.href).catch(() => {});
+                }
+              }}
+              className="flex items-center gap-1.5 rounded-[10px] border border-[#A788FA]/30 px-3.5 py-2 text-xs font-medium text-[#6C5CE7] transition hover:bg-[#6C5CE7]/5"
+            >
               <Share2 size={14} strokeWidth={1.5} /> Share
             </button>
-            <button className="flex items-center gap-1.5 rounded-[10px] border border-[#A788FA]/30 px-3.5 py-2 text-xs font-medium text-[#6C5CE7] transition hover:bg-[#6C5CE7]/5">
+            <button
+              disabled
+              className="flex items-center gap-1.5 rounded-[10px] border border-[#A788FA]/20 px-3.5 py-2 text-xs font-medium text-[#2D3748]/40 cursor-not-allowed"
+            >
               <Flag size={14} strokeWidth={1.5} /> Report
             </button>
           </div>

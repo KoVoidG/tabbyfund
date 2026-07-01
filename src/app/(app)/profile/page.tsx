@@ -1,4 +1,5 @@
-import { getProfile } from "@/lib/supabase/auth-helpers";
+import { getProfile, getUser } from "@/lib/supabase/auth-helpers";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PawPrint, HandCoins, Truck, Heart, Calendar } from "lucide-react";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
@@ -8,16 +9,51 @@ export const metadata = {
   title: "Profile — TabbyFund",
 };
 
-const stats = [
-  { icon: PawPrint, label: "Rescues Reported", value: 3 },
-  { icon: HandCoins, label: "Total Donated", value: "฿5,200" },
-  { icon: Truck, label: "Transport Missions", value: 2 },
-  { icon: Heart, label: "Cats Adopted", value: 0 },
-];
+async function getProfileStats(userId: string) {
+  const supabase = await createClient();
+
+  const { count: reportsCreated } = await supabase
+    .from("cases")
+    .select("id", { count: "exact", head: true })
+    .eq("reporter_id", userId);
+
+  const { data: donations } = await supabase
+    .from("donations")
+    .select("amount")
+    .eq("donor_id", userId);
+
+  const totalDonated = donations?.reduce((sum, d) => sum + d.amount, 0) ?? 0;
+
+  const { count: transportsCompleted } = await supabase
+    .from("transport_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("claimed_by", userId);
+
+  const { count: fosterCases } = await supabase
+    .from("foster_records")
+    .select("id", { count: "exact", head: true })
+    .eq("caretaker_id", userId);
+
+  return {
+    reportsCreated: reportsCreated ?? 0,
+    totalDonated,
+    transportsCompleted: transportsCompleted ?? 0,
+    fosterCases: fosterCases ?? 0,
+  };
+}
 
 export default async function ProfilePage() {
   const profile = await getProfile();
   if (!profile) redirect("/profile-error");
+
+  const stats = await getProfileStats(profile.id);
+
+  const statCards = [
+    { icon: PawPrint, label: "Rescues Reported", value: stats.reportsCreated },
+    { icon: HandCoins, label: "Total Donated", value: stats.totalDonated > 0 ? `฿${stats.totalDonated.toLocaleString()}` : "฿0" },
+    { icon: Truck, label: "Transport Missions", value: stats.transportsCompleted },
+    { icon: Heart, label: "Foster Cases", value: stats.fosterCases },
+  ];
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -37,7 +73,7 @@ export default async function ProfilePage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((s) => (
+        {statCards.map((s) => (
           <div key={s.label} className="flex flex-col items-center rounded-[14px] border border-[#A788FA]/15 bg-white p-4 shadow-[0_2px_12px_rgba(108,92,231,0.06)]">
             <s.icon size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
             <p className="mt-2 text-lg font-bold text-[#2D3748]">{s.value}</p>

@@ -5,7 +5,12 @@ import { useState, useEffect, useCallback } from "react";
 const DRAFT_KEY = "tabbyfund_rescue_draft";
 
 export interface RescueDraft {
-  photoDataUrl?: string;
+  /** Public URL of the uploaded photo in Supabase Storage */
+  photoUrl?: string;
+  /** Storage path for cleanup (e.g., "{user_id}/{timestamp}.jpg") */
+  storagePath?: string;
+  /** Local blob URL for instant preview */
+  previewUrl?: string;
   aiResult?: {
     severity: string;
     confidence: number;
@@ -26,6 +31,8 @@ export interface RescueDraft {
     visibleInjuries: string;
     behaviour: string;
   };
+  /** Whether the reporter can transport the cat themselves */
+  canTransport?: boolean;
   currentStep: number;
   lastSaved?: string;
 }
@@ -49,7 +56,7 @@ export function useRescueDraft() {
       const stored = localStorage.getItem(DRAFT_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as RescueDraft;
-        if (parsed.currentStep > 0 || parsed.photoDataUrl) {
+        if (parsed.currentStep > 0 || parsed.photoUrl) {
           setDraft(parsed);
           setHasSavedDraft(true);
         }

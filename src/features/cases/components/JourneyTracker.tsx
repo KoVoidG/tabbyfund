@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { PawPrint, Truck, Stethoscope, Heart, HeartPulse, Home, Check } from "lucide-react";
-import type { CaseStatus } from "../mock-data";
+import type { CaseStatus } from "../types";
 
 interface JourneyStep {
   key: string;

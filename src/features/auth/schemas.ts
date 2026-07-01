@@ -34,6 +34,9 @@ export const registerSchema = z
     role: z.enum(["community", "vet"], {
       message: "Please select an account type",
     }),
+    // Optional vet clinic fields (only used when role = vet)
+    clinic_name: z.string().max(200).optional(),
+    clinic_address: z.string().max(500).optional(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",

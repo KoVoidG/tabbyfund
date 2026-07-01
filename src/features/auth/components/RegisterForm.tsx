@@ -49,6 +49,8 @@ export function RegisterForm() {
       formData.append("password", data.password);
       formData.append("confirm_password", data.confirm_password);
       formData.append("role", data.role);
+      if (data.clinic_name) formData.append("clinic_name", data.clinic_name);
+      if (data.clinic_address) formData.append("clinic_address", data.clinic_address);
 
       const result = await registerAction(formData);
 
@@ -264,6 +266,40 @@ export function RegisterForm() {
           </p>
         )}
       </div>
+
+      {/* Vet Clinic Fields — only visible when role = vet */}
+      {selectedRole === "vet" && (
+        <div className="space-y-3 rounded-[12px] border border-[#A788FA]/15 bg-[#F7F7FB] p-4">
+          <p className="text-xs font-medium text-[#6C5CE7]">Clinic Information (optional)</p>
+          <div>
+            <label htmlFor="register-clinic-name" className="mb-1 block text-xs font-medium text-[#2D3748]">
+              Clinic Name
+            </label>
+            <input
+              id="register-clinic-name"
+              type="text"
+              placeholder="e.g. Bangkok Pet Clinic"
+              className="h-10 w-full rounded-[10px] border border-[#A788FA]/20 bg-white px-3 text-sm text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none"
+              {...register("clinic_name")}
+            />
+          </div>
+          <div>
+            <label htmlFor="register-clinic-address" className="mb-1 block text-xs font-medium text-[#2D3748]">
+              Clinic Address
+            </label>
+            <input
+              id="register-clinic-address"
+              type="text"
+              placeholder="e.g. 45 Sukhumvit Soi 39, Bangkok"
+              className="h-10 w-full rounded-[10px] border border-[#A788FA]/20 bg-white px-3 text-sm text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none"
+              {...register("clinic_address")}
+            />
+          </div>
+          <p className="text-[10px] text-[#2D3748]/40">
+            Location will be geocoded automatically for transport guidance.
+          </p>
+        </div>
+      )}
 
       {/* Submit */}
       <button

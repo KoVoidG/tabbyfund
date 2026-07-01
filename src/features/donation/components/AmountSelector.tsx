@@ -1,6 +1,6 @@
 "use client";
 
-import { presetAmounts } from "../mock-data";
+const presetAmounts = [100, 200, 500, 1000, 2000, 5000];
 
 interface AmountSelectorProps {
   selected: number | null;

@@ -1,6 +1,6 @@
 import { getProfile } from "@/lib/supabase/auth-helpers";
 import { redirect } from "next/navigation";
-import { PawPrint, Truck, HandCoins, Heart, Plus, Search, Siren } from "lucide-react";
+import { PawPrint, Truck, HandCoins, Heart, Plus, Search } from "lucide-react";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 import { StatCard } from "@/features/dashboard/components/StatCard";
 import { QuickActionCard } from "@/features/dashboard/components/QuickActionCard";
@@ -11,13 +11,13 @@ import { TreatmentUpdateCard } from "@/features/dashboard/components/TreatmentUp
 import { AdoptionPreviewCard } from "@/features/dashboard/components/AdoptionPreviewCard";
 import { NotificationPreviewCard } from "@/features/dashboard/components/NotificationPreviewCard";
 import {
-  dashboardStats,
-  casesNeedingTransport,
-  activeFundraisers,
-  treatmentUpdates,
-  adoptionReady,
-  recentNotifications,
-} from "@/features/dashboard/mock-data";
+  getDashboardStats,
+  getCasesNeedingTransport,
+  getActiveFundraisers,
+  getTreatmentUpdates,
+  getAdoptionReadyCats,
+  getRecentNotifications,
+} from "@/lib/dashboard";
 
 export const metadata = {
   title: "Dashboard — TabbyFund",
@@ -26,6 +26,15 @@ export const metadata = {
 export default async function DashboardPage() {
   const profile = await getProfile();
   if (!profile) redirect("/profile-error");
+
+  const [stats, transportCases, fundraisers, treatments, adoptionCats, notifications] = await Promise.all([
+    getDashboardStats(profile.id),
+    getCasesNeedingTransport(),
+    getActiveFundraisers(),
+    getTreatmentUpdates(),
+    getAdoptionReadyCats(),
+    getRecentNotifications(),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -44,10 +53,10 @@ export default async function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard icon={PawPrint} label="Cats Reported" value={dashboardStats.catsReported} trend="+2 this week" />
-        <StatCard icon={Truck} label="Transport Missions" value={dashboardStats.transportMissions} />
-        <StatCard icon={HandCoins} label="Total Donated" value={`฿${dashboardStats.totalDonated.toLocaleString()}`} trend="+฿1,200 today" />
-        <StatCard icon={Heart} label="Adoptions" value={dashboardStats.successfulAdoptions} />
+        <StatCard icon={PawPrint} label="My Reports" value={stats.catsReported} />
+        <StatCard icon={Truck} label="My Transports" value={stats.transportMissions} />
+        <StatCard icon={HandCoins} label="My Donations" value={`฿${stats.totalDonated.toLocaleString()}`} />
+        <StatCard icon={Heart} label="Foster Cases" value={stats.successfulAdoptions} />
       </div>
 
       {/* Quick Actions */}
@@ -56,50 +65,60 @@ export default async function DashboardPage() {
           <QuickActionCard icon={Plus} label="Report Cat" href="/report" description="Found an injured cat?" />
           <QuickActionCard icon={Search} label="Browse Cases" href="/cases" description="View rescue feed" />
           <QuickActionCard icon={Heart} label="Adopt" href="/adopt" description="Give a cat a home" />
-          <QuickActionCard icon={HandCoins} label="Donate" href="/cases" description="Fund a treatment" />
+          <QuickActionCard icon={HandCoins} label="Donate" href="/donate" description="Fund a treatment" />
         </div>
       </DashboardSection>
 
       {/* Cases Needing Transport */}
-      <DashboardSection title="Needs Transport" viewAllHref="/cases?status=AWAITING_TRANSPORT">
-        <div className="space-y-2">
-          {casesNeedingTransport.map((c) => (
-            <CasePreviewCard key={c.id} {...c} />
-          ))}
-        </div>
-      </DashboardSection>
+      {transportCases.length > 0 && (
+        <DashboardSection title="Needs Transport" viewAllHref="/cases?status=AWAITING_TRANSPORT">
+          <div className="space-y-2">
+            {transportCases.map((c) => (
+              <CasePreviewCard key={c.id} {...c} />
+            ))}
+          </div>
+        </DashboardSection>
+      )}
 
       {/* Active Fundraisers */}
-      <DashboardSection title="Active Fundraisers" viewAllHref="/cases?status=FUNDING_OPEN">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {activeFundraisers.map((f) => (
-            <DonationProgressCard key={f.id} {...f} />
-          ))}
-        </div>
-      </DashboardSection>
+      {fundraisers.length > 0 && (
+        <DashboardSection title="Active Fundraisers" viewAllHref="/donate">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {fundraisers.map((f) => (
+              <DonationProgressCard key={f.id} {...f} />
+            ))}
+          </div>
+        </DashboardSection>
+      )}
 
       {/* Treatment Updates */}
-      <DashboardSection title="Treatment Updates" viewAllHref="/cases?status=IN_TREATMENT">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {treatmentUpdates.map((t) => (
-            <TreatmentUpdateCard key={t.id} {...t} />
-          ))}
-        </div>
-      </DashboardSection>
+      {treatments.length > 0 && (
+        <DashboardSection title="Treatment Updates" viewAllHref="/cases?status=IN_TREATMENT">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {treatments.map((t) => (
+              <TreatmentUpdateCard key={t.id} {...t} />
+            ))}
+          </div>
+        </DashboardSection>
+      )}
 
       {/* Adoption Ready */}
-      <DashboardSection title="Ready for Adoption" viewAllHref="/adopt">
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-          {adoptionReady.map((a) => (
-            <AdoptionPreviewCard key={a.id} {...a} />
-          ))}
-        </div>
-      </DashboardSection>
+      {adoptionCats.length > 0 && (
+        <DashboardSection title="Ready for Adoption" viewAllHref="/adopt">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            {adoptionCats.map((a) => (
+              <AdoptionPreviewCard key={a.id} {...a} />
+            ))}
+          </div>
+        </DashboardSection>
+      )}
 
       {/* Notifications */}
-      <DashboardSection title="Recent Notifications" viewAllHref="/notifications">
-        <NotificationPreviewCard notifications={recentNotifications} />
-      </DashboardSection>
+      {notifications.length > 0 && (
+        <DashboardSection title="Recent Notifications" viewAllHref="/notifications">
+          <NotificationPreviewCard notifications={notifications} />
+        </DashboardSection>
+      )}
     </div>
   );
 }

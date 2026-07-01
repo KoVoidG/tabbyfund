@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Trash2, FileText, Send } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Plus, Trash2, FileText, Send, LoaderCircle } from "lucide-react";
+import { submitVetQuote } from "../actions";
 
 interface QuoteItem {
   id: string;
@@ -10,15 +11,22 @@ interface QuoteItem {
   notes: string;
 }
 
+interface QuoteBuilderProps {
+  caseId: string;
+}
+
 /**
  * QuoteBuilder — multi-item treatment quote with live running total.
  * Allows adding/removing items, each with name, cost, and optional notes.
+ * Submits a real vet quote to Supabase.
  */
-export function QuoteBuilder() {
+export function QuoteBuilder({ caseId }: QuoteBuilderProps) {
   const [items, setItems] = useState<QuoteItem[]>([
     { id: "1", name: "", cost: 0, notes: "" },
   ]);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const total = items.reduce((sum, item) => sum + (item.cost || 0), 0);
 
@@ -35,6 +43,29 @@ export function QuoteBuilder() {
     setItems(items.map((i) => i.id === id ? { ...i, [field]: value } : i));
   }
 
+  function handleSubmit() {
+    setError(null);
+    startTransition(async () => {
+      // Build notes from all items
+      const notesText = items
+        .filter((i) => i.name)
+        .map((i) => `${i.name}: ฿${i.cost.toLocaleString()}${i.notes ? ` (${i.notes})` : ""}`)
+        .join(". ");
+
+      const result = await submitVetQuote({
+        caseId,
+        amount: total,
+        notes: notesText || `Treatment quote: ฿${total.toLocaleString()}`,
+      });
+
+      if (result.success) {
+        setSubmitted(true);
+      } else {
+        setError(result.error ?? "Failed to submit quote.");
+      }
+    });
+  }
+
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
       <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-4">
@@ -48,7 +79,7 @@ export function QuoteBuilder() {
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map((item, idx) => (
+          {items.map((item) => (
             <div key={item.id} className="flex gap-2 items-start">
               <div className="flex-1 space-y-2">
                 <div className="flex gap-2">
@@ -103,13 +134,24 @@ export function QuoteBuilder() {
             <span className="text-lg font-bold text-[#6C5CE7]">฿{total.toLocaleString()}</span>
           </div>
 
+          {/* Error */}
+          {error && (
+            <div className="rounded-[10px] bg-red-50 border border-red-200 p-3">
+              <p className="text-xs text-red-700">{error}</p>
+            </div>
+          )}
+
           {/* Submit */}
           <button
-            onClick={() => setSubmitted(true)}
-            disabled={total === 0 || !items.some((i) => i.name)}
+            onClick={handleSubmit}
+            disabled={total === 0 || !items.some((i) => i.name) || isPending}
             className="flex h-10 w-full items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA] disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Send size={14} strokeWidth={1.5} /> Submit Quote
+            {isPending ? (
+              <><LoaderCircle size={14} strokeWidth={2} className="animate-spin" /> Submitting...</>
+            ) : (
+              <><Send size={14} strokeWidth={1.5} /> Submit Quote</>
+            )}
           </button>
         </div>
       )}

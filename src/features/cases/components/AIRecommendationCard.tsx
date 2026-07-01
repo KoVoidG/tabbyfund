@@ -1,5 +1,5 @@
 import { Zap, Clock, TrendingUp, AlertTriangle } from "lucide-react";
-import type { Severity } from "../mock-data";
+import type { Severity } from "../types";
 
 interface AIRecommendationCardProps {
   severity: Severity;

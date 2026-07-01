@@ -76,6 +76,8 @@ export async function register(
     password: formData.get("password"),
     confirm_password: formData.get("confirm_password"),
     role: formData.get("role"),
+    clinic_name: formData.get("clinic_name"),
+    clinic_address: formData.get("clinic_address"),
   };
 
   // Validate input
@@ -93,6 +95,12 @@ export async function register(
   // Never allow admin self-registration
   const selectedRole = parsed.data.role === "vet" ? "vet" : "community";
 
+  // Normalize clinic fields (empty string → null, only for vets)
+  const clinicName = selectedRole === "vet" && parsed.data.clinic_name?.trim()
+    ? parsed.data.clinic_name.trim() : null;
+  const clinicAddress = selectedRole === "vet" && parsed.data.clinic_address?.trim()
+    ? parsed.data.clinic_address.trim() : null;
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -101,6 +109,8 @@ export async function register(
       data: {
         display_name: parsed.data.display_name,
         role: selectedRole,
+        clinic_name: clinicName,
+        clinic_address: clinicAddress,
       },
     },
   });
@@ -122,7 +132,27 @@ export async function register(
   // The handle_new_user trigger reads role from raw_user_meta_data
   // and creates the profile with the correct role.
   // Vet accounts start with is_verified = false (admin must approve).
-  // New user is auto-logged in (email confirmation disabled for MVP).
+  // For vets: geocode clinic address and save to profile.
+  if (clinicName || clinicAddress) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      // Best-effort geocoding — never blocks registration
+      const { geocodeClinicAddress } = await import("@/lib/geocode");
+      const { lat, lng } = await geocodeClinicAddress(clinicName, clinicAddress);
+
+      const { createServiceClient } = await import("@/lib/supabase/service");
+      const serviceClient = createServiceClient();
+      await serviceClient
+        .from("profiles")
+        .update({
+          clinic_name: clinicName,
+          clinic_address: clinicAddress,
+          clinic_lat: lat,
+          clinic_lng: lng,
+        })
+        .eq("id", user.id);
+    }
+  }
   redirect("/dashboard");
 }
 
@@ -220,7 +250,7 @@ function getRedirectForRole(profile: UserProfile | null): string {
     case "admin":
       return "/admin";
     case "vet":
-      return profile.is_verified ? "/vet" : "/vet/pending";
+      return "/vet";
     case "community":
     default:
       return "/dashboard";

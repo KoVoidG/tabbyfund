@@ -1,7 +1,7 @@
 import { Heart, CircleCheck, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
 
 interface AdoptionStatusCardProps {
-  status: "OPEN" | "MATCHED" | "COMPLETED";
+  status: "OPEN" | "MATCHED" | "COMPLETED" | "CLOSED";
   personality?: string;
   medicalNotes?: string;
   photo?: string;
@@ -34,11 +34,13 @@ export function AdoptionStatusCard({ status, personality, medicalNotes, photo }:
           <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
             status === "COMPLETED" ? "bg-emerald-500 text-white" :
             status === "MATCHED" ? "bg-purple-500 text-white" :
+            status === "CLOSED" ? "bg-gray-500 text-white" :
             "bg-pink-500 text-white"
           }`}>
             {status === "COMPLETED" && <><CircleCheck size={11} strokeWidth={2} /> Adopted!</>}
             {status === "MATCHED" && <><Heart size={11} strokeWidth={2} /> Matched</>}
             {status === "OPEN" && <><Sparkles size={11} strokeWidth={2} /> Ready</>}
+            {status === "CLOSED" && <><CircleCheck size={11} strokeWidth={2} /> Closed</>}
           </span>
         </div>
       </div>

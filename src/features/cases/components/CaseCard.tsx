@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MapPin, Clock, CircleAlert, TriangleAlert, Info, CircleCheck, HandCoins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import type { CaseStatus, Severity } from "../mock-data";
+import type { CaseStatus, Severity } from "../types";
 
 const severityConfig = {
   CRITICAL: { bg: "bg-red-600", text: "text-white", icon: CircleAlert },
@@ -16,6 +16,8 @@ const statusLabels: Record<CaseStatus, string> = {
   FUNDING_OPEN: "Funding Open", FUNDED: "Funded", IN_TREATMENT: "In Treatment",
   TREATED: "Treated", FUNDS_RELEASED: "Funds Released",
   IN_FOSTER: "In Foster", ADOPTED: "Adopted",
+  SHELTERED: "Sheltered", REUNITED: "Reunited",
+  CANCELLED: "Cancelled", LOST_CONTACT: "Lost Contact", DECEASED: "Deceased",
 };
 
 interface CaseCardProps {

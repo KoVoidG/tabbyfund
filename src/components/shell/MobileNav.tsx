@@ -20,10 +20,11 @@ interface MobileNavProps {
 const communityLinks = [
   { href: "/dashboard", icon: House, label: "Dashboard" },
   { href: "/cases", icon: PawPrint, label: "Rescue Feed" },
+  { href: "/volunteer", icon: Heart, label: "Volunteer" },
   { href: "/report", icon: Plus, label: "Report" },
   { href: "/donate", icon: HandCoins, label: "Donate" },
+  { href: "/foster", icon: Home, label: "My Foster" },
   { href: "/adopt", icon: Heart, label: "Adopt" },
-  { href: "/foster", icon: Home, label: "Foster" },
 ];
 
 const vetLinks = [
@@ -43,7 +44,7 @@ export function MobileNav({ profile }: MobileNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const showVet = profile.role === "vet" && profile.is_verified;
+  const showVet = profile.role === "vet";
   const showAdmin = profile.role === "admin";
 
   function isActive(href: string) {

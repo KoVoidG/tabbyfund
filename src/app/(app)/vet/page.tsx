@@ -1,10 +1,11 @@
-import { Stethoscope, Plus, FileText, Camera } from "lucide-react";
+import { Stethoscope, FileText, Camera } from "lucide-react";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 import { VetDashboardStats } from "@/features/vet/components/VetDashboardStats";
 import { VetCaseCard } from "@/features/vet/components/VetCaseCard";
 import { DashboardSection } from "@/features/dashboard/components/DashboardSection";
 import { QuickActionCard } from "@/features/dashboard/components/QuickActionCard";
-import { vetStats, vetCases } from "@/features/vet/mock-data";
+import { getVetCases, getVetStats } from "@/lib/vet-cases";
+import { requireRole } from "@/lib/supabase/auth-helpers";
 
 export const metadata = {
   title: "Vet Dashboard — TabbyFund",
@@ -12,13 +13,17 @@ export const metadata = {
 
 /**
  * /vet — Vet portal dashboard.
- * Shows cases by status, stats, and quick actions.
+ * Shows real cases by status, stats, and quick actions.
  */
-export default function VetDashboardPage() {
-  const waiting = vetCases.filter((c) => c.status === "waiting");
-  const quoted = vetCases.filter((c) => c.status === "quoted");
-  const inTreatment = vetCases.filter((c) => c.status === "in_treatment");
-  const completed = vetCases.filter((c) => c.status === "completed");
+export default async function VetDashboardPage() {
+  const profile = await requireRole("vet", { requireVerified: true });
+  const cases = await getVetCases(profile.id);
+  const stats = await getVetStats(profile.id);
+
+  const waiting = cases.filter((c) => c.vetStatus === "waiting");
+  const quoted = cases.filter((c) => c.vetStatus === "quoted");
+  const inTreatment = cases.filter((c) => c.vetStatus === "in_treatment");
+  const completed = cases.filter((c) => c.vetStatus === "completed");
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -36,7 +41,7 @@ export default function VetDashboardPage() {
       </div>
 
       {/* Stats */}
-      <VetDashboardStats {...vetStats} />
+      <VetDashboardStats {...stats} />
 
       {/* Quick Actions */}
       <DashboardSection title="Quick Actions">
@@ -81,6 +86,17 @@ export default function VetDashboardPage() {
             {completed.map((c) => <VetCaseCard key={c.id} vetCase={c} />)}
           </div>
         </DashboardSection>
+      )}
+
+      {/* Empty state */}
+      {cases.length === 0 && (
+        <div className="flex flex-col items-center justify-center rounded-[16px] border border-dashed border-[#A788FA]/20 bg-white p-12 text-center">
+          <Stethoscope size={40} strokeWidth={1} className="text-[#A788FA]/30 mb-3" />
+          <p className="text-sm font-medium text-[#2D3748]/60">No cases assigned yet</p>
+          <p className="mt-1 text-xs text-[#2D3748]/40">
+            Cases will appear here when transports are delivered to vet clinics
+          </p>
+        </div>
       )}
     </div>
   );

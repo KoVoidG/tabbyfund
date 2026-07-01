@@ -25,8 +25,8 @@ export function ReviewCard({ draft }: ReviewCardProps) {
           <Camera size={14} strokeWidth={1.5} className="text-[#6C5CE7]" />
           <span className="text-xs font-medium text-[#2D3748]">Photo</span>
         </div>
-        {draft.photoDataUrl && (
-          <img src={draft.photoDataUrl} alt="Rescue" className="w-full h-40 object-cover" />
+        {(draft.previewUrl || draft.photoUrl) && (
+          <img src={draft.previewUrl ?? draft.photoUrl} alt="Rescue" className="w-full h-40 object-cover" />
         )}
       </div>
 
