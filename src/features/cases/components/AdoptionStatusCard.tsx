@@ -1,6 +1,11 @@
-import { Heart, CircleCheck, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
+"use client";
+
+import { useTransition } from "react";
+import { Heart, CircleCheck, PawPrint, ShieldCheck, Sparkles, LoaderCircle } from "lucide-react";
+import { adoptCat } from "@/features/adoption/actions";
 
 interface AdoptionStatusCardProps {
+  caseId: string;
   status: "OPEN" | "MATCHED" | "COMPLETED" | "CLOSED";
   personality?: string;
   medicalNotes?: string;
@@ -11,7 +16,18 @@ interface AdoptionStatusCardProps {
  * AdoptionStatusCard — Tinder-style adoption preview card.
  * Shows personality tags, health tags, adoption readiness, and CTA.
  */
-export function AdoptionStatusCard({ status, personality, medicalNotes, photo }: AdoptionStatusCardProps) {
+export function AdoptionStatusCard({ caseId, status, personality, medicalNotes, photo }: AdoptionStatusCardProps) {
+  const [isPending, startTransition] = useTransition();
+
+  function handleAdopt() {
+    startTransition(async () => {
+      const result = await adoptCat(caseId);
+      if (!result.success) {
+        alert(result.error ?? "Failed to finalize adoption. Please try again.");
+      }
+    });
+  }
+
   // Split personality into tags
   const personalityTags = personality
     ? personality.split(",").map((t) => t.trim()).filter(Boolean)
@@ -81,8 +97,16 @@ export function AdoptionStatusCard({ status, personality, medicalNotes, photo }:
 
         {/* CTA */}
         {status === "OPEN" && (
-          <button className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-[#6C5CE7] to-[#A788FA] text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.98]">
-            <Heart size={16} strokeWidth={1.5} /> Request Adoption
+          <button
+            onClick={handleAdopt}
+            disabled={isPending}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-gradient-to-r from-[#6C5CE7] to-[#A788FA] text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+          >
+            {isPending ? (
+              <><LoaderCircle size={16} strokeWidth={2} className="animate-spin" /> Finalizing...</>
+            ) : (
+              <><Heart size={16} strokeWidth={1.5} /> Request Adoption</>
+            )}
           </button>
         )}
       </div>

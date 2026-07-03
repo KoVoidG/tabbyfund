@@ -17,9 +17,9 @@ export interface AdoptableCatRow {
   energyLevel: string | null;
   goodWithChildren: boolean | null;
   goodWithCats: boolean | null;
+  goodWithDogs: boolean | null;
+  litterTrained: boolean | null;
   indoorOnly: boolean | null;
-  idealHome: string[] | null;
-  favouriteActivities: string[] | null;
   observations: string | null;
   fosterPhotos: string[] | null;
   fosterCaretakerId: string | null;
@@ -79,9 +79,9 @@ export async function getAdoptableCats(): Promise<AdoptableCatRow[]> {
     energyLevel: d.energy_level,
     goodWithChildren: d.good_with_children,
     goodWithCats: d.good_with_cats,
+    goodWithDogs: d.good_with_dogs,
+    litterTrained: d.litter_trained,
     indoorOnly: d.indoor_only,
-    idealHome: d.ideal_home,
-    favouriteActivities: d.favourite_activities,
     observations: d.observations,
     fosterPhotos: d.foster_photos,
     fosterCaretakerId: d.foster_caretaker_id,
@@ -128,9 +128,9 @@ export async function getAdoptableCatByCaseId(caseId: string): Promise<Adoptable
     energyLevel: data.energy_level,
     goodWithChildren: data.good_with_children,
     goodWithCats: data.good_with_cats,
+    goodWithDogs: data.good_with_dogs,
+    litterTrained: data.litter_trained,
     indoorOnly: data.indoor_only,
-    idealHome: data.ideal_home,
-    favouriteActivities: data.favourite_activities,
     observations: data.observations,
     fosterPhotos: data.foster_photos,
     fosterCaretakerId: data.foster_caretaker_id,

@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { CatGallery } from "@/features/adoption/components/CatGallery";
 import { MedicalSummaryCard } from "@/features/adoption/components/MedicalSummaryCard";
 import { BehaviouralSummaryCard } from "@/features/adoption/components/BehaviouralSummaryCard";
-import { IdealHomeCard } from "@/features/adoption/components/IdealHomeCard";
 import { ApplicationCTA } from "@/features/adoption/components/ApplicationCTA";
 import { HealthTags } from "@/features/adoption/components/HealthTags";
 import { getAdoptableCatByCaseId } from "@/lib/adoption";
@@ -76,9 +75,9 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
         energyLevel={cat.energyLevel ?? "medium"}
         goodWithChildren={cat.goodWithChildren ?? undefined}
         goodWithCats={cat.goodWithCats ?? undefined}
+        goodWithDogs={cat.goodWithDogs ?? undefined}
+        litterTrained={cat.litterTrained ?? undefined}
         indoorOnly={cat.indoorOnly ?? true}
-        idealHome={cat.idealHome ?? []}
-        favouriteActivities={cat.favouriteActivities ?? []}
         foster="Foster Caretaker"
       />
 
@@ -88,11 +87,6 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
           <h3 className="text-sm font-semibold text-[#2D3748] mb-2">Foster Observations</h3>
           <p className="text-sm text-[#2D3748]/80 leading-relaxed">{cat.observations}</p>
         </div>
-      )}
-
-      {/* Ideal Home */}
-      {cat.idealHome && cat.idealHome.length > 0 && (
-        <IdealHomeCard criteria={cat.idealHome} />
       )}
 
       {/* Application CTA */}

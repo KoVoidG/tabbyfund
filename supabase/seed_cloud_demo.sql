@@ -104,9 +104,9 @@ BEGIN
   -- STEP 3: Cases (15 scenarios)
   -- ========================================================================
 
-  INSERT INTO cases (id, reporter_id, status, photo_url, description, precise_lat, precise_lng, fuzzed_lat, fuzzed_lng, ai_condition, ai_severity, ai_confidence, ai_reasoning, ai_first_aid, ai_analyzed_at) VALUES
+  INSERT INTO cases (id, reporter_id, status, assigned_vet_id, photo_url, description, precise_lat, precise_lng, fuzzed_lat, fuzzed_lng, ai_condition, ai_severity, ai_confidence, ai_reasoning, ai_first_aid, ai_analyzed_at) VALUES
   -- Case 1: AWAITING_TRANSPORT — needs volunteer
-  ('c0000000-0000-0000-0000-000000000001', v_somchai, 'AWAITING_TRANSPORT',
+  ('c0000000-0000-0000-0000-000000000001', v_somchai, 'AWAITING_TRANSPORT', NULL,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Fracture',
    'Cat hit by car near Sukhumvit Soi 23. Hind leg broken, unable to stand.',
    13.7380, 100.5608, 13.739, 100.562,
@@ -116,7 +116,7 @@ BEGIN
    now() - interval '2 hours'),
 
   -- Case 2: IN_TRANSIT — volunteer claimed
-  ('c0000000-0000-0000-0000-000000000002', v_nattaya, 'IN_TRANSIT',
+  ('c0000000-0000-0000-0000-000000000002', v_nattaya, 'IN_TRANSIT', NULL,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Open+Wound',
    'Cat with large open wound on back, found near Chatuchak market.',
    13.7999, 100.5533, 13.801, 100.554,
@@ -126,7 +126,7 @@ BEGIN
    now() - interval '5 hours'),
 
   -- Case 3: AT_VET — awaiting vet quote (demo: vet creates quote here)
-  ('c0000000-0000-0000-0000-000000000003', v_prawit, 'AT_VET',
+  ('c0000000-0000-0000-0000-000000000003', v_prawit, 'AT_VET', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Eye+Injury',
    'Cat with swollen eye and discharge, found in Ari. Now at vet.',
    13.7788, 100.5447, 13.780, 100.545,
@@ -136,7 +136,7 @@ BEGIN
    now() - interval '1 day'),
 
   -- Case 4: FUNDING_OPEN — partially funded (62%)
-  ('c0000000-0000-0000-0000-000000000004', v_kannika, 'FUNDING_OPEN',
+  ('c0000000-0000-0000-0000-000000000004', v_kannika, 'FUNDING_OPEN', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Skin+Condition',
    'Malnourished cat with skin condition behind Wat Phra Kaew.',
    13.7516, 100.4926, 13.752, 100.493,
@@ -146,17 +146,17 @@ BEGIN
    now() - interval '3 days'),
 
   -- Case 5: FUNDING_OPEN — partially funded (61%)
-  ('c0000000-0000-0000-0000-000000000005', v_thana, 'FUNDING_OPEN',
+  ('c0000000-0000-0000-0000-000000000005', v_thana, 'FUNDING_OPEN', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Dog+Bite',
    'Cat bitten by dog with multiple wounds near Lumpini Park.',
    13.7311, 100.5418, 13.732, 100.542,
    'Open Wound', 'HIGH', 88,
    'Multiple bite wounds. Some infected. Alert but in pain.',
-   ARRAY['Do not touch wounds','Keep calm','Transport to vet ASAP'],
+   ARRAY['Do not touch wounds','Keep warm','Transport to vet ASAP'],
    now() - interval '2 days'),
 
   -- Case 6: FUNDING_OPEN — early funding (20%)
-  ('c0000000-0000-0000-0000-000000000006', v_somchai, 'FUNDING_OPEN',
+  ('c0000000-0000-0000-0000-000000000006', v_somchai, 'FUNDING_OPEN', v_anuwat,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Fracture+Silom',
    'Cat with broken front leg from height fall near Silom condo.',
    13.7252, 100.5347, 13.726, 100.535,
@@ -166,7 +166,7 @@ BEGIN
    now() - interval '4 days'),
 
   -- Case 7: IN_TREATMENT — active surgery/ICU
-  ('c0000000-0000-0000-0000-000000000007', v_nattaya, 'IN_TREATMENT',
+  ('c0000000-0000-0000-0000-000000000007', v_nattaya, 'IN_TREATMENT', v_anuwat,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Road+Accident',
    'Cat hit by vehicle on Phahon Yothin. Heavy bleeding from hind leg.',
    13.8189, 100.5619, 13.820, 100.562,
@@ -176,7 +176,7 @@ BEGIN
    now() - interval '5 days'),
 
   -- Case 8: IN_TREATMENT — monitoring
-  ('c0000000-0000-0000-0000-000000000008', v_prawit, 'IN_TREATMENT',
+  ('c0000000-0000-0000-0000-000000000008', v_prawit, 'IN_TREATMENT', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Abdominal',
    'Cat with abdominal swelling in Khlong Toei market area.',
    13.7078, 100.5578, 13.708, 100.558,
@@ -186,7 +186,7 @@ BEGIN
    now() - interval '6 days'),
 
   -- Case 9: IN_FOSTER — behaviour profile complete, publicly adoptable
-  ('c0000000-0000-0000-0000-000000000009', v_kannika, 'IN_FOSTER',
+  ('c0000000-0000-0000-0000-000000000009', v_kannika, 'IN_FOSTER', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Orange+Tabby',
    'Orange tabby with leg wound from Thonglor. Fully recovered.',
    13.7364, 100.5780, 13.737, 100.579,
@@ -196,7 +196,7 @@ BEGIN
    now() - interval '14 days'),
 
   -- Case 10: ADOPTED — complete lifecycle
-  ('c0000000-0000-0000-0000-000000000010', v_thana, 'ADOPTED',
+  ('c0000000-0000-0000-0000-000000000010', v_thana, 'ADOPTED', v_anuwat,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Adopted+Tabby',
    'Tabby with broken hind leg near Chulalongkorn. Now adopted!',
    13.7380, 100.5322, 13.739, 100.533,
@@ -206,7 +206,7 @@ BEGIN
    now() - interval '21 days'),
 
   -- Case 11: IN_TRANSIT — reporter self-transports
-  ('c0000000-0000-0000-0000-000000000011', v_somchai, 'IN_TRANSIT',
+  ('c0000000-0000-0000-0000-000000000011', v_somchai, 'IN_TRANSIT', NULL,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Self+Transport',
    'Kitten found under parked car on Ratchadamri. Reporter transporting.',
    13.7439, 100.5401, 13.744, 100.541,
@@ -216,7 +216,7 @@ BEGIN
    now() - interval '1 hour'),
 
   -- Case 12: FUNDED — ready for vet to start treatment
-  ('c0000000-0000-0000-0000-000000000012', v_kannika, 'FUNDED',
+  ('c0000000-0000-0000-0000-000000000012', v_kannika, 'FUNDED', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Funded',
    'Cat with infected ear from canal near Bang Rak. Fully funded.',
    13.7261, 100.5149, 13.727, 100.515,
@@ -225,8 +225,8 @@ BEGIN
    ARRAY['Do not touch ear','Keep from water','Vet care needed'],
    now() - interval '6 days'),
 
-  -- Case 13: TREATED — needs caretaker volunteer
-  ('c0000000-0000-0000-0000-000000000013', v_nattaya, 'TREATED',
+  -- Case 13: FUNDS_RELEASED — needs caretaker volunteer
+  ('c0000000-0000-0000-0000-000000000013', v_nattaya, 'FUNDS_RELEASED', v_siriporn,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Needs+Caretaker',
    'Recovered from respiratory infection near Saphan Kwai. Needs caretaker.',
    13.7928, 100.5491, 13.793, 100.550,
@@ -236,7 +236,7 @@ BEGIN
    now() - interval '10 days'),
 
   -- Case 14: TREATED — NOT ready for adoption
-  ('c0000000-0000-0000-0000-000000000014', v_prawit, 'TREATED',
+  ('c0000000-0000-0000-0000-000000000014', v_prawit, 'TREATED', v_anuwat,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Not+Adoptable',
    'Recovered from leg injury but chronic joint condition. Ongoing care needed.',
    13.7460, 100.5687, 13.747, 100.569,
@@ -246,7 +246,7 @@ BEGIN
    now() - interval '12 days'),
 
   -- Case 15: DECEASED — terminal
-  ('c0000000-0000-0000-0000-000000000015', v_thana, 'DECEASED',
+  ('c0000000-0000-0000-0000-000000000015', v_thana, 'DECEASED', v_anuwat,
    'https://placehold.co/400x300/F3C9A6/2D3748?text=Memorial',
    'Cat with severe internal injuries near expressway. Did not survive.',
    13.7615, 100.5692, 13.762, 100.570,
@@ -361,7 +361,7 @@ BEGIN
   -- STEP 7: Treatment Records (disable escrow trigger during seed)
   -- ========================================================================
 
-  ALTER TABLE treatment_records DISABLE TRIGGER treatment_escrow_release;
+  ALTER TABLE treatment_records DISABLE TRIGGER check_escrow_on_treatment;
 
   INSERT INTO treatment_records (id, case_id, vet_id, treatment_summary, outcome, photo_urls, vaccination_status, is_neutered, special_needs, ready_for_adoption, ready_for_adoption_at, confirmed_at, created_at) VALUES
   -- Case 7: In treatment (ongoing)
@@ -393,17 +393,17 @@ BEGIN
    'Emergency surgery attempted. Internal injuries too severe. Did not survive.',
    'DECEASED', '{}', NULL, false, NULL, false, NULL, now() - interval '12 days', now() - interval '13 days');
 
-  ALTER TABLE treatment_records ENABLE TRIGGER treatment_escrow_release;
+  ALTER TABLE treatment_records ENABLE TRIGGER check_escrow_on_treatment;
 
   -- ========================================================================
   -- STEP 8: Foster Records
   -- ========================================================================
 
-  INSERT INTO foster_records (id, case_id, caretaker_id, started_at, ended_at, status, personality, energy_level, good_with_children, good_with_cats, indoor_only, ideal_home, favourite_activities, observations, foster_photos, behaviour_profile_complete) VALUES
+  INSERT INTO foster_records (id, case_id, caretaker_id, started_at, ended_at, status, personality, energy_level, good_with_children, good_with_cats, good_with_dogs, litter_trained, indoor_only, ideal_home, favourite_activities, observations, foster_photos, behaviour_profile_complete) VALUES
   -- Case 9: Active foster, behaviour profile COMPLETE (publicly adoptable)
   ('f0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000009', v_prawit,
    now() - interval '7 days', NULL, 'ACTIVE',
-   ARRAY['Affectionate','Playful','Curious'], 'medium', true, true, true,
+   ARRAY['Affectionate','Playful','Curious'], 'medium', true, true, true, true, true,
    ARRAY['Apartment','Indoor only','First-time owner'],
    ARRAY['Chasing toys','Window watching','Sleeping beside humans'],
    'Very friendly after recovery. Enjoys attention and adapts quickly to new people.',
@@ -411,7 +411,7 @@ BEGIN
   -- Case 10: Foster completed → adopted
   ('f0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000010', v_thana,
    now() - interval '10 days', now() - interval '3 days', 'ADOPTED',
-   ARRAY['Calm','Gentle','Lap Cat'], 'low', true, true, true,
+   ARRAY['Calm','Gentle','Lap Cat'], 'low', true, true, false, true, true,
    ARRAY['Quiet home','Indoor only'],
    ARRAY['Cuddling','Sleeping','Gentle play'],
    'Excellent temperament. Quickly bonded with adopter.',

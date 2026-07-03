@@ -16,8 +16,8 @@ export function VetQuoteCard({ vet, amount, notes }: VetQuoteCardProps) {
         <Stethoscope size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Vet Quote
       </h3>
       <div className="flex items-center gap-3 mb-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FFF3E0]">
-          <Stethoscope size={16} strokeWidth={1.5} className="text-[#2D3748]" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#6C5CE7]/8">
+          <Stethoscope size={16} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div>
           <p className="text-sm font-medium text-[#2D3748]">{vet}</p>

@@ -1,44 +1,81 @@
+"use client";
+
 import Link from "next/link";
-import { PawPrint, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { PawPrint } from "lucide-react";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
+import { PawBackground } from "@/components/ui/PawBackground";
 
-/**
- * Global 404 page — shown when a route doesn't exist.
- * Uses the confused mascot for a friendly, on-brand experience.
- */
 export default function NotFound() {
+  const router = useRouter();
+
+  useEffect(() => {
+    document.title = "404 Not Found — TabbyFund";
+  }, []);
+
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#F7F7FB] px-4 py-12">
-      <div className="w-full max-w-md space-y-6 text-center">
-        <TabbyMascot variant="confused" size="xl" className="mx-auto" />
+    <section className="relative h-dvh overflow-hidden bg-[#F7F7FB] text-[#25324B] flex flex-col items-center justify-center">
+      <PawBackground density="low" />
 
-        <div>
-          <h1 className="font-heading text-2xl font-bold text-[#2D3748]">
-            Page Not Found
+      {/* Subtle radial glow centering on the content */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(108,92,231,0.06),transparent_50%)]" />
+
+      <div className="relative z-10 flex h-full items-center justify-center px-6 py-6 w-full">
+        <div className="w-full max-w-xl text-center flex flex-col items-center justify-center">
+          {/* Mascot */}
+          <TabbyMascot
+            variant="404"
+            size="xl"
+            className="drop-shadow-[0_8px_20px_rgba(108,92,231,0.08)] mb-2"
+          />
+
+          {/* Rescue trail badge */}
+          <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#EEE9FF] px-4 py-2 text-[10px] font-bold uppercase tracking-wide text-[#6C5CE7] select-none">
+            <PawPrint size={10} strokeWidth={2.5} className="fill-[#6C5CE7]" />
+            Rescue trail not found
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl font-heading leading-tight max-w-md">
+            Tabby lost the
+            <span className="block text-[#6C5CE7] mt-0.5">rescue trail.</span>
           </h1>
-          <p className="mt-2 text-sm text-[#2D3748]/60">
-            Oops! This cat wandered somewhere we couldn&apos;t find.
-          </p>
-          <p className="mt-1 text-xs text-[#2D3748]/40">
-            The page you&apos;re looking for doesn&apos;t exist or may have been moved.
-          </p>
-        </div>
 
-        <div className="flex flex-col gap-2.5">
-          <Link
-            href="/dashboard"
-            className="flex h-11 items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA]"
-          >
-            <PawPrint size={16} strokeWidth={1.5} /> Go to Dashboard
-          </Link>
-          <Link
-            href="/login"
-            className="flex h-11 items-center justify-center gap-2 rounded-[12px] border border-[#A788FA]/30 text-sm font-medium text-[#6C5CE7] transition hover:bg-[#6C5CE7]/5"
-          >
-            <ArrowLeft size={16} strokeWidth={1.5} /> Back to Login
-          </Link>
+          {/* Description */}
+          <p className="mx-auto mt-3 max-w-md text-xs font-medium leading-relaxed text-[#6F7895] md:text-sm">
+            This page doesn’t exist, but every rescue still has a way home.
+          </p>
+
+          {/* Action buttons */}
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row w-full max-w-sm sm:max-w-none px-4 sm:px-0">
+            <button
+              onClick={() => router.back()}
+              className="flex h-12 sm:w-48 items-center justify-center gap-2 rounded-full bg-[#6C5CE7] px-6 text-sm font-bold text-white shadow-[0_12px_24px_rgba(108,92,231,0.16)] hover:bg-[#5B4BE2] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+            >
+              Take Tabby Home
+            </button>
+
+            <Link
+              href="/cases"
+              className="flex h-12 sm:w-48 items-center justify-center gap-2 rounded-full border border-[#6C5CE7]/20 bg-white/80 backdrop-blur-xs px-6 text-sm font-bold text-[#6C5CE7] hover:bg-[#EEE9FF] hover:border-[#6C5CE7]/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+            >
+              Browse Rescue Cases
+            </Link>
+          </div>
+
+          {/* Trust Note Card */}
+          <div className="mx-auto mt-8 w-full max-w-md rounded-3xl border border-[#ECE9F6] bg-white/85 p-4 text-left shadow-sm backdrop-blur-sm select-none">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#6C5CE7]">
+              Community powered
+            </p>
+            <p className="mt-1 text-[11px] sm:text-xs font-semibold text-[#6F7895] leading-normal">
+              Every rescue on TabbyFund is tracked from report to treatment to
+              adoption.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

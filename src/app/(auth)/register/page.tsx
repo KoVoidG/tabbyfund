@@ -1,41 +1,28 @@
 import Link from "next/link";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
+import { PawPrint } from "lucide-react";
 
 export const metadata = {
   title: "Create Account — TabbyFund",
 };
 
-/**
- * Register page — rendered inside the (auth) layout card.
- * Layout provides: centered wrapper, PawPrint logo, branding, white card.
- * This page provides: heading, form, and login link.
- */
 export default function RegisterPage() {
   return (
-    <div className="space-y-5">
-      {/* Heading */}
-      <div>
-        <h2 className="text-center font-heading text-lg font-semibold text-[#2D3748]">
-          Create Account
-        </h2>
-        <p className="text-center mt-1 text-sm text-[#2D3748]/60">
-          Join TabbyFund and help rescue stray cats
-        </p>
+    <div className="min-h-dvh bg-[#F7F7FB] py-12 px-4 flex flex-col items-center justify-center text-[#25324B] selection:bg-[#EEE9FF] selection:text-[#6C5CE7]">
+      <div className="w-full max-w-4xl space-y-6">
+        {/* Logo Header */}
+        <div className="flex items-center gap-2 justify-center">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#6C5CE7]/10 text-[#6C5CE7]">
+            <PawPrint size={18} strokeWidth={2.5} />
+          </div>
+          <span className="font-heading text-lg font-black tracking-tight">TabbyFund</span>
+        </div>
+
+        {/* Wizard Form Wrapper */}
+        <div className="rounded-[24px] bg-white border border-[rgba(108,92,231,.08)] p-6 sm:p-8 shadow-[0_20px_50px_rgba(108,92,231,0.03)] w-full">
+          <RegisterForm />
+        </div>
       </div>
-
-      {/* Form */}
-      <RegisterForm />
-
-      {/* Login link */}
-      <p className="text-center text-sm text-[#2D3748]/60">
-        Already have an account?{" "}
-        <Link
-          href="/login"
-          className="font-medium text-[#6C5CE7] hover:text-[#A788FA] transition-colors"
-        >
-          Sign in
-        </Link>
-      </p>
     </div>
   );
 }

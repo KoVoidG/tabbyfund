@@ -1,6 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export interface VetClinic {
+  vetId: string;
   vetName: string;
   clinicName: string;
   clinicAddress: string | null;
@@ -16,11 +17,11 @@ export async function getVerifiedVetClinics(
   fromLat?: number,
   fromLng?: number
 ): Promise<VetClinic[]> {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("display_name, clinic_name, clinic_address, clinic_lat, clinic_lng")
+    .select("id, display_name, clinic_name, clinic_address, clinic_lat, clinic_lng")
     .eq("role", "vet")
     .eq("is_verified", true)
     .not("clinic_name", "is", null);
@@ -35,6 +36,7 @@ export async function getVerifiedVetClinics(
         distance = haversineKm(fromLat, fromLng, v.clinic_lat, v.clinic_lng);
       }
       return {
+        vetId: v.id,
         vetName: v.display_name,
         clinicName: v.clinic_name!,
         clinicAddress: v.clinic_address,

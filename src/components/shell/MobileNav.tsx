@@ -3,7 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, House, PawPrint, Plus, Heart, HandCoins, Home, Stethoscope, ShieldCheck } from "lucide-react";
+import {
+  Menu,
+  LayoutDashboard,
+  ClipboardList,
+  HandHeart,
+  TriangleAlert,
+  HandCoins,
+  HouseHeart,
+  PawPrint,
+  Stethoscope,
+  ShieldCheck,
+  Users,
+  BarChart3,
+  History,
+  LogOut,
+} from "lucide-react";
 import {
   Sheet,
   SheetTrigger,
@@ -18,21 +33,32 @@ interface MobileNavProps {
 }
 
 const communityLinks = [
-  { href: "/dashboard", icon: House, label: "Dashboard" },
-  { href: "/cases", icon: PawPrint, label: "Rescue Feed" },
-  { href: "/volunteer", icon: Heart, label: "Volunteer" },
-  { href: "/report", icon: Plus, label: "Report" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/cases", icon: ClipboardList, label: "Rescue Feed" },
+  { href: "/volunteer", icon: HandHeart, label: "Volunteer" },
+  { href: "/report", icon: TriangleAlert, label: "Report" },
   { href: "/donate", icon: HandCoins, label: "Donate" },
-  { href: "/foster", icon: Home, label: "My Foster" },
-  { href: "/adopt", icon: Heart, label: "Adopt" },
+  { href: "/foster", icon: HouseHeart, label: "My Foster" },
+  { href: "/adopt", icon: PawPrint, label: "Adopt" },
 ];
 
 const vetLinks = [
   { href: "/vet", icon: Stethoscope, label: "Vet Dashboard" },
 ];
 
-const adminLinks = [
-  { href: "/admin", icon: ShieldCheck, label: "Admin" },
+const normalAdminLinks = [
+  { href: "/admin", icon: ShieldCheck, label: "Admin Operations" },
+];
+
+const adminSectionLinks = [
+  { href: "/admin", icon: LayoutDashboard, label: "Admin Dashboard" },
+  { href: "/admin/cases", icon: ClipboardList, label: "Case Management" },
+  { href: "/admin/moderation", icon: TriangleAlert, label: "Case Moderation" },
+  { href: "/admin/vets", icon: Stethoscope, label: "Veterinarians" },
+  { href: "/admin/users", icon: Users, label: "Community Users" },
+  { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/admin/activity", icon: History, label: "Platform Activity" },
+  { href: "/dashboard", icon: LogOut, label: "Exit Admin" },
 ];
 
 /**
@@ -46,11 +72,15 @@ export function MobileNav({ profile }: MobileNavProps) {
 
   const showVet = profile.role === "vet";
   const showAdmin = profile.role === "admin";
+  const isAdminPath = pathname.startsWith("/admin");
 
   function isActive(href: string) {
-    if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/dashboard" && !isAdminPath) return pathname === "/dashboard";
+    if (href === "/admin") return pathname === "/admin";
     return pathname === href || pathname.startsWith(href + "/");
   }
+
+  const activeLinks = isAdminPath ? adminSectionLinks : communityLinks;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -66,12 +96,12 @@ export function MobileNav({ profile }: MobileNavProps) {
         <SheetHeader className="border-b border-[#A788FA]/10 px-5 py-4">
           <SheetTitle className="flex items-center gap-2 text-[#6C5CE7]">
             <PawPrint size={18} strokeWidth={1.5} />
-            TabbyFund
+            {isAdminPath ? "TabbyAdmin" : "TabbyFund"}
           </SheetTitle>
         </SheetHeader>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
-          {communityLinks.map((link) => (
+          {activeLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -87,7 +117,7 @@ export function MobileNav({ profile }: MobileNavProps) {
             </Link>
           ))}
 
-          {showVet && (
+          {!isAdminPath && showVet && (
             <>
               <div className="my-3 h-px bg-[#A788FA]/10" />
               {vetLinks.map((link) => (
@@ -108,10 +138,10 @@ export function MobileNav({ profile }: MobileNavProps) {
             </>
           )}
 
-          {showAdmin && (
+          {!isAdminPath && showAdmin && (
             <>
               <div className="my-3 h-px bg-[#A788FA]/10" />
-              {adminLinks.map((link) => (
+              {normalAdminLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

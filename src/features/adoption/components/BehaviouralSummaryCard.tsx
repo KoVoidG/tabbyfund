@@ -6,9 +6,9 @@ interface BehaviouralSummaryCardProps {
   energyLevel: string;
   goodWithChildren?: boolean;
   goodWithCats?: boolean;
+  goodWithDogs?: boolean;
+  litterTrained?: boolean;
   indoorOnly: boolean;
-  idealHome: string[];
-  favouriteActivities: string[];
   foster: string;
 }
 
@@ -16,7 +16,16 @@ interface BehaviouralSummaryCardProps {
  * BehaviouralSummaryCard — foster-owned behavioural information for adoption profile.
  * Clearly labeled as "Behavioural Profile by Foster".
  */
-export function BehaviouralSummaryCard({ personality, energyLevel, goodWithChildren, goodWithCats, indoorOnly, idealHome, favouriteActivities, foster }: BehaviouralSummaryCardProps) {
+export function BehaviouralSummaryCard({
+  personality,
+  energyLevel,
+  goodWithChildren,
+  goodWithCats,
+  goodWithDogs,
+  litterTrained,
+  indoorOnly,
+  foster,
+}: BehaviouralSummaryCardProps) {
   return (
     <div className="rounded-[16px] border border-[#6C5CE7]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
       <div className="flex items-center justify-between mb-4">
@@ -45,43 +54,31 @@ export function BehaviouralSummaryCard({ personality, energyLevel, goodWithChild
             <p className="text-[9px] text-[#2D3748]/50">Environment</p>
             <p className="font-medium text-[#2D3748]">{indoorOnly ? "Indoor only" : "Indoor/Outdoor"}</p>
           </div>
-          {goodWithChildren !== undefined && (
+          {goodWithChildren !== undefined && goodWithChildren !== null && (
             <div className="rounded-[8px] bg-[#F7F7FB] p-2.5">
               <p className="text-[9px] text-[#2D3748]/50">Children</p>
               <p className="font-medium text-[#2D3748]">{goodWithChildren ? "Good ✓" : "Not recommended"}</p>
             </div>
           )}
-          {goodWithCats !== undefined && (
+          {goodWithCats !== undefined && goodWithCats !== null && (
             <div className="rounded-[8px] bg-[#F7F7FB] p-2.5">
               <p className="text-[9px] text-[#2D3748]/50">Other cats</p>
               <p className="font-medium text-[#2D3748]">{goodWithCats ? "Good ✓" : "Prefers alone"}</p>
             </div>
           )}
+          {goodWithDogs !== undefined && goodWithDogs !== null && (
+            <div className="rounded-[8px] bg-[#F7F7FB] p-2.5">
+              <p className="text-[9px] text-[#2D3748]/50">Dogs</p>
+              <p className="font-medium text-[#2D3748]">{goodWithDogs ? "Good ✓" : "Not recommended"}</p>
+            </div>
+          )}
+          {litterTrained !== undefined && litterTrained !== null && (
+            <div className="rounded-[8px] bg-[#F7F7FB] p-2.5">
+              <p className="text-[9px] text-[#2D3748]/50">Litter trained</p>
+              <p className="font-medium text-[#2D3748]">{litterTrained ? "Yes ✓" : "No"}</p>
+            </div>
+          )}
         </div>
-
-        {/* Activities */}
-        {favouriteActivities.length > 0 && (
-          <div>
-            <p className="text-[10px] font-medium text-[#2D3748]/50 mb-1.5">Favourite Activities</p>
-            <div className="flex flex-wrap gap-1.5">
-              {favouriteActivities.map((a) => (
-                <span key={a} className="rounded-full bg-[#FFF3E0] px-2.5 py-0.5 text-[10px] font-medium text-[#2D3748]">{a}</span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Ideal home */}
-        {idealHome.length > 0 && (
-          <div>
-            <p className="text-[10px] font-medium text-[#2D3748]/50 mb-1.5">Ideal Home</p>
-            <div className="flex flex-wrap gap-1.5">
-              {idealHome.map((h) => (
-                <span key={h} className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700">{h}</span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

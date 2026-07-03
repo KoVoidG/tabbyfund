@@ -28,8 +28,12 @@ export interface CaseDetail {
   ai_first_aid: string[] | null;
   fuzzed_lat: number;
   fuzzed_lng: number;
+  precise_lat?: number | null;
+  precise_lng?: number | null;
   created_at: string;
   updated_at: string;
+  assigned_vet_id: string | null;
+  assigned_vet: { display_name: string; clinic_name: string | null } | null;
   reporter: { display_name: string } | null;
   // Related records (may be null if not yet in that stage)
   transport: {
@@ -59,6 +63,9 @@ export interface CaseDetail {
     started_at: string;
     observations: string | null;
     personality: string[] | null;
+    status: Enums<"foster_status">;
+    caretaker_id: string;
+    behaviour_profile_complete: boolean;
   } | null;
   adoption: {
     status: Enums<"adoption_status">;
@@ -66,6 +73,54 @@ export interface CaseDetail {
     medical_notes: string | null;
   } | null;
 }
+
+export interface ParsedAIReasoning {
+  reasoning: string;
+  urgency: string;
+  estimatedRecovery: string;
+  recommendedAction: string;
+  recoveryConfidence: number;
+}
+
+/**
+ * Helper to parse serialized JSON inside the ai_reasoning column.
+ * Falls back to plain text parsing if the column contains legacy raw text.
+ */
+export function parseAIReasoning(rawReasoning: string | null): ParsedAIReasoning {
+  if (!rawReasoning) {
+    return {
+      reasoning: "",
+      urgency: "Monitor",
+      estimatedRecovery: "Determined by vet",
+      recommendedAction: "Monitor the cat and provide basic care.",
+      recoveryConfidence: 50,
+    };
+  }
+
+  try {
+    if (rawReasoning.trim().startsWith("{")) {
+      const parsed = JSON.parse(rawReasoning);
+      return {
+        reasoning: parsed.reasoning || "",
+        urgency: parsed.urgency || "Monitor",
+        estimatedRecovery: parsed.estimatedRecovery || "Determined by vet",
+        recommendedAction: parsed.recommendedAction || "Monitor the cat and provide basic care.",
+        recoveryConfidence: typeof parsed.recoveryConfidence === "number" ? parsed.recoveryConfidence : 50,
+      };
+    }
+  } catch (e) {
+    // Ignore JSON parse error and fallback
+  }
+
+  return {
+    reasoning: rawReasoning,
+    urgency: "Monitor",
+    estimatedRecovery: "Determined by vet",
+    recommendedAction: "Monitor the cat and provide basic care.",
+    recoveryConfidence: 50,
+  };
+}
+
 
 // ============================================================
 // Query helpers
@@ -94,10 +149,7 @@ export async function getPublicCases(): Promise<PublicCase[]> {
     return [];
   }
 
-  // Filter out terminal statuses (view doesn't filter them)
-  return ((data ?? []) as PublicCase[]).filter(
-    (c) => c.status && !TERMINAL_STATUSES.includes(c.status)
-  );
+  return (data ?? []) as PublicCase[];
 }
 
 /**
@@ -122,102 +174,120 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
   const { createServiceClient } = await import("@/lib/supabase/service");
   const caseReader = createServiceClient();
 
-  const { data: caseData, error: caseError } = await caseReader
+  const { data: caseData, error: caseError } = await (caseReader
     .from("cases")
     .select(`
       id, photo_url, description, status,
       ai_severity, ai_condition, ai_confidence, ai_reasoning, ai_first_aid,
       fuzzed_lat, fuzzed_lng, created_at, updated_at,
-      reporter:profiles!cases_reporter_id_fkey(display_name)
-    `)
+      assigned_vet_id,
+      reporter:profiles!cases_reporter_id_fkey(display_name),
+      assigned_vet:profiles!cases_assigned_vet_id_fkey(display_name, clinic_name)
+    `) as any)
     .eq("id", id)
     .single();
 
   if (caseError || !caseData) return null;
 
-  // All queries below use the authenticated client (RLS allows authenticated reads)
+  // All queries below use the service client caseReader to bypass profile RLS
+  // so that transporter and foster caretaker names are visible to other users.
 
   // Fetch transport request
-  const { data: transport } = await supabase
+  const { data: transport } = await caseReader
     .from("transport_requests")
     .select(`
       status, claimed_by,
       claimed_by_profile:profiles!transport_requests_claimed_by_fkey(display_name)
     `)
     .eq("case_id", id)
-    .single();
+    .maybeSingle();
 
   // Fetch vet quote
-  const { data: vetQuote } = await supabase
+  const { data: vetQuote } = await caseReader
     .from("vet_quotes")
     .select(`
       quoted_amount, notes,
       vet_profile:profiles!vet_quotes_vet_id_fkey(display_name)
     `)
     .eq("case_id", id)
-    .single();
+    .maybeSingle();
 
   // Fetch funding progress via RPC
   let funding: CaseDetail["funding"] = null;
   if (vetQuote) {
-    const { data: fundingData } = await supabase
+    const { data: fundingData } = await caseReader
       .rpc("get_funding_progress", { p_case_id: id });
 
     if (fundingData && fundingData.length > 0) {
       const f = fundingData[0];
       funding = {
-        goal: f.goal,
-        total_raised: f.total_raised,
-        donor_count: f.donor_count,
-        is_fully_funded: f.is_fully_funded,
+          goal: f.goal,
+          total_raised: f.total_raised,
+          donor_count: f.donor_count,
+          is_fully_funded: f.is_fully_funded,
       };
     }
   }
 
   // Fetch treatment record
-  const { data: treatment } = await supabase
+  const { data: treatment } = await caseReader
     .from("treatment_records")
     .select(`
       treatment_summary, outcome, photo_urls,
       vet_profile:profiles!treatment_records_vet_id_fkey(display_name)
     `)
     .eq("case_id", id)
-    .single();
+    .maybeSingle();
 
-  // Fetch foster record (most recent active one)
-  const { data: foster } = await supabase
+  // Fetch foster record (most recent one, active or otherwise)
+  const { data: foster } = await caseReader
     .from("foster_records")
     .select(`
-      started_at, observations, personality,
+      started_at, observations, personality, status, caretaker_id, behaviour_profile_complete,
       caretaker_profile:profiles!foster_records_caretaker_id_fkey(display_name)
     `)
     .eq("case_id", id)
     .order("started_at", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   // Fetch adoption listing
-  const { data: adoption } = await supabase
+  const { data: adoption } = await caseReader
     .from("adoption_listings")
     .select("status, personality, medical_notes")
     .eq("case_id", id)
-    .single();
+    .maybeSingle();
+
+  // Fetch precise coordinates using the authenticated client.
+  // RLS will allow this ONLY if the user is the reporter, assigned transporter, verified vet, or admin.
+  // Otherwise, it returns null or fails gracefully.
+  const { data: preciseCoords } = await supabase
+    .from("cases")
+    .select("precise_lat, precise_lng")
+    .eq("id", id)
+    .maybeSingle();
+
+  const c = caseData as any;
 
   return {
-    id: caseData.id,
-    photo_url: caseData.photo_url,
-    description: caseData.description,
-    status: caseData.status,
-    ai_severity: caseData.ai_severity,
-    ai_condition: caseData.ai_condition,
-    ai_confidence: caseData.ai_confidence,
-    ai_reasoning: caseData.ai_reasoning,
-    ai_first_aid: caseData.ai_first_aid,
-    fuzzed_lat: caseData.fuzzed_lat,
-    fuzzed_lng: caseData.fuzzed_lng,
-    created_at: caseData.created_at,
-    updated_at: caseData.updated_at,
-    reporter: caseData.reporter as { display_name: string } | null,
+    id: c.id,
+    photo_url: c.photo_url,
+    description: c.description,
+    status: c.status,
+    ai_severity: c.ai_severity,
+    ai_condition: c.ai_condition,
+    ai_confidence: c.ai_confidence,
+    ai_reasoning: c.ai_reasoning,
+    ai_first_aid: c.ai_first_aid,
+    fuzzed_lat: c.fuzzed_lat,
+    fuzzed_lng: c.fuzzed_lng,
+    precise_lat: preciseCoords?.precise_lat ?? null,
+    precise_lng: preciseCoords?.precise_lng ?? null,
+    created_at: c.created_at,
+    updated_at: c.updated_at,
+    assigned_vet_id: c.assigned_vet_id ?? null,
+    assigned_vet: c.assigned_vet ?? null,
+    reporter: c.reporter as { display_name: string } | null,
     transport: transport
       ? {
           status: transport.status,
@@ -247,6 +317,9 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
           started_at: foster.started_at,
           observations: foster.observations,
           personality: foster.personality,
+          status: foster.status,
+          caretaker_id: foster.caretaker_id,
+          behaviour_profile_complete: foster.behaviour_profile_complete,
         }
       : null,
     adoption: adoption

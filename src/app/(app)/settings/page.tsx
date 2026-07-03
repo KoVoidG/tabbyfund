@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Bell, Eye, Moon, Globe, Type, Accessibility, Info } from "lucide-react";
+import { Settings, Bell, Moon, Accessibility, Info } from "lucide-react";
 
 interface ToggleProps {
   label: string;
@@ -85,7 +85,6 @@ export default function SettingsPage() {
         <div className="text-xs text-[#2D3748]/60 space-y-1">
           <p>TabbyFund v0.1.0 — Hackathon MVP</p>
           <p>Community-powered cat rescue platform</p>
-          <p>Built with Next.js, Supabase, and love 🐱</p>
         </div>
       </section>
     </div>

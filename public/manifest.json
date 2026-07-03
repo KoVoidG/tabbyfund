@@ -1,0 +1,30 @@
+{
+  "name": "TabbyFund — Community-Powered Cat Rescue",
+  "short_name": "TabbyFund",
+  "description": "A transparent, community-driven platform for stray cat rescue, transport, and treatment.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7FB",
+  "theme_color": "#6C5CE7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

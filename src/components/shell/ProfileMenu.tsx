@@ -2,16 +2,10 @@
 
 import { useTransition } from "react";
 import { ChevronDown, User, Settings, LogOut, RefreshCw } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { logout } from "@/features/auth/actions";
 import type { UserProfile } from "@/features/auth/types";
+import { Dropdown } from "@/components/ui/Dropdown";
 
 interface ProfileMenuProps {
   profile: UserProfile;
@@ -31,12 +25,6 @@ export function ProfileMenu({ profile }: ProfileMenuProps) {
     });
   }
 
-  function handleSwitchAccount() {
-    startTransition(async () => {
-      await logout();
-    });
-  }
-
   const initials = profile.display_name
     .split(" ")
     .map((w) => w[0])
@@ -45,9 +33,11 @@ export function ProfileMenu({ profile }: ProfileMenuProps) {
     .toUpperCase();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-3 rounded-xl px-3 py-2 transition-colors hover:bg-[#6C5CE7]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7]/20">
+    <Dropdown
+      align="right"
+      widthClass="w-48"
+      trigger={
+        <button className="flex items-center gap-3 rounded-xl px-3 py-2 transition-colors hover:bg-[#6C5CE7]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7]/20 cursor-pointer">
           {/* Avatar */}
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6C5CE7]/10 text-sm font-semibold text-[#6C5CE7]">
             {initials}
@@ -70,39 +60,34 @@ export function ProfileMenu({ profile }: ProfileMenuProps) {
           {/* Chevron */}
           <ChevronDown size={14} strokeWidth={1.5} className="hidden sm:block text-[#2D3748]/40" />
         </button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#A788FA]/15 shadow-[0_4px_20px_rgba(108,92,231,0.1)]">
-        <DropdownMenuItem asChild className="flex items-center gap-2 rounded-lg text-sm text-[#2D3748] cursor-pointer focus:bg-[#6C5CE7]/5 focus:text-[#6C5CE7]">
-          <a href="/profile">
-            <User size={16} strokeWidth={1.5} />
-            Profile
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="flex items-center gap-2 rounded-lg text-sm text-[#2D3748] cursor-pointer focus:bg-[#6C5CE7]/5 focus:text-[#6C5CE7]">
-          <a href="/settings">
-            <Settings size={16} strokeWidth={1.5} />
-            Settings
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-[#A788FA]/10" />
-        <DropdownMenuItem
-          onClick={handleSwitchAccount}
-          disabled={isPending}
-          className="flex items-center gap-2 rounded-lg text-sm text-[#2D3748] cursor-pointer focus:bg-[#6C5CE7]/5 focus:text-[#6C5CE7]"
+      }
+    >
+      <div className="flex flex-col p-1 space-y-0.5">
+        <a
+          href="/profile"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#2D3748] hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7] transition"
         >
-          <RefreshCw size={16} strokeWidth={1.5} />
-          Switch account
-        </DropdownMenuItem>
-        <DropdownMenuItem
+          <User size={14} strokeWidth={2} />
+          Profile
+        </a>
+        <a
+          href="/settings"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#2D3748] hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7] transition"
+        >
+          <Settings size={14} strokeWidth={2} />
+          Settings
+        </a>
+        <div className="h-px bg-[#A788FA]/10 my-1 mx-2" />
+        <button
+          type="button"
           onClick={handleLogout}
           disabled={isPending}
-          className="flex items-center gap-2 rounded-lg text-sm text-red-600 cursor-pointer focus:bg-red-50 focus:text-red-700"
+          className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition text-left cursor-pointer disabled:opacity-50"
         >
-          <LogOut size={16} strokeWidth={1.5} />
+          <LogOut size={14} strokeWidth={2} />
           {isPending ? "Signing out..." : "Log out"}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </button>
+      </div>
+    </Dropdown>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { PWARegistration } from "@/components/PWARegistration";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,6 +22,12 @@ export const metadata: Metadata = {
   description:
     "A transparent, community-driven platform that helps rescue injured stray cats by connecting community members, verified veterinarians, and administrators through one complete rescue lifecycle.",
   keywords: ["cat rescue", "stray cats", "Thailand", "crowdfunding", "animal welfare"],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "TabbyFund",
+  },
 };
 
 export const viewport: Viewport = {
@@ -39,7 +46,9 @@ export default function RootLayout({
     <html lang="en" className={cn(inter.variable, poppins.variable)}>
       <body className="min-h-dvh flex flex-col antialiased font-sans">
         {children}
+        <PWARegistration />
       </body>
     </html>
   );
 }
+

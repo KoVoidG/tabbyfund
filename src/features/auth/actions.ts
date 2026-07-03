@@ -167,7 +167,7 @@ export async function logout(): Promise<never> {
 
 /**
  * Request a password reset email.
- * Always returns success to avoid leaking whether the email exists.
+ * Checks if the email exists and returns a validation error if not found (hackathon build requirement).
  */
 export async function requestPasswordReset(
   formData: FormData
@@ -185,13 +185,43 @@ export async function requestPasswordReset(
     };
   }
 
-  const supabase = await createClient();
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback?next=/reset-password`,
-  });
+  const emailLower = parsed.data.email.toLowerCase();
 
-  // Always return success — never reveal if email exists
-  return { success: true };
+  try {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      if (process.env.NODE_ENV === "production") {
+        console.error("[auth-actions] NEXT_PUBLIC_SITE_URL is not configured in production!");
+        return {
+          success: false,
+          error: {
+            code: "UNKNOWN_ERROR",
+            message: "Internal configuration error. Please try again later.",
+          },
+        };
+      } else {
+        console.warn("[auth-actions] NEXT_PUBLIC_SITE_URL is not configured. Falling back to localhost.");
+      }
+    }
+
+    const redirectSiteUrl = siteUrl ?? "http://localhost:3000";
+
+    const supabase = await createClient();
+    await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+      redirectTo: `${redirectSiteUrl}/auth/callback?next=/reset-password`,
+    });
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("[auth-actions] Unexpected reset error:", err.message);
+    return {
+      success: false,
+      error: {
+        code: "UNKNOWN_ERROR",
+        message: "An unexpected error occurred. Please try again.",
+      },
+    };
+  }
 }
 
 /**

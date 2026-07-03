@@ -48,7 +48,32 @@ export async function startFoster(input: StartFosterInput): Promise<FosterAction
   }
 
   if (!["TREATED", "FUNDS_RELEASED"].includes(caseData.status)) {
-    return { success: false, error: "This case is not ready for foster care." };
+    return { success: false, error: "This case is not ready for foster care (requires treatment completed first)." };
+  }
+
+  // Enforce transporter priority logic
+  const { data: transport } = await serviceClient
+    .from("transport_requests")
+    .select("claimed_by")
+    .eq("case_id", input.caseId)
+    .maybeSingle();
+
+  if (transport && transport.claimed_by && transport.claimed_by !== user.id) {
+    // Check if the transporter declined
+    const { data: declined } = await serviceClient
+      .from("foster_records")
+      .select("id")
+      .eq("case_id", input.caseId)
+      .eq("caretaker_id", transport.claimed_by)
+      .eq("status", "REASSIGNED")
+      .maybeSingle();
+
+    if (!declined) {
+      return {
+        success: false,
+        error: "The assigned transporter has priority to foster. Please wait for them to accept or decline first.",
+      };
+    }
   }
 
   // Check for existing active foster record
@@ -57,7 +82,7 @@ export async function startFoster(input: StartFosterInput): Promise<FosterAction
     .select("id")
     .eq("case_id", input.caseId)
     .eq("status", "ACTIVE")
-    .single();
+    .maybeSingle();
 
   if (existing) {
     return { success: false, error: "This case already has an active foster caretaker." };
@@ -87,6 +112,64 @@ export async function startFoster(input: StartFosterInput): Promise<FosterAction
   revalidatePath(`/cases/${input.caseId}`);
   revalidatePath("/cases");
   revalidatePath("/foster");
+  revalidatePath("/volunteer");
+
+  return { success: true };
+}
+
+// ============================================================
+// Decline Foster (transporter declines caretaker role)
+// ============================================================
+
+export async function declineFoster(input: StartFosterInput): Promise<FosterActionResult> {
+  const user = await requireAuth();
+  const supabase = await createClient();
+  const serviceClient = createServiceClient();
+
+  // Verify transporter is indeed the current user
+  const { data: transport } = await supabase
+    .from("transport_requests")
+    .select("claimed_by")
+    .eq("case_id", input.caseId)
+    .maybeSingle();
+
+  if (!transport || transport.claimed_by !== user.id) {
+    return { success: false, error: "Only the assigned transporter can decline the caretaker role." };
+  }
+
+  // Check if already declined
+  const { data: alreadyDeclined } = await supabase
+    .from("foster_records")
+    .select("id")
+    .eq("case_id", input.caseId)
+    .eq("caretaker_id", user.id)
+    .eq("status", "REASSIGNED")
+    .maybeSingle();
+
+  if (alreadyDeclined) {
+    return { success: false, error: "You have already declined the caretaker role." };
+  }
+
+  // Insert a REASSIGNED foster record to mark that they declined
+  const now = new Date().toISOString();
+  const { error: insertError } = await serviceClient
+    .from("foster_records")
+    .insert({
+      case_id: input.caseId,
+      caretaker_id: user.id,
+      status: "REASSIGNED",
+      started_at: now,
+      ended_at: now,
+    });
+
+  if (insertError) {
+    console.error("[foster] Decline failed:", insertError.message);
+    return { success: false, error: "Failed to decline the role." };
+  }
+
+  revalidatePath(`/cases/${input.caseId}`);
+  revalidatePath("/cases");
+  revalidatePath("/volunteer");
 
   return { success: true };
 }
@@ -101,10 +184,13 @@ interface UpdateBehaviouralProfileInput {
   energyLevel: "low" | "medium" | "high";
   goodWithChildren: boolean | null;
   goodWithCats: boolean | null;
+  goodWithDogs: boolean | null;
+  litterTrained: boolean | null;
   indoorOnly: boolean;
-  idealHome: string[];
-  favouriteActivities: string[];
+  idealHome?: string[];
+  favouriteActivities?: string[];
   observations: string;
+  fosterPhotos?: string[];
   markComplete: boolean;
 }
 
@@ -154,10 +240,13 @@ export async function updateBehaviouralProfile(input: UpdateBehaviouralProfileIn
       energy_level: input.energyLevel,
       good_with_children: input.goodWithChildren,
       good_with_cats: input.goodWithCats,
+      good_with_dogs: input.goodWithDogs,
+      litter_trained: input.litterTrained,
       indoor_only: input.indoorOnly,
-      ideal_home: input.idealHome,
-      favourite_activities: input.favouriteActivities,
+      ideal_home: input.idealHome || [],
+      favourite_activities: input.favouriteActivities || [],
       observations: input.observations || null,
+      foster_photos: input.fosterPhotos || [],
       behaviour_profile_complete: input.markComplete,
     })
     .eq("id", fosterRecord.id);
@@ -167,8 +256,36 @@ export async function updateBehaviouralProfile(input: UpdateBehaviouralProfileIn
     return { success: false, error: "Failed to save profile. Please try again." };
   }
 
+  if (input.markComplete) {
+    // Check if listing already exists
+    const { data: existingListing } = await supabase
+      .from("adoption_listings")
+      .select("id")
+      .eq("case_id", input.caseId)
+      .maybeSingle();
+
+    if (!existingListing) {
+      const { error: listingError } = await serviceClient
+        .from("adoption_listings")
+        .insert({
+          case_id: input.caseId,
+          status: "OPEN",
+        });
+      if (listingError) {
+        console.error("[foster] Failed to create adoption listing:", listingError.message);
+      }
+    } else {
+      // If it exists, update its status to OPEN
+      await serviceClient
+        .from("adoption_listings")
+        .update({ status: "OPEN" })
+        .eq("case_id", input.caseId);
+    }
+  }
+
   revalidatePath(`/cases/${input.caseId}`);
   revalidatePath("/foster");
+  revalidatePath("/adopt");
 
   return { success: true };
 }

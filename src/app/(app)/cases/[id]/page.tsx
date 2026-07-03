@@ -14,7 +14,9 @@ import { CaretakerVolunteerCard } from "@/features/cases/components/CaretakerVol
 import { RescueTimeline } from "@/features/cases/components/RescueTimeline";
 import { CaseStickyNav } from "@/features/cases/components/CaseStickyNav";
 import { FadeIn } from "@/features/cases/components/FadeIn";
-import { getCaseDetail } from "@/lib/cases";
+import { CaseDetailMap } from "@/features/cases/components/CaseDetailMap";
+import { CompactRescueSummary } from "@/features/cases/components/CompactRescueSummary";
+import { getCaseDetail, parseAIReasoning } from "@/lib/cases";
 import { getUser } from "@/lib/supabase/auth-helpers";
 import { getVerifiedVetClinics } from "@/lib/vet-clinics";
 import type { CaseStatus, Severity } from "@/features/cases/types";
@@ -49,6 +51,39 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
   const severity = (c.ai_severity ?? "MEDIUM") as Severity;
   const status = c.status as CaseStatus;
 
+  // Derive CompactRescueSummary props
+  let currentFoster: string | null = null;
+  if (status === "ADOPTED") {
+    currentFoster = "Adopted";
+  } else if (c.foster && c.foster.status === "ACTIVE") {
+    currentFoster = c.foster.caretaker_profile?.display_name ?? "Caretaker";
+  } else if (status === "FUNDS_RELEASED") {
+    currentFoster = "Waiting for volunteer";
+  } else {
+    currentFoster = "Not ready";
+  }
+
+  let fundingStatus = "Pending Quote";
+  if (c.funding) {
+    const pct = c.funding.goal > 0 ? Math.min(Math.round((c.funding.total_raised / c.funding.goal) * 100), 100) : 0;
+    fundingStatus = `฿${c.funding.total_raised.toLocaleString()} / ฿${c.funding.goal.toLocaleString()} (${pct}%)`;
+  }
+
+  let treatmentStatus = "Pending Examination";
+  if (c.treatment) {
+    if (c.treatment.outcome === "RECOVERED" && status !== "DECEASED") {
+      treatmentStatus = "Completed";
+    } else if (c.treatment.outcome === "DECEASED") {
+      treatmentStatus = "Deceased";
+    } else {
+      treatmentStatus = "In Progress";
+    }
+  } else if (["REPORTED", "TRIAGED", "AWAITING_TRANSPORT", "IN_TRANSIT"].includes(status)) {
+    treatmentStatus = "Pending Examination";
+  } else {
+    treatmentStatus = "Awaiting Exam";
+  }
+
   return (
     <div className="mx-auto max-w-5xl">
       {/* Desktop floating aside */}
@@ -79,6 +114,19 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
           <JourneyTracker status={status} sticky />
         </FadeIn>
 
+        {/* Compact Rescue Summary */}
+        <FadeIn delay={20}>
+          <CompactRescueSummary
+            reporter={reporterName}
+            transporter={c.transport?.claimed_by_profile?.display_name ?? null}
+            assignedVet={c.assigned_vet?.display_name ?? null}
+            currentFoster={currentFoster}
+            status={status}
+            fundingStatus={fundingStatus}
+            treatmentStatus={treatmentStatus}
+          />
+        </FadeIn>
+
         {/* DESKTOP: Hero after tracker */}
         <div className="hidden sm:block">
           <FadeIn delay={50}>
@@ -98,21 +146,43 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
           </FadeIn>
         </div>
 
+        {/* Map Section */}
+        <FadeIn delay={75}>
+          <div id="section-map" className="scroll-mt-32 sm:scroll-mt-20">
+            <CaseDetailMap
+              fuzzedLat={c.fuzzed_lat}
+              fuzzedLng={c.fuzzed_lng}
+              preciseLat={c.precise_lat}
+              preciseLng={c.precise_lng}
+            />
+          </div>
+        </FadeIn>
+
         {/* AI Analysis + Recommendation */}
-        {c.ai_condition && (
-          <FadeIn delay={100}>
-            <div id="section-ai" className="scroll-mt-32 sm:scroll-mt-20 space-y-4">
-              <AIAnalysisCard
-                condition={c.ai_condition}
-                confidence={c.ai_confidence ?? 0}
-                reasoning={c.ai_reasoning ?? ""}
-                firstAid={c.ai_first_aid ?? []}
-                severity={severity}
-              />
-              <AIRecommendationCard severity={severity} condition={c.ai_condition} />
-            </div>
-          </FadeIn>
-        )}
+        {c.ai_condition && (() => {
+          const parsedAI = parseAIReasoning(c.ai_reasoning);
+          return (
+            <FadeIn delay={100}>
+              <div id="section-ai" className="scroll-mt-32 sm:scroll-mt-20 space-y-4">
+                <AIAnalysisCard
+                  condition={c.ai_condition}
+                  confidence={c.ai_confidence ?? 0}
+                  reasoning={parsedAI.reasoning}
+                  firstAid={c.ai_first_aid ?? []}
+                  severity={severity}
+                />
+                <AIRecommendationCard
+                  severity={severity}
+                  condition={c.ai_condition}
+                  recommendedAction={parsedAI.recommendedAction}
+                  estimatedRecovery={parsedAI.estimatedRecovery}
+                  urgency={parsedAI.urgency}
+                  recoveryConfidence={parsedAI.recoveryConfidence}
+                />
+              </div>
+            </FadeIn>
+          );
+        })()}
 
         {/* Transport */}
         {c.transport && (
@@ -125,6 +195,10 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                 isAssignedTransporter={currentUserId != null && c.transport.claimed_by === currentUserId}
                 fuzzedLat={c.fuzzed_lat}
                 fuzzedLng={c.fuzzed_lng}
+                preciseLat={c.precise_lat}
+                preciseLng={c.precise_lng}
+                assignedVetName={c.assigned_vet?.display_name}
+                assignedVetClinic={c.assigned_vet?.clinic_name}
               />
             </div>
           </FadeIn>
@@ -171,13 +245,15 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                 vet={c.treatment.vet_profile?.display_name ?? "Vet"}
                 summary={c.treatment.treatment_summary}
                 outcome={c.treatment.outcome}
+                beforePhoto={c.photo_url}
+                afterPhoto={c.treatment.photo_urls?.[0] || null}
               />
             </div>
           </FadeIn>
         )}
 
         {/* Foster */}
-        {c.foster && (
+        {c.foster && c.foster.status === "ACTIVE" && (
           <FadeIn delay={350}>
             <div id="section-foster" className="scroll-mt-32 sm:scroll-mt-20">
               <FosterCard
@@ -188,20 +264,52 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
           </FadeIn>
         )}
 
-        {/* Caretaker volunteer — shown when case is TREATED/FUNDS_RELEASED but has no foster record */}
-        {!c.foster && ["TREATED", "FUNDS_RELEASED"].includes(c.status) && (
-          <FadeIn delay={350}>
-            <div id="section-foster" className="scroll-mt-32 sm:scroll-mt-20">
-              <CaretakerVolunteerCard caseId={c.id} />
-            </div>
-          </FadeIn>
-        )}
+        {/* Caretaker volunteer or Transporter CTA — shown when case is TREATED/FUNDS_RELEASED but has no ACTIVE foster record */}
+        {["TREATED", "FUNDS_RELEASED"].includes(status) && !(c.foster && c.foster.status === "ACTIVE") && (() => {
+          const isTransporter = c.transport != null && c.transport.claimed_by === currentUserId;
+          const transporterId = c.transport?.claimed_by;
+          const transporterHasDeclined = c.foster != null && c.foster.caretaker_id === transporterId && c.foster.status === "REASSIGNED";
+
+          if (isTransporter && !transporterHasDeclined) {
+            return (
+              <FadeIn delay={350}>
+                <div id="section-foster" className="scroll-mt-32 sm:scroll-mt-20">
+                  <CaretakerVolunteerCard caseId={c.id} isTransporter={true} />
+                </div>
+              </FadeIn>
+            );
+          }
+
+          if (transporterHasDeclined || !transporterId) {
+            return (
+              <FadeIn delay={350}>
+                <div id="section-foster" className="scroll-mt-32 sm:scroll-mt-20">
+                  <CaretakerVolunteerCard caseId={c.id} isTransporter={false} />
+                </div>
+              </FadeIn>
+            );
+          }
+
+          // If there is an assigned transporter who hasn't declined yet (and current user is not transporter):
+          if (transporterId && !transporterHasDeclined) {
+            return (
+              <FadeIn delay={350}>
+                <div id="section-foster" className="scroll-mt-32 sm:scroll-mt-20">
+                  <CaretakerVolunteerCard caseId={c.id} transporterPending={true} />
+                </div>
+              </FadeIn>
+            );
+          }
+
+          return null;
+        })()}
 
         {/* Adoption */}
-        {c.adoption && (
+        {c.adoption && (c.foster?.behaviour_profile_complete || status === "ADOPTED" || status === "REUNITED") && (
           <FadeIn delay={400}>
             <div id="section-forever-home" className="scroll-mt-32 sm:scroll-mt-20">
               <AdoptionStatusCard
+                caseId={c.id}
                 status={c.adoption.status}
                 personality={c.adoption.personality ?? undefined}
                 medicalNotes={c.adoption.medical_notes ?? undefined}
@@ -212,7 +320,26 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
 
         {/* Rescue Timeline */}
         <FadeIn delay={450}>
-          <RescueTimeline status={status} />
+          <RescueTimeline
+            status={status}
+            reporterName={reporterName}
+            transporterName={c.transport?.claimed_by_profile?.display_name ?? null}
+            assignedVetName={c.assigned_vet?.display_name ?? null}
+            assignedClinicName={c.assigned_vet?.clinic_name ?? null}
+            hasQuote={c.vet_quote != null}
+            caretakerName={c.foster?.caretaker_profile?.display_name ?? null}
+            isBehaviourComplete={c.foster?.behaviour_profile_complete ?? false}
+            hasAdoptionListing={c.adoption != null}
+            isEscrowReleased={
+              status === "FUNDS_RELEASED" ||
+              status === "ADOPTED" ||
+              status === "SHELTERED" ||
+              status === "DECEASED" ||
+              (!!c.funding?.is_fully_funded &&
+                (c.treatment?.outcome === "RECOVERED" ||
+                  c.treatment?.outcome === "DECEASED"))
+            }
+          />
         </FadeIn>
       </div>
     </div>
@@ -232,13 +359,23 @@ async function TransportCardWithClinics(props: {
   isAssignedTransporter: boolean;
   fuzzedLat: number;
   fuzzedLng: number;
+  preciseLat?: number | null;
+  preciseLng?: number | null;
+  assignedVetName?: string | null;
+  assignedVetClinic?: string | null;
 }) {
-  const clinics = await getVerifiedVetClinics(props.fuzzedLat, props.fuzzedLng);
-  const nearestClinics = clinics.slice(0, 3).map((c) => ({
+  const originLat = props.preciseLat ?? props.fuzzedLat;
+  const originLng = props.preciseLng ?? props.fuzzedLng;
+
+  const clinics = await getVerifiedVetClinics(originLat, originLng);
+  const nearestClinics = clinics.map((c) => ({
+    vetId: c.vetId,
     vetName: c.vetName,
     clinicName: c.clinicName,
     clinicAddress: c.clinicAddress,
     distance: c.distance,
+    clinicLat: c.clinicLat,
+    clinicLng: c.clinicLng,
   }));
 
   return (
@@ -248,6 +385,11 @@ async function TransportCardWithClinics(props: {
       transporter={props.transporter}
       isAssignedTransporter={props.isAssignedTransporter}
       nearestClinics={nearestClinics}
+      lat={originLat}
+      lng={originLng}
+      isPrecise={!!props.preciseLat}
+      assignedVetName={props.assignedVetName}
+      assignedVetClinic={props.assignedVetClinic}
     />
   );
 }

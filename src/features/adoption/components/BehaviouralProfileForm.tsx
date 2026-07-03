@@ -1,11 +1,19 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { PawPrint, Save, Camera, CircleCheck, LoaderCircle } from "lucide-react";
+import { PawPrint, Save, Camera, CircleCheck, LoaderCircle, X, CheckCircle2, Circle } from "lucide-react";
 import { updateBehaviouralProfile } from "@/features/foster/actions";
+import { uploadFosterPhoto, deleteFosterPhoto } from "@/features/foster/lib/upload-foster-photo";
 
 const personalityOptions = ["Affectionate", "Playful", "Shy", "Curious", "Calm", "Lap Cat", "Independent", "Talkative", "Energetic", "Gentle"];
 const energyOptions = ["low", "medium", "high"] as const;
+
+interface FosterPhotoItem {
+  id: string;
+  file?: File;
+  previewUrl: string;
+  photoUrl?: string;
+}
 
 interface BehaviouralProfileFormProps {
   caseId: string;
@@ -21,10 +29,12 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
   const [energy, setEnergy] = useState<"low" | "medium" | "high">("medium");
   const [goodWithChildren, setGoodWithChildren] = useState<boolean | null>(null);
   const [goodWithCats, setGoodWithCats] = useState<boolean | null>(null);
+  const [goodWithDogs, setGoodWithDogs] = useState<boolean | null>(null);
+  const [litterTrained, setLitterTrained] = useState<boolean | null>(null);
   const [indoorOnly, setIndoorOnly] = useState(true);
-  const [idealHome, setIdealHome] = useState("");
-  const [activities, setActivities] = useState("");
   const [observations, setObservations] = useState("");
+  const [photoItems, setPhotoItems] = useState<FosterPhotoItem[]>([]);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [markComplete, setMarkComplete] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,24 +44,143 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
     setPersonality((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
   }
 
+  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setError(null);
+    const newItems: FosterPhotoItem[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        setError("Please upload only JPG, PNG, or WEBP images.");
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Each image must be under 10MB.");
+        continue;
+      }
+
+      const localUrl = URL.createObjectURL(file);
+      newItems.push({
+        id: Math.random().toString(36).substring(7),
+        file,
+        previewUrl: localUrl,
+      });
+    }
+
+    setPhotoItems((prev) => [...prev, ...newItems]);
+    e.target.value = "";
+  }
+
+  async function handleRemovePhotoItem(item: FosterPhotoItem) {
+    if (item.photoUrl) {
+      // Extract storage path from the foster-photos public URL
+      const parts = item.photoUrl.split("/foster-photos/");
+      if (parts.length > 1) {
+        try {
+          await deleteFosterPhoto(parts[1]);
+        } catch (err) {
+          console.error("Failed to delete foster photo:", err);
+        }
+      }
+    }
+
+    if (item.file) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+
+    setPhotoItems((prev) => prev.filter((i) => i.id !== item.id));
+  }
+
+  async function handleCloudUpload() {
+    const pendingUploads = photoItems.filter((item) => item.file && !item.photoUrl);
+    if (pendingUploads.length === 0) return;
+
+    setIsUploadingPhoto(true);
+    setError(null);
+    try {
+      const updatedItems = [...photoItems];
+      for (const item of pendingUploads) {
+        if (!item.file) continue;
+        const res = await uploadFosterPhoto(item.file);
+        if (res.success && res.publicUrl) {
+          const idx = updatedItems.findIndex((i) => i.id === item.id);
+          if (idx !== -1) {
+            updatedItems[idx] = {
+              ...updatedItems[idx],
+              photoUrl: res.publicUrl,
+              // Release the local object URL since we now have the cloud URL
+              previewUrl: res.publicUrl,
+            };
+            URL.revokeObjectURL(item.previewUrl);
+          }
+        } else {
+          setError(res.error ?? "Failed to upload one or more photos.");
+          setIsUploadingPhoto(false);
+          return;
+        }
+      }
+      setPhotoItems(updatedItems);
+    } catch (err) {
+      setError("Failed to upload photos.");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  }
+
   function handleSave() {
     setError(null);
     startTransition(async () => {
+      let finalPhotos = photoItems.map((i) => i.photoUrl).filter(Boolean) as string[];
+      const pendingUploads = photoItems.filter((item) => item.file && !item.photoUrl);
+
+      if (pendingUploads.length > 0) {
+        setIsUploadingPhoto(true);
+        try {
+          const uploadedUrls: string[] = [];
+          for (const item of pendingUploads) {
+            if (!item.file) continue;
+            const res = await uploadFosterPhoto(item.file);
+            if (res.success && res.publicUrl) {
+              uploadedUrls.push(res.publicUrl);
+            } else {
+              setError(res.error ?? "Failed to upload photos.");
+              setIsUploadingPhoto(false);
+              return;
+            }
+          }
+          finalPhotos = [...finalPhotos, ...uploadedUrls];
+        } catch (err) {
+          setError("Failed to upload photos.");
+          setIsUploadingPhoto(false);
+          return;
+        } finally {
+          setIsUploadingPhoto(false);
+        }
+      }
+
       const result = await updateBehaviouralProfile({
         caseId,
         personality,
         energyLevel: energy,
         goodWithChildren,
         goodWithCats,
+        goodWithDogs,
+        litterTrained,
         indoorOnly,
-        idealHome: idealHome ? idealHome.split(",").map((s) => s.trim()).filter(Boolean) : [],
-        favouriteActivities: activities ? activities.split(",").map((s) => s.trim()).filter(Boolean) : [],
         observations,
+        fosterPhotos: finalPhotos,
         markComplete,
       });
 
       if (result.success) {
         setSaved(true);
+        photoItems.forEach((item) => {
+          if (item.file) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
+        });
       } else {
         setError(result.error ?? "Failed to save profile.");
       }
@@ -70,114 +199,369 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
     );
   }
 
+  const checklist = [
+    { label: "Choose personality tags", done: personality.length > 0 },
+    { label: "Define energy level", done: !!energy },
+    { label: "Answer compatibility checks", done: goodWithChildren !== null && goodWithCats !== null && goodWithDogs !== null && litterTrained !== null },
+    { label: "Write daily observations", done: observations.trim().length >= 10 },
+    { label: "Upload foster photos", done: photoItems.length > 0 },
+  ];
+
   return (
-    <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-4">
-        <PawPrint size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Behavioural Profile
-        <span className="text-[10px] font-normal text-[#2D3748]/50 ml-auto">Completed by Foster</span>
-      </h3>
-
-      <div className="space-y-5">
-        {/* Personality tags */}
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#6C5CE7]/8">
+          <PawPrint size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
+        </div>
         <div>
-          <label className="mb-2 block text-xs font-medium text-[#2D3748]">Personality (select all that apply)</label>
-          <div className="flex flex-wrap gap-1.5">
-            {personalityOptions.map((tag) => (
-              <button key={tag} type="button" onClick={() => togglePersonality(tag)} className={`rounded-full px-3 py-1 text-[11px] font-medium transition ${personality.includes(tag) ? "bg-[#6C5CE7] text-white" : "bg-[#F7F7FB] text-[#2D3748]/60 hover:bg-[#6C5CE7]/10"}`}>
-                {tag}
-              </button>
-            ))}
+          <h1 className="font-heading text-lg font-bold text-[#2D3748]">Behaviour Profile</h1>
+          <p className="text-xs text-[#2D3748]/60">Complete the cat&apos;s observations and personality traits</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* LEFT COLUMN (~65% / lg:col-span-2) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Card 1: Temperament */}
+          <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-4">
+            <h2 className="text-xs font-bold text-[#6C5CE7] uppercase tracking-wider">1. Temperament & Energy</h2>
+
+            {/* Personality Tags */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-[#2D3748]">Personality Tags (select all that apply)</label>
+              <div className="flex flex-wrap gap-1.5">
+                {personalityOptions.map((tag) => {
+                  const selected = personality.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => togglePersonality(tag)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                        selected
+                          ? "bg-[#6C5CE7] text-white shadow-sm border border-[#6C5CE7]"
+                          : "border border-[#A788FA]/15 bg-[#F7F7FB] text-[#2D3748]/75 hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7] hover:border-[#6C5CE7]/20"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Energy Level */}
+            <div className="space-y-2 pt-2">
+              <label className="block text-xs font-semibold text-[#2D3748]">Energy Level</label>
+              <div className="flex gap-2">
+                {energyOptions.map((level) => {
+                  const selected = energy === level;
+                  return (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => setEnergy(level)}
+                      className={`flex-1 rounded-[12px] py-2.5 text-xs font-bold capitalize transition-all border ${
+                        selected
+                          ? "bg-[#6C5CE7] text-white shadow-sm border-[#6C5CE7]"
+                          : "border-[#A788FA]/15 bg-[#F7F7FB] text-[#2D3748]/75 hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7] hover:border-[#6C5CE7]/20"
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Household & Compatibility */}
+          <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-4">
+            <h2 className="text-xs font-bold text-[#6C5CE7] uppercase tracking-wider">2. Compatibility & Habits</h2>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Children */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-semibold text-[#2D3748]">Good with kids?</label>
+                <div className="flex gap-1.5">
+                  {[true, false].map((val) => {
+                    const selected = goodWithChildren === val;
+                    return (
+                      <button
+                        key={String(val)}
+                        type="button"
+                        onClick={() => setGoodWithChildren(val)}
+                        className={`flex-1 rounded-[8px] py-1.5 text-xs font-bold transition-all border ${
+                          selected
+                            ? "bg-[#6C5CE7] text-white shadow-sm border-[#6C5CE7]"
+                            : "border-[#A788FA]/15 bg-[#F7F7FB] text-[#2D3748]/75 hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7]"
+                        }`}
+                      >
+                        {val ? "Yes" : "No"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Cats */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-semibold text-[#2D3748]">Good with cats?</label>
+                <div className="flex gap-1.5">
+                  {[true, false].map((val) => {
+                    const selected = goodWithCats === val;
+                    return (
+                      <button
+                        key={String(val)}
+                        type="button"
+                        onClick={() => setGoodWithCats(val)}
+                        className={`flex-1 rounded-[8px] py-1.5 text-xs font-bold transition-all border ${
+                          selected
+                            ? "bg-[#6C5CE7] text-white shadow-sm border-[#6C5CE7]"
+                            : "border-[#A788FA]/15 bg-[#F7F7FB] text-[#2D3748]/75 hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7]"
+                        }`}
+                      >
+                        {val ? "Yes" : "No"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dogs */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-semibold text-[#2D3748]">Good with dogs?</label>
+                <div className="flex gap-1.5">
+                  {[true, false].map((val) => {
+                    const selected = goodWithDogs === val;
+                    return (
+                      <button
+                        key={String(val)}
+                        type="button"
+                        onClick={() => setGoodWithDogs(val)}
+                        className={`flex-1 rounded-[8px] py-1.5 text-xs font-bold transition-all border ${
+                          selected
+                            ? "bg-[#6C5CE7] text-white shadow-sm border-[#6C5CE7]"
+                            : "border-[#A788FA]/15 bg-[#F7F7FB] text-[#2D3748]/75 hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7]"
+                        }`}
+                      >
+                        {val ? "Yes" : "No"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Litter Trained */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-semibold text-[#2D3748]">Litter trained?</label>
+                <div className="flex gap-1.5">
+                  {[true, false].map((val) => {
+                    const selected = litterTrained === val;
+                    return (
+                      <button
+                        key={String(val)}
+                        type="button"
+                        onClick={() => setLitterTrained(val)}
+                        className={`flex-1 rounded-[8px] py-1.5 text-xs font-bold transition-all border ${
+                          selected
+                            ? "bg-[#6C5CE7] text-white shadow-sm border-[#6C5CE7]"
+                            : "border-[#A788FA]/15 bg-[#F7F7FB] text-[#2D3748]/75 hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7]"
+                        }`}
+                      >
+                        {val ? "Yes" : "No"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Indoor Checkbox */}
+            <div className="pt-2">
+              <label className="flex items-center gap-2.5 cursor-pointer rounded-[12px] border border-[#A788FA]/10 bg-[#F7F7FB] p-3 transition hover:border-[#6C5CE7]/20">
+                <input
+                  type="checkbox"
+                  checked={indoorOnly}
+                  onChange={(e) => setIndoorOnly(e.target.checked)}
+                  className="h-4.5 w-4.5 rounded border-[#A788FA]/30 text-[#6C5CE7] focus:ring-[#6C5CE7]"
+                />
+                <div className="text-left">
+                  <span className="block text-xs font-semibold text-[#2D3748]">Indoor Only</span>
+                  <span className="block text-[10px] text-[#2D3748]/55 mt-0.5">Recommended to keep this cat indoors only</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Card 3: Observations */}
+          <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-4">
+            <h2 className="text-xs font-bold text-[#6C5CE7] uppercase tracking-wider">3. Daily Observations</h2>
+            <div className="space-y-2">
+              <textarea
+                value={observations}
+                onChange={(e) => setObservations(e.target.value)}
+                placeholder="Write observations about behaviour, temperament, diet, sleeping habits..."
+                className="w-full min-h-[220px] rounded-[12px] border border-[#A788FA]/20 bg-white px-3.5 py-2.5 text-xs text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/10"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Energy level */}
-        <div>
-          <label className="mb-2 block text-xs font-medium text-[#2D3748]">Energy Level</label>
-          <div className="flex gap-2">
-            {energyOptions.map((level) => (
-              <button key={level} type="button" onClick={() => setEnergy(level)} className={`flex-1 rounded-[10px] py-2 text-xs font-medium capitalize transition ${energy === level ? "bg-[#6C5CE7] text-white" : "border border-[#A788FA]/20 text-[#2D3748]/60 hover:border-[#6C5CE7]/30"}`}>
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* RIGHT COLUMN (~35% / lg:col-span-1) */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Foster Photo Upload */}
+          <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-4">
+            <h2 className="text-xs font-bold text-[#6C5CE7] uppercase tracking-wider">Media Upload</h2>
+            <div className="space-y-3">
+              {/* Upload Drop Zone area */}
+              <div className="flex flex-col gap-3 rounded-[12px] border-2 border-dashed border-[#A788FA]/20 bg-[#F7F7FB] p-6 items-center text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#6C5CE7]/10 text-[#6C5CE7]">
+                  <Camera size={20} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#2D3748]">Upload Foster Photos</p>
+                  <p className="text-[10px] text-[#2D3748]/45 mt-0.5">JPG, PNG, WEBP · Max 10MB per file</p>
+                </div>
+                <label className="flex h-8 items-center gap-1.5 rounded-[8px] bg-white px-3.5 text-xs font-semibold text-[#2D3748] border border-[#A788FA]/20 cursor-pointer shadow-xs hover:bg-slate-50 transition active:scale-[0.98]">
+                  Select Files
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    onChange={handlePhotoSelect}
+                    className="hidden"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
 
-        {/* Compatibility */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-[#2D3748]">Good with children?</label>
-            <div className="flex gap-2">
-              {[true, false].map((val) => (
-                <button key={String(val)} type="button" onClick={() => setGoodWithChildren(val)} className={`flex-1 rounded-[8px] py-1.5 text-[10px] font-medium transition ${goodWithChildren === val ? "bg-[#6C5CE7] text-white" : "border border-[#A788FA]/20 text-[#2D3748]/60"}`}>
-                  {val ? "Yes" : "No"}
-                </button>
+              {/* Photo state */}
+              {photoItems.length > 0 && (() => {
+                const allUploaded = photoItems.every((item) => !!item.photoUrl);
+                const pendingCount = photoItems.filter((item) => !item.photoUrl).length;
+
+                if (allUploaded) {
+                  // All uploaded — no preview needed, show clean success state
+                  return (
+                    <div className="rounded-[12px] border border-emerald-200 bg-emerald-50/60 px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={16} strokeWidth={2} className="text-emerald-500 shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-emerald-700">
+                            {photoItems.length} photo{photoItems.length !== 1 ? "s" : ""} uploaded
+                          </p>
+                          <p className="text-[10px] text-emerald-600/70 mt-0.5">Saved to foster-photos</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Has pending (not yet uploaded) — show preview grid + upload button
+                return (
+                  <div className="space-y-3 pt-1">
+                    <div className="grid grid-cols-3 gap-2">
+                      {photoItems.map((item) => (
+                        <div key={item.id} className="relative group rounded-[10px] overflow-hidden border border-[#A788FA]/15 h-16 bg-slate-100">
+                          <img src={item.previewUrl} alt="Foster cat preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhotoItem(item)}
+                            className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/75 shadow-xs"
+                            aria-label="Remove photo"
+                          >
+                            <X size={10} strokeWidth={2.5} />
+                          </button>
+                          {/* Status dot: green = uploaded, amber = pending */}
+                          <div className={`absolute bottom-1 left-1 h-2 w-2 rounded-full ${item.photoUrl ? "bg-emerald-400" : "bg-amber-400"}`} />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCloudUpload}
+                        disabled={isUploadingPhoto}
+                        className="flex h-8 items-center gap-1.5 rounded-[8px] bg-[#6C5CE7] px-3.5 text-xs font-semibold text-white hover:bg-[#A788FA] transition disabled:opacity-50"
+                      >
+                        {isUploadingPhoto ? (
+                          <LoaderCircle size={12} className="animate-spin text-white" />
+                        ) : (
+                          <Camera size={12} strokeWidth={1.5} />
+                        )}
+                        {isUploadingPhoto ? "Uploading..." : `Upload ${pendingCount} photo${pendingCount !== 1 ? "s" : ""}`}
+                      </button>
+                      <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                        {pendingCount} pending
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Profile Completion Checklist Card */}
+          <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-3">
+            <h2 className="text-xs font-bold text-[#6C5CE7] uppercase tracking-wider">Completion Checklist</h2>
+            <ul className="space-y-2 text-xs">
+              {checklist.map((item, idx) => (
+                <li key={idx} className="flex items-center gap-2 text-[#2D3748]/75">
+                  {item.done ? (
+                    <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                  ) : (
+                    <Circle size={15} className="text-[#2D3748]/25 shrink-0" />
+                  )}
+                  <span className={item.done ? "line-through text-[#2D3748]/45" : ""}>{item.label}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-[#2D3748]">Good with cats?</label>
-            <div className="flex gap-2">
-              {[true, false].map((val) => (
-                <button key={String(val)} type="button" onClick={() => setGoodWithCats(val)} className={`flex-1 rounded-[8px] py-1.5 text-[10px] font-medium transition ${goodWithCats === val ? "bg-[#6C5CE7] text-white" : "border border-[#A788FA]/20 text-[#2D3748]/60"}`}>
-                  {val ? "Yes" : "No"}
-                </button>
-              ))}
-            </div>
+
+          {/* Mark complete box */}
+          <div className={`rounded-[16px] border p-4.5 transition-all duration-300 ${
+            markComplete
+              ? "border-emerald-200 bg-emerald-50/20 shadow-[0_2px_12px_rgba(16,185,129,0.02)]"
+              : "border-[#6C5CE7]/15 bg-[#6C5CE7]/[0.02]"
+          }`}>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={markComplete}
+                onChange={(e) => setMarkComplete(e.target.checked)}
+                className="mt-0.5 h-4.5 w-4.5 rounded border-[#A788FA]/30 text-[#6C5CE7] focus:ring-[#6C5CE7]"
+              />
+              <div>
+                <p className={`text-sm font-bold ${markComplete ? "text-emerald-700" : "text-[#6C5CE7]"}`}>
+                  Mark Profile Complete
+                </p>
+                <p className="text-[11px] text-[#2D3748]/60 mt-0.5 leading-relaxed">
+                  Checking this enables public adoption listings for this cat once vet clearance is final.
+                </p>
+              </div>
+            </label>
           </div>
         </div>
+      </div>
 
-        {/* Indoor */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={indoorOnly} onChange={(e) => setIndoorOnly(e.target.checked)} className="h-4 w-4 rounded border-[#A788FA]/30 text-[#6C5CE7] focus:ring-[#6C5CE7]" />
-          <span className="text-xs font-medium text-[#2D3748]">Indoor only recommended</span>
-        </label>
-
-        {/* Text fields */}
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#2D3748]">Ideal Home (comma separated)</label>
-          <input type="text" value={idealHome} onChange={(e) => setIdealHome(e.target.value)} placeholder="e.g. Quiet apartment, patient owner" className="h-9 w-full rounded-[10px] border border-[#A788FA]/20 bg-white px-3 text-xs text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#2D3748]">Favourite Activities (comma separated)</label>
-          <input type="text" value={activities} onChange={(e) => setActivities(e.target.value)} placeholder="e.g. Sunbathing, playing with string toys" className="h-9 w-full rounded-[10px] border border-[#A788FA]/20 bg-white px-3 text-xs text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none" />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-[#2D3748]">Daily Observations</label>
-          <textarea rows={2} value={observations} onChange={(e) => setObservations(e.target.value)} placeholder="Notes about behaviour, eating, sleep..." className="w-full rounded-[10px] border border-[#A788FA]/20 bg-white px-3 py-2 text-xs text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none resize-none" />
-        </div>
-
-        {/* Mark complete checkbox */}
-        <div className="rounded-[12px] border border-[#6C5CE7]/15 bg-[#6C5CE7]/[0.03] p-4">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={markComplete} onChange={(e) => setMarkComplete(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-[#A788FA]/30 text-[#6C5CE7] focus:ring-[#6C5CE7]" />
-            <div>
-              <p className="text-sm font-semibold text-[#6C5CE7]">Mark Profile Complete</p>
-              <p className="text-[11px] text-[#2D3748]/60 mt-0.5">
-                Once marked complete, this cat will be eligible for the public adoption listing (if the vet has also approved).
-              </p>
-            </div>
-          </label>
-        </div>
-
-        {/* Error */}
+      {/* Save Button (Full Width, Centered below both columns) */}
+      <div className="pt-6 border-t border-[#A788FA]/10 flex flex-col items-center gap-4 w-full">
         {error && (
-          <div className="rounded-[10px] bg-red-50 border border-red-200 p-3">
-            <p className="text-xs text-red-700">{error}</p>
+          <div className="rounded-[10px] bg-red-50 border border-red-200 p-3 w-full max-w-md">
+            <p className="text-xs text-red-700 font-medium text-center">{error}</p>
           </div>
         )}
-
-        {/* Save */}
         <button
           onClick={handleSave}
-          disabled={isPending}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA] disabled:opacity-60 disabled:cursor-not-allowed"
+          disabled={isPending || isUploadingPhoto}
+          className="flex h-12 w-full max-w-md items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-bold text-white transition hover:bg-[#A788FA] shadow-[0_4px_12px_rgba(108,92,231,0.15)] hover:shadow-[0_6px_20px_rgba(108,92,231,0.25)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isPending ? (
-            <><LoaderCircle size={14} strokeWidth={2} className="animate-spin" /> Saving...</>
+            <><LoaderCircle size={15} strokeWidth={2.5} className="animate-spin" /> Saving Profile...</>
           ) : (
-            <><Save size={14} strokeWidth={1.5} /> Save Behavioural Profile</>
+            <><Save size={15} strokeWidth={1.5} /> Save Behavioural Profile</>
           )}
         </button>
       </div>

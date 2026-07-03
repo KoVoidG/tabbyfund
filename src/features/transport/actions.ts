@@ -59,11 +59,15 @@ export async function claimTransport(caseId: string): Promise<TransportActionRes
  *
  * @param caseId - The case whose transport to mark as delivered
  */
-export async function deliverTransport(caseId: string): Promise<TransportActionResult> {
+export async function deliverTransport(caseId: string, vetId: string): Promise<TransportActionResult> {
   const user = await requireAuth();
   const supabase = await createClient();
 
-  // Verify the current user is the assigned transporter
+  if (!vetId) {
+    return { success: false, error: "Destination clinic/vet is required." };
+  }
+
+  // 1. Verify the current user is the assigned transporter
   const { data: transport, error: fetchError } = await supabase
     .from("transport_requests")
     .select("id, status, claimed_by")
@@ -87,7 +91,32 @@ export async function deliverTransport(caseId: string): Promise<TransportActionR
     };
   }
 
-  // Update transport status to DELIVERED
+  // 2. Verify selected vet exists, role = 'vet', is_verified = true, and has clinic details
+  // Note: we query using the service role client since profiles table RLS restricts
+  // non-owner selects for general profiles.
+  const { createServiceClient } = await import("@/lib/supabase/service");
+  const serviceClient = createServiceClient();
+
+  const { data: vetProfile, error: vetError } = await serviceClient
+    .from("profiles")
+    .select("id, role, is_verified, clinic_name, clinic_address")
+    .eq("id", vetId)
+    .single();
+
+  if (vetError || !vetProfile) {
+    return { success: false, error: "Selected clinic/vet profile not found." };
+  }
+  if (vetProfile.role !== "vet") {
+    return { success: false, error: "Selected profile is not a veterinarian." };
+  }
+  if (!vetProfile.is_verified) {
+    return { success: false, error: "Selected veterinarian clinic is not verified." };
+  }
+  if (!vetProfile.clinic_name || !vetProfile.clinic_address) {
+    return { success: false, error: "Selected clinic is missing name or address." };
+  }
+
+  // 3. Update transport status to DELIVERED
   const { error: updateError } = await supabase
     .from("transport_requests")
     .update({
@@ -101,14 +130,13 @@ export async function deliverTransport(caseId: string): Promise<TransportActionR
     return { success: false, error: "Failed to mark as delivered. Please try again." };
   }
 
-  // Advance case status to AT_VET using service_role
-  // (RLS only allows reporter/vet/admin to update cases, not transporter)
-  const { createServiceClient } = await import("@/lib/supabase/service");
-  const serviceClient = createServiceClient();
-
+  // 4. Advance case status to AT_VET and assign the vet using service_role
   const { error: caseError } = await serviceClient
     .from("cases")
-    .update({ status: "AT_VET" })
+    .update({
+      status: "AT_VET",
+      assigned_vet_id: vetId,
+    } as any)
     .eq("id", caseId)
     .eq("status", "IN_TRANSIT");
 

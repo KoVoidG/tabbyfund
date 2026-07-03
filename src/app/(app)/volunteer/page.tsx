@@ -35,11 +35,19 @@ export default async function VolunteerPage() {
       </div>
 
       {/* Transport Needed */}
-      <DashboardSection title="Transport Needed" viewAllHref="/cases?status=AWAITING_TRANSPORT">
+      <div>
+        <div className="mb-2">
+          <h2 className="font-heading text-sm font-semibold text-[#2D3748]">Transport Needed</h2>
+          <p className="text-xs text-[#2D3748]/60 mt-0.5">Help transport rescued cats safely to their assigned veterinarian.</p>
+        </div>
         {transportCases.length === 0 ? (
-          <div className="flex flex-col items-center rounded-[14px] border border-dashed border-[#A788FA]/20 bg-white p-8 text-center">
-            <Truck size={32} strokeWidth={1} className="text-[#A788FA]/30 mb-2" />
-            <p className="text-xs text-[#2D3748]/50">No cats need transport right now</p>
+          <div className="flex flex-col items-center rounded-[16px] border border-dashed border-[#A788FA]/20 bg-white p-8 text-center space-y-3">
+            <TabbyMascot variant="sleep" size="lg" className="opacity-75" />
+            <div>
+              <p className="text-sm font-bold text-[#6C5CE7]">Great news!</p>
+              <p className="text-xs font-medium text-[#2D3748]/70 mt-0.5">There are currently no cats waiting for transport to the vet.</p>
+              <p className="text-[10px] text-[#2D3748]/40 mt-0.5">Thank you for checking in! All rescued cats are currently safe at clinics.</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
@@ -48,14 +56,22 @@ export default async function VolunteerPage() {
             ))}
           </div>
         )}
-      </DashboardSection>
+      </div>
 
       {/* Temporary Caretaker Needed */}
-      <DashboardSection title="Temporary Caretaker Needed" viewAllHref="/cases">
+      <div className="pt-2">
+        <div className="mb-2">
+          <h2 className="font-heading text-sm font-semibold text-[#2D3748]">Temporary Caretaker Needed</h2>
+          <p className="text-xs text-[#2D3748]/60 mt-0.5">These cats have completed treatment and are waiting for temporary foster care before adoption.</p>
+        </div>
         {caretakerCases.length === 0 ? (
-          <div className="flex flex-col items-center rounded-[14px] border border-dashed border-[#A788FA]/20 bg-white p-8 text-center">
-            <Home size={32} strokeWidth={1} className="text-[#A788FA]/30 mb-2" />
-            <p className="text-xs text-[#2D3748]/50">No cats need a temporary caretaker right now</p>
+          <div className="flex flex-col items-center rounded-[16px] border border-dashed border-[#A788FA]/20 bg-white p-8 text-center space-y-3">
+            <TabbyMascot variant="happy" size="lg" className="opacity-75" />
+            <div>
+              <p className="text-sm font-bold text-[#6C5CE7]">Great news!</p>
+              <p className="text-xs font-medium text-[#2D3748]/70 mt-0.5">There are currently no cats waiting for temporary foster care.</p>
+              <p className="text-[10px] text-[#2D3748]/40 mt-0.5">All recovering cats are settled in warm foster homes.</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
@@ -64,7 +80,7 @@ export default async function VolunteerPage() {
             ))}
           </div>
         )}
-      </DashboardSection>
+      </div>
     </div>
   );
 }

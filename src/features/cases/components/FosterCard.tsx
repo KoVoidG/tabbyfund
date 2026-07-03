@@ -31,8 +31,8 @@ export function FosterCard({ caretaker, days }: FosterCardProps) {
       </div>
 
       {/* Foster note */}
-      <div className="mt-4 flex gap-2 rounded-[10px] bg-[#FFF3E0]/40 p-3">
-        <MessageCircle size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-[#F3C9A6]" />
+      <div className="mt-4 flex gap-2 rounded-[10px] bg-[#A788FA]/5 p-3">
+        <MessageCircle size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-[#6C5CE7]" />
         <p className="text-xs text-[#2D3748]/70 italic leading-relaxed">
           &ldquo;The cat is adjusting well. Eating regularly and becoming more playful each day.&rdquo;
         </p>

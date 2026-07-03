@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
 import { WizardProgress } from "./WizardProgress";
 import { PhotoUploader } from "./PhotoUploader";
@@ -11,6 +12,7 @@ import { ReviewCard } from "./ReviewCard";
 import { SubmitSuccess } from "./SubmitSuccess";
 import { useRescueDraft } from "../hooks/useRescueDraft";
 import { submitRescueReport } from "../actions";
+import { deleteUploadedPhoto } from "../lib/upload-photo";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 
 const TOTAL_STEPS = 5;
@@ -20,9 +22,22 @@ const TOTAL_STEPS = 5;
  * Manages step navigation, validation, and draft persistence.
  */
 export function RescueWizard() {
+  const router = useRouter();
   const { draft, saveDraft, clearDraft, hasSavedDraft, isLoaded, discardDraft } = useRescueDraft();
   const [step, setStep] = useState(draft.currentStep);
   const [submitted, setSubmitted] = useState(false);
+
+  async function handleCancel() {
+    if (draft.storagePath) {
+      try {
+        await deleteUploadedPhoto(draft.storagePath);
+      } catch (err) {
+        console.error("Failed to delete draft photo during cancellation:", err);
+      }
+    }
+    discardDraft();
+    router.push("/dashboard");
+  }
   const [createdCaseId, setCreatedCaseId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -160,6 +175,7 @@ export function RescueWizard() {
         {step === 1 && (
           <AIAnalysisPreview
             photoDataUrl={draft.previewUrl ?? draft.photoUrl}
+            storagePath={draft.storagePath}
             aiResult={draft.aiResult}
             onAnalysisComplete={(result) => saveDraft({ aiResult: result })}
           />
@@ -185,14 +201,24 @@ export function RescueWizard() {
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={goBack}
-          disabled={step === 0}
-          className="flex items-center gap-1.5 rounded-[10px] px-4 py-2.5 text-sm font-medium text-[#2D3748]/60 transition hover:bg-[#F7F7FB] disabled:opacity-0"
-        >
-          <ArrowLeft size={16} strokeWidth={1.5} /> Back
-        </button>
+        {step < TOTAL_STEPS - 1 ? (
+          <button
+            type="button"
+            onClick={goBack}
+            disabled={step === 0}
+            className="flex items-center gap-1.5 rounded-[10px] px-4 py-2.5 text-sm font-medium text-[#2D3748]/60 transition hover:bg-[#F7F7FB] disabled:opacity-0"
+          >
+            <ArrowLeft size={16} strokeWidth={1.5} /> Back
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="flex items-center gap-1.5 rounded-[10px] bg-red-50 text-red-600 px-4 py-2.5 text-sm font-semibold transition hover:bg-red-100"
+          >
+            Cancel
+          </button>
+        )}
 
         {step < TOTAL_STEPS - 1 ? (
           <button
@@ -215,7 +241,7 @@ export function RescueWizard() {
                 <LoaderCircle size={16} strokeWidth={2} className="animate-spin" /> Submitting...
               </>
             ) : (
-              "Submit Rescue"
+              "Submit Report"
             )}
           </button>
         )}

@@ -16,13 +16,15 @@ interface SubmitReportInput {
     condition: string;
     reasoning: string;
     firstAid: string[];
+    urgency?: string;
+    estimatedRecovery?: string;
+    recommendedAction?: string;
+    recoveryConfidence?: number;
   };
   /** Location data */
   location: {
     lat: number;
     lng: number;
-    fuzzedLat: number;
-    fuzzedLng: number;
     address: string;
   };
   /** Additional details */
@@ -42,6 +44,81 @@ export interface SubmitReportResult {
   error?: string;
 }
 
+// In-memory rate limiting store for Gemini AI triage
+const aiTriageRateLimits = new Map<string, number[]>();
+const LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_REQUESTS = 5;
+
+/**
+ * Server action: Analyze a rescue photo using Gemini Vision API.
+ */
+export async function analyzeRescuePhoto(storagePath: string): Promise<{
+  success: boolean;
+  result?: {
+    condition: string;
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    confidence: number;
+    reasoning: string;
+    firstAid: string[];
+    urgency: string;
+    estimatedRecovery: string;
+    recommendedAction: string;
+    recoveryConfidence: number;
+  };
+  error?: string;
+ }> {
+  // 1. Authenticate user
+  const user = await requireAuth();
+  const userId = user.id;
+
+  // Rate limiting check
+  const now = Date.now();
+  const userRequests = aiTriageRateLimits.get(userId) || [];
+  const recentRequests = userRequests.filter(ts => now - ts < LIMIT_WINDOW_MS);
+
+  if (recentRequests.length >= MAX_REQUESTS) {
+    return {
+      success: false,
+      error: "You've reached the AI analysis limit. Please try again in a few minutes."
+    };
+  }
+
+  // Record this request
+  recentRequests.push(now);
+  aiTriageRateLimits.set(userId, recentRequests);
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("[gemini] GEMINI_API_KEY not configured.");
+    return { success: false, error: "AI analysis failed. Please try again." };
+  }
+
+  try {
+    const supabase = await createClient();
+    
+    // Download image from Supabase Storage
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from("rescue-photos")
+      .download(storagePath);
+
+    if (downloadError || !fileData) {
+      console.error("[gemini] Failed to download image:", downloadError?.message);
+      return { success: false, error: "AI analysis failed. Please try again." };
+    }
+
+    const buffer = Buffer.from(await fileData.arrayBuffer());
+    const mimeType = fileData.type || "image/jpeg";
+
+    const { triageImage } = await import("@/lib/gemini");
+    const result = await triageImage(buffer, mimeType);
+
+    return { success: true, result };
+  } catch (e) {
+    console.error("[gemini] Error analyzing image:", e);
+    return { success: false, error: "AI analysis failed. Please try again." };
+  }
+}
+
 /**
  * Server action: Submit a rescue report.
  *
@@ -51,9 +128,11 @@ export interface SubmitReportResult {
  * Flow:
  * 1. Authenticate user
  * 2. Validate photo URL exists
- * 3. Insert case row (using authenticated client — RLS validates reporter_id)
- * 4. Create transport_requests row using service_role
- * 5. Return the new case ID
+ * 3. Generate fuzzed coordinates on the server
+ * 4. Serialize extra AI assessment fields into the ai_reasoning column
+ * 5. Insert case row (using authenticated client — RLS validates reporter_id)
+ * 6. Create transport_requests row using service_role
+ * 7. Return the new case ID
  *
  * If DB insert fails, attempts to delete the uploaded photo.
  */
@@ -72,7 +151,21 @@ export async function submitRescueReport(
     return { success: false, error: "Photo is required. Please upload a photo first." };
   }
 
-  // 3. Insert case row using authenticated client (RLS validates reporter_id = auth.uid())
+  // 3. Generate fuzzed coordinates on the server (approx. 400m fuzz)
+  const fuzzOffset = () => (Math.random() - 0.5) * 0.008;
+  const fuzzedLat = input.location.lat + fuzzOffset();
+  const fuzzedLng = input.location.lng + fuzzOffset();
+
+  // 4. Serialize extra Gemini fields into the ai_reasoning text column
+  const serializedReasoning = JSON.stringify({
+    reasoning: input.aiResult.reasoning,
+    urgency: input.aiResult.urgency || "Monitor",
+    estimatedRecovery: input.aiResult.estimatedRecovery || "Unknown",
+    recommendedAction: input.aiResult.recommendedAction || "No action specified.",
+    recoveryConfidence: input.aiResult.recoveryConfidence ?? 50
+  });
+
+  // 5. Insert case row using authenticated client (RLS validates reporter_id = auth.uid())
   const severity = normalizeSeverity(input.aiResult.severity);
   const initialCaseStatus = input.canTransport ? "IN_TRANSIT" : "AWAITING_TRANSPORT";
 
@@ -85,12 +178,12 @@ export async function submitRescueReport(
       status: initialCaseStatus,
       precise_lat: input.location.lat,
       precise_lng: input.location.lng,
-      fuzzed_lat: input.location.fuzzedLat,
-      fuzzed_lng: input.location.fuzzedLng,
+      fuzzed_lat: fuzzedLat,
+      fuzzed_lng: fuzzedLng,
       ai_severity: severity,
       ai_condition: input.aiResult.condition,
       ai_confidence: input.aiResult.confidence,
-      ai_reasoning: input.aiResult.reasoning,
+      ai_reasoning: serializedReasoning,
       ai_first_aid: input.aiResult.firstAid,
       ai_analyzed_at: new Date().toISOString(),
     })
@@ -106,7 +199,7 @@ export async function submitRescueReport(
     return { success: false, error: "Failed to create rescue case. Please try again." };
   }
 
-  // 4. Create transport request using service_role (RLS is admin-only for INSERT)
+  // 6. Create transport request using service_role (RLS is admin-only for INSERT)
   if (input.canTransport) {
     const { error: transportError } = await serviceClient
       .from("transport_requests")
@@ -167,3 +260,4 @@ function buildDescription(input: SubmitReportInput): string {
   if (input.location.address) parts.push(`Location: ${input.location.address}`);
   return parts.join(". ") || "Rescue case reported.";
 }
+

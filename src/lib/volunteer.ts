@@ -27,12 +27,11 @@ export interface CaretakerNeededCase {
  * NEVER selects precise_lat/precise_lng.
  */
 export async function getTransportNeeded(): Promise<TransportNeededCase[]> {
-  const supabase = await createClient();
   const { createServiceClient } = await import("@/lib/supabase/service");
   const caseReader = createServiceClient();
 
-  // transport_requests SELECT is open to all authenticated users
-  const { data } = await supabase
+  // transport_requests SELECT using service client
+  const { data } = await caseReader
     .from("transport_requests")
     .select("case_id")
     .eq("status", "OPEN");
@@ -68,12 +67,11 @@ export async function getTransportNeeded(): Promise<TransportNeededCase[]> {
  * Only public-safe fields selected. No precise coordinates.
  */
 export async function getCaretakerNeeded(): Promise<CaretakerNeededCase[]> {
-  const supabase = await createClient();
   const { createServiceClient } = await import("@/lib/supabase/service");
   const caseReader = createServiceClient();
 
-  // treatment_records SELECT is open to all authenticated users
-  const { data: treatments } = await supabase
+  // treatment_records SELECT using service client
+  const { data: treatments } = await caseReader
     .from("treatment_records")
     .select("case_id")
     .eq("ready_for_adoption", true)
@@ -92,15 +90,46 @@ export async function getCaretakerNeeded(): Promise<CaretakerNeededCase[]> {
 
   if (!cases || cases.length === 0) return [];
 
-  // foster_records SELECT is open to all authenticated users
-  const { data: activeFosters } = await supabase
+  // Fetch transport requests for these cases
+  const { data: transports } = await caseReader
+    .from("transport_requests")
+    .select("case_id, claimed_by")
+    .in("case_id", cases.map((c) => c.id));
+
+  // Fetch active foster records
+  const { data: activeFosters } = await caseReader
     .from("foster_records")
     .select("case_id")
     .eq("status", "ACTIVE")
     .in("case_id", cases.map((c) => c.id));
 
+  // Fetch declined/reassigned foster records
+  const { data: declinedFosters } = await caseReader
+    .from("foster_records")
+    .select("case_id, caretaker_id")
+    .eq("status", "REASSIGNED")
+    .in("case_id", cases.map((c) => c.id));
+
   const fosterCaseIds = new Set((activeFosters ?? []).map((f) => f.case_id));
-  const needsCaretaker = cases.filter((c) => !fosterCaseIds.has(c.id));
+
+  const needsCaretaker = cases.filter((c) => {
+    // 1. Already has an active caretaker
+    if (fosterCaseIds.has(c.id)) return false;
+
+    // 2. Transporter priority logic
+    const transport = (transports ?? []).find((t) => t.case_id === c.id);
+    if (transport && transport.claimed_by) {
+      const declined = (declinedFosters ?? []).some(
+        (df) => df.case_id === c.id && df.caretaker_id === transport.claimed_by
+      );
+      if (!declined) {
+        // Has not declined yet; transporter has priority. Do not show to other volunteers.
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   return needsCaretaker.map((c) => ({
     id: c.id,

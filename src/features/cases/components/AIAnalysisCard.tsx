@@ -38,33 +38,42 @@ export function AIAnalysisCard({ condition, confidence, reasoning, firstAid, sev
 
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      {/* Centered header: mascot + condition + confidence */}
-      <div className="flex flex-col items-center text-center mb-6">
-        <TabbyMascot variant={mascotVariant} size="xl" />
-        <h3 className="mt-3 font-heading text-base font-semibold text-[#2D3748]">AI Analysis</h3>
-        <p className="mt-1 text-xl font-bold text-[#2D3748]">{condition}</p>
-        <span className={`mt-2 rounded-full border px-3 py-0.5 text-xs font-semibold ${confColor}`}>
-          Confidence: {confidence}%
-        </span>
+      {/* Compact header: mascot + condition/confidence banner */}
+      <div className="flex items-center gap-4 mb-5 pb-4 border-b border-[#A788FA]/10">
+        <TabbyMascot variant={mascotVariant} size="md" className="shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold text-[#6C5CE7]/70 uppercase tracking-wider mb-0.5">AI Analysis</p>
+          <h3 className="font-heading text-base font-bold text-[#2D3748] truncate">{condition}</h3>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${confColor}`}>
+              {confidence}% confidence
+            </span>
+            <span className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-[#6C5CE7]/5 border-[#A788FA]/15 text-[#6C5CE7]`}>
+              AI · Not a diagnosis
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Left-aligned details */}
       <div className="space-y-4">
         <div>
-          <p className="text-xs font-medium text-[#2D3748]/60 mb-1">Reasoning</p>
+          <p className="text-[10px] font-bold text-[#2D3748]/50 uppercase tracking-wider mb-1.5">Reasoning</p>
           <p className="text-sm text-[#2D3748]/80 leading-relaxed">{reasoning}</p>
         </div>
-        <div>
-          <p className="text-xs font-medium text-[#2D3748]/60 mb-2">First Aid Guidance</p>
-          <ul className="space-y-2">
-            {firstAid.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-[#2D3748]/80">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#6C5CE7]" />
-                {tip}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {firstAid.length > 0 && (
+          <div>
+            <p className="text-[10px] font-bold text-[#2D3748]/50 uppercase tracking-wider mb-2">First Aid Guidance</p>
+            <ol className="space-y-2">
+              {firstAid.map((tip, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-[#2D3748]/80">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6C5CE7]/10 text-[10px] font-bold text-[#6C5CE7]">{i + 1}</span>
+                  {tip}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
       </div>
 
       {/* Disclaimer */}

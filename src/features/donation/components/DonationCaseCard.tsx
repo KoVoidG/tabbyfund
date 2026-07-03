@@ -7,10 +7,10 @@ import { DonationSheet } from "./DonationSheet";
 import type { FundingCase } from "@/lib/donations";
 
 const severityConfig = {
-  CRITICAL: { bg: "bg-red-600", text: "text-white", icon: CircleAlert },
-  HIGH: { bg: "bg-orange-500", text: "text-white", icon: TriangleAlert },
-  MEDIUM: { bg: "bg-amber-400", text: "text-[#2D3748]", icon: Info },
-  LOW: { bg: "bg-emerald-500", text: "text-white", icon: CircleCheck },
+  CRITICAL: { bg: "bg-red-100 border border-red-200/50", text: "text-red-800", icon: CircleAlert },
+  HIGH: { bg: "bg-orange-100 border border-orange-200/50", text: "text-orange-800", icon: TriangleAlert },
+  MEDIUM: { bg: "bg-amber-100 border border-amber-200/50", text: "text-amber-800", icon: Info },
+  LOW: { bg: "bg-emerald-100 border border-emerald-200/50", text: "text-emerald-800", icon: CircleCheck },
 };
 
 interface DonationCaseCardProps {
@@ -52,11 +52,21 @@ export function DonationCaseCard({ caseData }: DonationCaseCardProps) {
           </p>
 
           {/* Progress */}
-          <div className="mt-3">
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span className="text-[#6C5CE7]">{percent}% Funded</span>
+              <span className="text-[#2D3748]/50">{caseData.donors} {caseData.donors === 1 ? "donor" : "donors"}</span>
+            </div>
             <Progress value={percent} className="h-2 bg-[#A788FA]/15 [&>div]:bg-[#6C5CE7] [&>div]:rounded-full rounded-full" />
-            <div className="mt-1.5 flex items-center justify-between text-[10px]">
-              <span className="font-medium text-[#6C5CE7]">฿{caseData.raised.toLocaleString()}</span>
-              <span className="text-[#2D3748]/50">฿{remaining.toLocaleString()} left</span>
+            <div className="grid grid-cols-2 gap-1 text-[10px] text-[#2D3748]/60 font-medium">
+              <div>
+                <span className="block text-[#2D3748]/40 text-[9px] uppercase tracking-wider">Amount Raised</span>
+                <span className="text-[#2D3748] font-bold">฿{caseData.raised.toLocaleString()}</span>
+              </div>
+              <div className="text-right">
+                <span className="block text-[#2D3748]/40 text-[9px] uppercase tracking-wider">Remaining</span>
+                <span className="text-[#6C5CE7] font-bold">฿{remaining.toLocaleString()}</span>
+              </div>
             </div>
           </div>
 

@@ -11,10 +11,10 @@ interface CasePreviewCardProps {
 }
 
 const severityConfig = {
-  CRITICAL: { bg: "bg-red-600", text: "text-white", icon: CircleAlert, label: "Critical" },
-  HIGH: { bg: "bg-orange-500", text: "text-white", icon: TriangleAlert, label: "High" },
-  MEDIUM: { bg: "bg-amber-400", text: "text-[#2D3748]", icon: CircleAlert, label: "Medium" },
-  LOW: { bg: "bg-emerald-500", text: "text-white", icon: CircleAlert, label: "Low" },
+  CRITICAL: { bg: "bg-red-100 border border-red-200/50", text: "text-red-800", icon: CircleAlert, label: "Critical" },
+  HIGH: { bg: "bg-orange-100 border border-orange-200/50", text: "text-orange-800", icon: TriangleAlert, label: "High" },
+  MEDIUM: { bg: "bg-amber-100 border border-amber-200/50", text: "text-amber-800", icon: CircleAlert, label: "Medium" },
+  LOW: { bg: "bg-emerald-100 border border-emerald-200/50", text: "text-emerald-800", icon: CircleAlert, label: "Low" },
 };
 
 /**

@@ -24,7 +24,9 @@ export type MascotVariant =
   | "warning"
   | "confused"
   | "shy"
-  | "sad";
+  | "sad"
+  | "doc"
+  | "404";
 
 export type MascotSize = "sm" | "md" | "lg" | "xl";
 
@@ -37,10 +39,10 @@ interface TabbyMascotProps {
 }
 
 const SIZE_MAP: Record<MascotSize, number> = {
-  sm: 32,
-  md: 64,
-  lg: 96,
-  xl: 128,
+  sm: 40,
+  md: 72,
+  lg: 112,
+  xl: 148,
 };
 
 const ALT_MAP: Record<MascotVariant, string> = {
@@ -56,6 +58,8 @@ const ALT_MAP: Record<MascotVariant, string> = {
   confused: "TabbyFund mascot looking confused",
   shy: "TabbyFund mascot feeling shy",
   sad: "TabbyFund mascot feeling sad",
+  doc: "TabbyFund veterinarian doctor mascot",
+  "404": "TabbyFund mascot searching for a lost page",
 };
 
 export function TabbyMascot({

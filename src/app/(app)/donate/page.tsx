@@ -39,12 +39,15 @@ export default async function DonatePage() {
 
       {/* Empty state */}
       {cases.length === 0 && (
-        <div className="flex flex-col items-center justify-center rounded-[16px] border border-dashed border-[#A788FA]/20 bg-white p-12 text-center">
-          <HandCoins size={40} strokeWidth={1} className="text-[#A788FA]/30 mb-3" />
-          <p className="text-sm font-medium text-[#2D3748]/60">No active fundraisers</p>
-          <p className="mt-1 text-xs text-[#2D3748]/40">
-            Cases will appear here once a vet submits a treatment quote
-          </p>
+        <div className="flex flex-col items-center justify-center rounded-[16px] border border-dashed border-[#A788FA]/20 bg-white p-12 text-center space-y-3">
+          <TabbyMascot variant="sleep" size="lg" />
+          <div>
+            <p className="text-sm font-bold text-[#6C5CE7]">Great news!</p>
+            <p className="text-xs font-medium text-[#2D3748]/70 mt-0.5">There are currently no active fundraising campaigns.</p>
+            <p className="mt-1 text-[10px] text-[#2D3748]/40">
+              Cases will appear here once a vet submits a treatment quote!
+            </p>
+          </div>
         </div>
       )}
 

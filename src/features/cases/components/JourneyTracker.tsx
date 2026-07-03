@@ -21,13 +21,18 @@ const steps: JourneyStep[] = [
   { key: "forever-home", icon: Heart, label: "Forever Home", statuses: ["ADOPTED"] },
 ];
 
-function getStepState(stepIndex: number, currentStepIndex: number) {
+function getStepState(stepIndex: number, currentStepIndex: number, status: CaseStatus) {
+  const TERMINAL = ["ADOPTED", "SHELTERED", "DECEASED", "REUNITED"];
+  if (TERMINAL.includes(status)) return "completed";
   if (stepIndex < currentStepIndex) return "completed";
   if (stepIndex === currentStepIndex) return "current";
   return "upcoming";
 }
 
 function getCurrentStepIndex(status: CaseStatus): number {
+  if (["SHELTERED", "DECEASED", "REUNITED"].includes(status)) {
+    return steps.length - 1;
+  }
   const idx = steps.findIndex((s) => s.statuses.includes(status));
   return idx >= 0 ? idx : 0;
 }
@@ -73,7 +78,7 @@ export function JourneyTracker({ status, sticky = false }: JourneyTrackerProps) 
         className="flex items-center gap-1 overflow-x-auto px-4 py-3 sm:px-6 sm:py-4 scrollbar-hide sm:justify-between sm:overflow-visible"
       >
         {steps.map((step, i) => {
-          const state = getStepState(i, currentIdx);
+          const state = getStepState(i, currentIdx, status);
           const Icon = step.icon;
           const isCurrent = state === "current";
           return (

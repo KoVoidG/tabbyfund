@@ -26,10 +26,11 @@ export async function getFundingCases(): Promise<FundingCase[]> {
   const caseReader = createServiceClient();
 
   // Use service_role for cases (restrictive SELECT RLS)
+  // Fetch cases that reached FUNDING_OPEN and are not terminal/cancelled
   const { data: cases, error } = await caseReader
     .from("cases")
     .select("id, photo_url, description, ai_condition, ai_severity, fuzzed_lat, fuzzed_lng, created_at")
-    .eq("status", "FUNDING_OPEN")
+    .in("status", ["FUNDING_OPEN", "FUNDED", "IN_TREATMENT", "TREATED", "FUNDS_RELEASED", "IN_FOSTER"])
     .order("created_at", { ascending: false });
 
   if (error || !cases || cases.length === 0) {
@@ -43,6 +44,15 @@ export async function getFundingCases(): Promise<FundingCase[]> {
       .rpc("get_funding_progress", { p_case_id: c.id });
 
     const funding = fundingData?.[0];
+    const goal = funding?.goal ?? 0;
+    const raised = funding?.total_raised ?? 0;
+    const isFullyFunded = funding?.is_fully_funded ?? (goal > 0 && raised >= goal);
+
+    // Skip cases that have reached 100% funding
+    if (isFullyFunded) {
+      continue;
+    }
+
     results.push({
       id: c.id,
       photo_url: c.photo_url,
@@ -52,8 +62,8 @@ export async function getFundingCases(): Promise<FundingCase[]> {
       fuzzed_lat: c.fuzzed_lat,
       fuzzed_lng: c.fuzzed_lng,
       created_at: c.created_at,
-      goal: funding?.goal ?? 0,
-      raised: funding?.total_raised ?? 0,
+      goal: goal,
+      raised: raised,
       donors: funding?.donor_count ?? 0,
     });
   }

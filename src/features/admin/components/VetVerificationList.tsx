@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { CircleCheck, X, LoaderCircle } from "lucide-react";
 import { verifyVet, rejectVet } from "../actions";
 import type { VetProfile } from "@/lib/admin";
+import { TabbyMascot } from "@/components/branding/TabbyMascot";
 
 interface VetVerificationListProps {
   pendingVets: VetProfile[];
@@ -33,7 +34,10 @@ export function VetVerificationList({ pendingVets }: VetVerificationListProps) {
     <section>
       <h2 className="text-sm font-semibold text-[#2D3748] mb-3">Pending Verification</h2>
       {pendingVets.length === 0 ? (
-        <p className="text-xs text-[#2D3748]/50">No pending vet verifications.</p>
+        <div className="rounded-[16px] border border-slate-100 bg-[#F7F7FB] p-5 text-center flex items-center justify-center gap-3">
+          <TabbyMascot variant="wave" size="sm" />
+          <p className="text-xs text-[#2D3748]/60 font-medium">All veterinarian accounts are verified! No new registrations pending.</p>
+        </div>
       ) : (
         <div className="space-y-2">
           {pendingVets.map((v) => (

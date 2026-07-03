@@ -40,9 +40,58 @@ export async function getProfile(): Promise<UserProfile | null> {
     .from("profiles")
     .select("id, display_name, avatar_url, role, is_verified, created_at, updated_at")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) return null;
+  if (error) {
+    console.error("[auth-helpers] Error fetching profile:", error.message);
+    return null;
+  }
+
+  if (!data) {
+    // Self-healing: if user is authenticated but profile is missing (e.g. database reset/push)
+    try {
+      const { createServiceClient } = await import("./service");
+      const serviceClient = createServiceClient();
+      const displayName = user.email ? user.email.split("@")[0] : "User";
+
+      const { error: createError } = await serviceClient
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            display_name: displayName,
+            role: "community",
+            is_verified: false,
+          },
+          {
+            onConflict: "id",
+            ignoreDuplicates: true,
+          }
+        );
+
+      if (createError) {
+        console.error("[auth-helpers] Failed to self-heal missing profile:", createError.message);
+        return null;
+      }
+
+      // Query the profile using serviceClient to get the actual record (newly inserted or existing)
+      const { data: healedProfile, error: fetchHealedError } = await serviceClient
+        .from("profiles")
+        .select("id, display_name, avatar_url, role, is_verified, created_at, updated_at")
+        .eq("id", user.id)
+        .single();
+
+      if (fetchHealedError || !healedProfile) {
+        console.error("[auth-helpers] Failed to fetch healed profile:", fetchHealedError?.message);
+        return null;
+      }
+
+      return healedProfile as UserProfile;
+    } catch (err) {
+      console.error("[auth-helpers] Self-heal error:", err);
+      return null;
+    }
+  }
 
   return data as UserProfile;
 }

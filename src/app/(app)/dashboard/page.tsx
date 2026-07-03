@@ -10,6 +10,8 @@ import { DonationProgressCard } from "@/features/dashboard/components/DonationPr
 import { TreatmentUpdateCard } from "@/features/dashboard/components/TreatmentUpdateCard";
 import { AdoptionPreviewCard } from "@/features/dashboard/components/AdoptionPreviewCard";
 import { NotificationPreviewCard } from "@/features/dashboard/components/NotificationPreviewCard";
+import { createClient } from "@/lib/supabase/server";
+import { CaretakerVolunteerCard } from "@/features/cases/components/CaretakerVolunteerCard";
 import {
   getDashboardStats,
   getCasesNeedingTransport,
@@ -36,6 +38,49 @@ export default async function DashboardPage() {
     getRecentNotifications(),
   ]);
 
+  // Fetch pending foster decisions for transporter priority
+  const supabase = await createClient();
+  const { data: myTransports } = await supabase
+    .from("transport_requests")
+    .select("case_id")
+    .eq("claimed_by", profile.id);
+
+  const myCaseIds = (myTransports ?? []).map((t) => t.case_id);
+
+  let pendingFosterDecisions: any[] = [];
+  if (myCaseIds.length > 0) {
+    const { data: candidateCases } = await supabase
+      .from("cases")
+      .select("id, status, ai_condition, photo_url")
+      .in("id", myCaseIds)
+      .in("status", ["TREATED", "FUNDS_RELEASED"]);
+
+    if (candidateCases && candidateCases.length > 0) {
+      const candidateIds = candidateCases.map((c) => c.id);
+
+      const { data: fosterRecords } = await supabase
+        .from("foster_records")
+        .select("case_id, status, caretaker_id")
+        .in("case_id", candidateIds);
+
+      pendingFosterDecisions = candidateCases.filter((c) => {
+        const caseFosters = (fosterRecords ?? []).filter((f) => f.case_id === c.id);
+        const hasActiveFoster = caseFosters.some((f) => f.status === "ACTIVE");
+        const hasDeclined = caseFosters.some((f) => f.caretaker_id === profile.id && f.status === "REASSIGNED");
+        return !hasActiveFoster && !hasDeclined;
+      });
+    }
+  }
+
+  const endingSoonFundraisers = fundraisers.filter((f) => {
+    const pct = f.goal > 0 ? (f.raised / f.goal) * 100 : 0;
+    return pct >= 75 && pct < 100;
+  });
+  const regularFundraisers = fundraisers.filter((f) => {
+    const pct = f.goal > 0 ? (f.raised / f.goal) * 100 : 0;
+    return pct < 75;
+  });
+
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       {/* Welcome Hero */}
@@ -50,6 +95,72 @@ export default async function DashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Needs Your Attention Section */}
+      {(pendingFosterDecisions.length > 0 || transportCases.length > 0 || endingSoonFundraisers.length > 0) && (
+        <div className="rounded-[20px] border border-red-100 bg-red-50/10 p-5 sm:p-6 shadow-[0_4px_20px_rgba(239,68,68,0.02)] space-y-4">
+          <h2 className="font-heading text-base font-bold text-[#2D3748] flex items-center gap-2">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+            Needs Your Attention
+          </h2>
+          <div className="space-y-4">
+            {/* Transporter Foster Decisions */}
+            {pendingFosterDecisions.map((decisionCase) => (
+              <div key={decisionCase.id} className="relative overflow-hidden rounded-[16px] border border-[#6C5CE7]/20 bg-white p-5 shadow-[0_2px_12px_rgba(108,92,231,0.04)]">
+                <div className="flex flex-col gap-5 md:flex-row md:items-center">
+                  {decisionCase.photo_url && (
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[12px] border border-[#A788FA]/20">
+                      <img src={decisionCase.photo_url} alt="" className="h-full w-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#6C5CE7] px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                      Priority Decision
+                    </span>
+                    <h3 className="font-heading text-base font-bold text-[#2D3748]">
+                      Caretaker Decision: {decisionCase.ai_condition ?? "Rescue Cat"}
+                    </h3>
+                    <p className="text-xs text-[#2D3748]/60 leading-relaxed max-w-xl">
+                      As the transporter, you have first priority to foster this cat during recovery. Please accept or decline.
+                    </p>
+                  </div>
+                  <div className="w-full shrink-0 md:w-80">
+                    <CaretakerVolunteerCard caseId={decisionCase.id} isTransporter={true} />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Needs Transport */}
+            {transportCases.length > 0 && (
+              <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_2px_12px_rgba(108,92,231,0.04)] space-y-3">
+                <h3 className="text-xs font-bold text-[#6C5CE7] flex items-center gap-1.5 uppercase tracking-wider">
+                  <Truck size={14} className="text-[#6C5CE7]" /> Transport Needed
+                </h3>
+                <div className="space-y-2">
+                  {transportCases.map((c) => (
+                    <CasePreviewCard key={c.id} {...c} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Funding Ending Soon */}
+            {endingSoonFundraisers.length > 0 && (
+              <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_2px_12px_rgba(108,92,231,0.04)] space-y-3">
+                <h3 className="text-xs font-bold text-amber-600 flex items-center gap-1.5 uppercase tracking-wider">
+                  <HandCoins size={14} className="text-amber-600" /> Funding Ending Soon (Almost Funded!)
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {endingSoonFundraisers.map((f) => (
+                    <DonationProgressCard key={f.id} {...f} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -69,22 +180,11 @@ export default async function DashboardPage() {
         </div>
       </DashboardSection>
 
-      {/* Cases Needing Transport */}
-      {transportCases.length > 0 && (
-        <DashboardSection title="Needs Transport" viewAllHref="/cases?status=AWAITING_TRANSPORT">
-          <div className="space-y-2">
-            {transportCases.map((c) => (
-              <CasePreviewCard key={c.id} {...c} />
-            ))}
-          </div>
-        </DashboardSection>
-      )}
-
       {/* Active Fundraisers */}
-      {fundraisers.length > 0 && (
+      {regularFundraisers.length > 0 && (
         <DashboardSection title="Active Fundraisers" viewAllHref="/donate">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {fundraisers.map((f) => (
+            {regularFundraisers.map((f) => (
               <DonationProgressCard key={f.id} {...f} />
             ))}
           </div>

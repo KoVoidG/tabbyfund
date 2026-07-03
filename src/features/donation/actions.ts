@@ -53,8 +53,43 @@ export async function submitDonation(
     return { success: false, error: "Case not found." };
   }
 
-  if (caseData.status !== "FUNDING_OPEN") {
-    return { success: false, error: "This case is not currently accepting donations." };
+  // Check if case is in a terminal or cancelled status
+  const TERMINAL_STATUSES = ["ADOPTED", "SHELTERED", "REUNITED", "CANCELLED", "LOST_CONTACT", "DECEASED"];
+  if (TERMINAL_STATUSES.includes(caseData.status)) {
+    return { success: false, error: "This case is closed and no longer accepting donations." };
+  }
+
+  // Check if a quote exists (which means the case has reached the quote/funding open stage)
+  const { data: quote } = await caseReader
+    .from("vet_quotes")
+    .select("id")
+    .eq("case_id", caseId)
+    .maybeSingle();
+
+  if (!quote) {
+    return { success: false, error: "This case is not currently accepting donations (awaiting vet quote)." };
+  }
+
+  // Check if funding is already complete and validate remaining amount
+  const { data: initialFundingCheck } = await caseReader
+    .rpc("get_funding_progress", { p_case_id: caseId });
+
+  if (initialFundingCheck && initialFundingCheck.length > 0) {
+    const funding = initialFundingCheck[0];
+    const quotedAmount = funding.goal;
+    const currentFunding = funding.total_raised;
+    const remainingAmount = quotedAmount - currentFunding;
+
+    if (remainingAmount <= 0) {
+      return { success: false, error: "This case has already reached its funding goal." };
+    }
+
+    if (amount > remainingAmount) {
+      return {
+        success: false,
+        error: `Only ฿${remainingAmount} is still needed for this case. Please enter an amount less than or equal to the remaining amount.`,
+      };
+    }
   }
 
   // Insert donation with HELD_IN_ESCROW status

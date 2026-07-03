@@ -2,14 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, PawPrint, Plus, Heart, HandCoins } from "lucide-react";
+import { House, PawPrint, Plus, Heart, HandCoins, ShieldCheck, ClipboardList, TriangleAlert, Stethoscope, LogOut } from "lucide-react";
 
-const items = [
+interface NavItem {
+  href: string;
+  icon: any;
+  label: string;
+  primary?: boolean;
+}
+
+const communityItems: NavItem[] = [
   { href: "/dashboard", icon: House, label: "Home" },
   { href: "/cases", icon: PawPrint, label: "Feed" },
   { href: "/report", icon: Plus, label: "Report", primary: true },
   { href: "/adopt", icon: Heart, label: "Adopt" },
   { href: "/donate", icon: HandCoins, label: "Donate" },
+];
+
+const adminItems: NavItem[] = [
+  { href: "/admin", icon: ShieldCheck, label: "Dashboard" },
+  { href: "/admin/cases", icon: ClipboardList, label: "Cases" },
+  { href: "/admin/moderation", icon: TriangleAlert, label: "Moderate" },
+  { href: "/admin/vets", icon: Stethoscope, label: "Vets" },
+  { href: "/dashboard", icon: LogOut, label: "Exit Admin" },
 ];
 
 /**
@@ -18,13 +33,18 @@ const items = [
  */
 export function BottomNav() {
   const pathname = usePathname();
+  const isAdminPath = pathname.startsWith("/admin");
+  const items = isAdminPath ? adminItems : communityItems;
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden border-t border-[#A788FA]/10 bg-white/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around py-1.5">
         {items.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          if (item.primary) {
+          const isActive = item.href === "/admin" 
+            ? pathname === "/admin" 
+            : pathname === item.href || pathname.startsWith(item.href + "/");
+
+          if (item.primary && !isAdminPath) {
             return (
               <Link
                 key={item.href}

@@ -49,6 +49,10 @@ export function DonationSheet({ caseData, open, onClose }: DonationSheetProps) {
       ? Math.round((caseData.raised / caseData.goal) * 100)
       : 0;
 
+  const remainingAmount = caseData.goal - caseData.raised;
+  const isOverfunded = finalAmount > remainingAmount;
+  const isFullyFunded = remainingAmount <= 0;
+
   function handleConfirmPayment() {
     setError(null);
 
@@ -144,10 +148,22 @@ export function DonationSheet({ caseData, open, onClose }: DonationSheetProps) {
                   onCustomChange={setCustomAmount}
                 />
 
+                {isFullyFunded && (
+                  <div className="rounded-[10px] bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700">
+                    This case has already reached its funding goal.
+                  </div>
+                )}
+
+                {!isFullyFunded && isOverfunded && (
+                  <div className="rounded-[10px] bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+                    Only ฿{remainingAmount} is still needed for this case. Please enter an amount less than or equal to the remaining amount.
+                  </div>
+                )}
+
                 <EscrowExplainer />
 
                 <button
-                  disabled={!finalAmount || finalAmount <= 0}
+                  disabled={!finalAmount || finalAmount <= 0 || isOverfunded || isFullyFunded}
                   onClick={() => setStep("payment")}
                   className="w-full h-11 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA] disabled:opacity-40 disabled:cursor-not-allowed"
                 >

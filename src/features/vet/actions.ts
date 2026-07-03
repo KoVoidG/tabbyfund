@@ -46,6 +46,23 @@ export async function submitVetQuote(input: SubmitQuoteInput): Promise<VetAction
     return { success: false, error: "Treatment notes are required." };
   }
 
+  // Validate assigned vet and case status
+  const { data: caseData } = await supabase
+    .from("cases")
+    .select("assigned_vet_id, status")
+    .eq("id", input.caseId)
+    .single();
+
+  if (!caseData) {
+    return { success: false, error: "Case not found." };
+  }
+  if (caseData.assigned_vet_id !== profile.id) {
+    return { success: false, error: "Only the assigned veterinarian can submit a quote." };
+  }
+  if (caseData.status !== "AT_VET") {
+    return { success: false, error: "Quotes can only be submitted for cases in AT_VET status." };
+  }
+
   // Check for existing quote (vet_quotes is one-to-one via unique constraint on case_id)
   const { data: existing } = await supabase
     .from("vet_quotes")
@@ -124,6 +141,17 @@ export async function createTreatmentRecord(input: CreateTreatmentInput): Promis
     return { success: false, error: "Treatment summary is required." };
   }
 
+  // Validate assigned vet
+  const { data: caseData } = await supabase
+    .from("cases")
+    .select("assigned_vet_id")
+    .eq("id", input.caseId)
+    .single();
+
+  if (!caseData || caseData.assigned_vet_id !== profile.id) {
+    return { success: false, error: "Only the assigned veterinarian can start treatment." };
+  }
+
   // Check if treatment record already exists
   const { data: existing } = await supabase
     .from("treatment_records")
@@ -178,11 +206,22 @@ interface UpdateTreatmentInput {
  * Update an existing treatment record summary/outcome.
  */
 export async function updateTreatmentRecord(input: UpdateTreatmentInput): Promise<VetActionResult> {
-  await requireRole("vet", { requireVerified: true });
+  const profile = await requireRole("vet", { requireVerified: true });
   const supabase = await createClient();
 
   if (!input.treatmentSummary?.trim()) {
     return { success: false, error: "Treatment summary is required." };
+  }
+
+  // Validate assigned vet
+  const { data: caseData } = await supabase
+    .from("cases")
+    .select("assigned_vet_id")
+    .eq("id", input.caseId)
+    .single();
+
+  if (!caseData || caseData.assigned_vet_id !== profile.id) {
+    return { success: false, error: "Only the assigned veterinarian can update treatment." };
   }
 
   const { error } = await supabase
@@ -210,11 +249,12 @@ export async function updateTreatmentRecord(input: UpdateTreatmentInput): Promis
 
 interface CompleteTreatmentInput {
   caseId: string;
-  outcome: "RECOVERED" | "DECEASED" | "REFERRED";
+  outcome: "RECOVERED" | "DECEASED";
   vaccinationStatus: string;
   isNeutered: boolean;
   specialNeeds: string;
   readyForAdoption: boolean;
+  photoUrl?: string;
 }
 
 /**
@@ -228,27 +268,49 @@ interface CompleteTreatmentInput {
  * - If outcome is RECOVERED and ready for adoption, case goes to IN_FOSTER next
  */
 export async function completeTreatment(input: CompleteTreatmentInput): Promise<VetActionResult> {
-  await requireRole("vet", { requireVerified: true });
+  const profile = await requireRole("vet", { requireVerified: true });
   const supabase = await createClient();
 
   if (!input.caseId) {
     return { success: false, error: "Case ID is required." };
   }
 
+  // Validate outcome
+  if (!["RECOVERED", "DECEASED"].includes(input.outcome)) {
+    return { success: false, error: "Invalid treatment outcome. Only Recovered or Deceased are supported." };
+  }
+
+  // Validate assigned vet
+  const { data: caseData } = await supabase
+    .from("cases")
+    .select("assigned_vet_id")
+    .eq("id", input.caseId)
+    .single();
+
+  if (!caseData || caseData.assigned_vet_id !== profile.id) {
+    return { success: false, error: "Only the assigned veterinarian can complete this treatment." };
+  }
+
   const now = new Date().toISOString();
 
   // Update treatment record
+  const updateData: any = {
+    outcome: input.outcome,
+    vaccination_status: input.vaccinationStatus || null,
+    is_neutered: input.isNeutered,
+    special_needs: input.specialNeeds || null,
+    ready_for_adoption: input.readyForAdoption,
+    ready_for_adoption_at: input.readyForAdoption ? now : null,
+    confirmed_at: now,
+  };
+
+  if (input.photoUrl) {
+    updateData.photo_urls = [input.photoUrl];
+  }
+
   const { error: updateError } = await supabase
     .from("treatment_records")
-    .update({
-      outcome: input.outcome,
-      vaccination_status: input.vaccinationStatus || null,
-      is_neutered: input.isNeutered,
-      special_needs: input.specialNeeds || null,
-      ready_for_adoption: input.readyForAdoption,
-      ready_for_adoption_at: input.readyForAdoption ? now : null,
-      confirmed_at: now,
-    })
+    .update(updateData)
     .eq("case_id", input.caseId);
 
   if (updateError) {
@@ -257,9 +319,11 @@ export async function completeTreatment(input: CompleteTreatmentInput): Promise<
   }
 
   // Advance case status
-  let newStatus: "TREATED" | "DECEASED";
+  let newStatus: "TREATED" | "DECEASED" | "SHELTERED";
   if (input.outcome === "DECEASED") {
     newStatus = "DECEASED";
+  } else if (input.outcome === "RECOVERED" && !input.readyForAdoption) {
+    newStatus = "SHELTERED";
   } else {
     newStatus = "TREATED";
   }
@@ -267,54 +331,40 @@ export async function completeTreatment(input: CompleteTreatmentInput): Promise<
   await supabase
     .from("cases")
     .update({ status: newStatus })
-    .eq("id", input.caseId)
-    .eq("status", "IN_TREATMENT");
+    .eq("id", input.caseId);
 
-  // If vet approved for adoption and recovered, create an adoption listing
+  // Fetch transporter for this case to send them a priority notification
+  const { data: transport } = await supabase
+    .from("transport_requests")
+    .select("claimed_by")
+    .eq("case_id", input.caseId)
+    .maybeSingle();
+
+  if (transport && transport.claimed_by && input.outcome === "RECOVERED" && input.readyForAdoption) {
+    const { createServiceClient } = await import("@/lib/supabase/service");
+    const serviceClient = createServiceClient();
+    await serviceClient
+      .from("notifications")
+      .insert({
+        user_id: transport.claimed_by,
+        title: "Foster caretaker priority role",
+        message: "The cat you transported has completed treatment. As the transporter, you have priority to foster them.",
+        type: "TREATMENT_COMPLETED",
+        is_read: false,
+      });
+  }
+
+  // If vet approved for adoption and recovered, create an adoption listing (CLOSED initially)
   if (input.readyForAdoption && input.outcome === "RECOVERED") {
     const { error: listingError } = await supabase
       .from("adoption_listings")
       .insert({
         case_id: input.caseId,
-        status: "OPEN",
+        status: "CLOSED",
       });
 
     if (listingError) {
       console.error("[vet] Adoption listing creation failed:", listingError.message);
-    }
-
-    // Auto-assign the transporter as temporary caretaker
-    const { createServiceClient } = await import("@/lib/supabase/service");
-    const serviceClient = createServiceClient();
-
-    // Find the transporter for this case
-    const { data: transport } = await supabase
-      .from("transport_requests")
-      .select("claimed_by")
-      .eq("case_id", input.caseId)
-      .eq("status", "DELIVERED")
-      .single();
-
-    if (transport?.claimed_by) {
-      // Create foster record with transporter as caretaker
-      const { error: fosterError } = await serviceClient
-        .from("foster_records")
-        .insert({
-          case_id: input.caseId,
-          caretaker_id: transport.claimed_by,
-          status: "ACTIVE",
-        });
-
-      if (!fosterError) {
-        // Advance case to IN_FOSTER
-        await serviceClient
-          .from("cases")
-          .update({ status: "IN_FOSTER" })
-          .eq("id", input.caseId)
-          .eq("status", "TREATED");
-      } else {
-        console.error("[vet] Auto-assign caretaker failed:", fosterError.message);
-      }
     }
   }
 

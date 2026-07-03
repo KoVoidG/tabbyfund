@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, X, LoaderCircle } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { uploadRescuePhoto, deleteUploadedPhoto } from "../lib/upload-photo";
 
 interface PhotoUploaderProps {
@@ -21,8 +21,20 @@ interface PhotoUploaderProps {
  */
 export function PhotoUploader({ photoUrl, storagePath, previewUrl, onPhotoUploaded }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [localPreview, setLocalPreview] = useState<string | null>(previewUrl || null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sync with incoming draft values if any (e.g. on restoration)
+  useEffect(() => {
+    if (previewUrl || photoUrl) {
+      setLocalPreview(previewUrl || photoUrl || null);
+    } else {
+      setLocalPreview(null);
+      setSelectedFile(null);
+    }
+  }, [previewUrl, photoUrl]);
 
   async function handleFile(file: File) {
     setError(null);
@@ -37,29 +49,19 @@ export function PhotoUploader({ photoUrl, storagePath, previewUrl, onPhotoUpload
       return;
     }
 
-    // Create local preview immediately
-    const localPreview = URL.createObjectURL(file);
-
-    setIsUploading(true);
-    const result = await uploadRescuePhoto(file);
-    setIsUploading(false);
-
-    if (result.success && result.publicUrl && result.storagePath) {
-      onPhotoUploaded({
-        photoUrl: result.publicUrl,
-        storagePath: result.storagePath,
-        previewUrl: localPreview,
-      });
-    } else {
+    if (localPreview && !photoUrl) {
       URL.revokeObjectURL(localPreview);
-      setError(result.error ?? "Upload failed. Please try again.");
     }
+
+    const preview = URL.createObjectURL(file);
+    setSelectedFile(file);
+    setLocalPreview(preview);
+    onPhotoUploaded(undefined); // Clear any previous uploaded data
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
-    // Reset input so same file can be re-selected
     e.target.value = "";
   }
 
@@ -74,22 +76,50 @@ export function PhotoUploader({ photoUrl, storagePath, previewUrl, onPhotoUpload
   }
 
   async function handleRemove() {
-    // Attempt to delete from storage
     if (storagePath) {
       await deleteUploadedPhoto(storagePath);
     }
+    if (localPreview && !photoUrl) {
+      URL.revokeObjectURL(localPreview);
+    }
+    setLocalPreview(null);
+    setSelectedFile(null);
     onPhotoUploaded(undefined);
   }
 
-  // Show uploaded photo
-  if (photoUrl || previewUrl) {
-    const displayUrl = previewUrl || photoUrl;
+  async function handleCloudUpload() {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
+    setError(null);
+    try {
+      const result = await uploadRescuePhoto(selectedFile);
+      if (result.success && result.publicUrl && result.storagePath) {
+        onPhotoUploaded({
+          photoUrl: result.publicUrl,
+          storagePath: result.storagePath,
+          previewUrl: localPreview || result.publicUrl,
+        });
+      } else {
+        setError(result.error ?? "Failed to upload photo.");
+      }
+    } catch (err) {
+      setError("Failed to upload photo.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  // Show uploaded photo or preview
+  if (localPreview) {
     return (
       <div className="space-y-4">
-        <h2 className="font-heading text-base font-semibold text-[#2D3748]">Photo Uploaded</h2>
-        <div className="relative overflow-hidden rounded-[12px] border border-[#A788FA]/15">
-          <img src={displayUrl} alt="Rescue cat" className="w-full h-56 object-cover" />
+        <label className="mb-1.5 block text-xs font-medium text-[#2D3748]">Upload one rescue photo</label>
+        
+        <div className="relative overflow-hidden rounded-[12px] border border-[#A788FA]/15 w-full max-w-[320px] h-56 bg-slate-50">
+          <img src={localPreview} alt="Rescue cat preview" className="w-full h-full object-cover" />
           <button
+            type="button"
             onClick={handleRemove}
             className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70"
             aria-label="Remove photo"
@@ -97,36 +127,49 @@ export function PhotoUploader({ photoUrl, storagePath, previewUrl, onPhotoUpload
             <X size={16} strokeWidth={2} />
           </button>
         </div>
-        <button
-          onClick={() => inputRef.current?.click()}
-          className="w-full rounded-[10px] border border-[#A788FA]/20 py-2.5 text-xs font-medium text-[#6C5CE7] transition hover:bg-[#6C5CE7]/5"
-        >
-          Replace Photo
-        </button>
-        <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleInputChange} />
-      </div>
-    );
-  }
 
-  // Upload state
-  if (isUploading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <LoaderCircle size={32} strokeWidth={2} className="animate-spin text-[#6C5CE7] mb-3" />
-        <p className="text-sm font-medium text-[#2D3748]">Uploading photo...</p>
-        <p className="mt-1 text-xs text-[#2D3748]/50">This may take a moment</p>
+        {photoUrl ? (
+          <span className="text-[10px] text-emerald-600 font-medium block">✓ Uploaded to cloud successfully</span>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleCloudUpload}
+              disabled={isUploading}
+              className="flex h-9 items-center gap-1.5 rounded-[10px] bg-[#6C5CE7] px-4 py-2 text-xs font-semibold text-white hover:bg-[#A788FA] transition disabled:opacity-50"
+            >
+              {isUploading ? (
+                <LoaderCircle size={12} className="animate-spin text-white" />
+              ) : (
+                <Camera size={12} strokeWidth={1.5} />
+              )}
+              Upload
+            </button>
+            <span className="text-[10px] text-amber-600 font-medium">Selected (Draft preview)</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-[10px] bg-red-50 border border-red-200 p-3 text-xs text-red-700 mt-2">
+            {error}
+          </div>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="font-heading text-base font-semibold text-[#2D3748]">
-        Take or upload a photo
-      </h2>
-      <p className="text-sm text-[#2D3748]/60">
-        A clear photo helps the AI assess the cat&apos;s condition and helps volunteers find it.
-      </p>
+      <label className="mb-1.5 block text-xs font-semibold text-[#2D3748]">Upload Rescue Photo</label>
+      <div className="text-xs text-[#2D3748]/70 space-y-1">
+        <p className="font-medium">Accepted formats:</p>
+        <ul className="list-disc list-inside pl-1 space-y-0.5 text-[#2D3748]/60">
+          <li>JPG</li>
+          <li>PNG</li>
+          <li>WEBP</li>
+        </ul>
+        <p className="font-medium mt-1.5">Maximum size: <span className="font-normal text-[#2D3748]/60">10 MB</span></p>
+      </div>
 
       {/* Drop zone */}
       <div
@@ -143,15 +186,15 @@ export function PhotoUploader({ photoUrl, storagePath, previewUrl, onPhotoUpload
             Tap to take a photo or upload
           </p>
           <p className="mt-0.5 text-xs text-[#2D3748]/50">
-            Drag & drop on desktop · JPG, PNG, WEBP · Max 10MB
+            Drag & drop on desktop
           </p>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-[10px] bg-red-50 border border-red-200 p-3">
-          <p className="text-xs text-red-700">{error}</p>
+        <div className="rounded-[10px] bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+          {error}
         </div>
       )}
 

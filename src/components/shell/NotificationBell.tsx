@@ -2,7 +2,7 @@
 
 import { Bell, Truck, Stethoscope, HandCoins, Heart, Info } from "lucide-react";
 import Link from "next/link";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dropdown } from "@/components/ui/Dropdown";
 
 const typeIcons: Record<string, typeof Bell> = {
   TRANSPORT_CLAIMED: Truck,
@@ -35,8 +35,10 @@ interface NotificationBellProps {
  */
 export function NotificationBell({ unreadCount, recentNotifications }: NotificationBellProps) {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <Dropdown
+      align="right"
+      widthClass="w-80"
+      trigger={
         <button className="relative flex h-10 w-10 items-center justify-center rounded-xl text-[#2D3748]/60 transition-colors hover:bg-[#6C5CE7]/5 hover:text-[#6C5CE7]">
           <Bell size={20} strokeWidth={1.5} />
           {unreadCount > 0 && (
@@ -45,11 +47,9 @@ export function NotificationBell({ unreadCount, recentNotifications }: Notificat
             </span>
           )}
         </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        className="w-80 rounded-xl border-[#A788FA]/15 p-0 shadow-[0_4px_20px_rgba(108,92,231,0.1)]"
-      >
+      }
+    >
+      <div className="flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#A788FA]/10 px-4 py-3">
           <h3 className="text-sm font-semibold text-[#2D3748]">Notifications</h3>
@@ -102,7 +102,7 @@ export function NotificationBell({ unreadCount, recentNotifications }: Notificat
             See all notifications
           </Link>
         </div>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </Dropdown>
   );
 }

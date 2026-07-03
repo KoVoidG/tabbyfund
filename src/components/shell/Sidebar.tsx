@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  House,
-  PawPrint,
-  Plus,
-  Heart,
+  LayoutDashboard,
+  ClipboardList,
+  HandHeart,
+  TriangleAlert,
   HandCoins,
-  Home,
+  HouseHeart,
+  PawPrint,
   Stethoscope,
   ShieldCheck,
-  Settings,
+  Users,
+  BarChart3,
+  History,
+  LogOut,
 } from "lucide-react";
 import { TabbyMascot } from "@/components/branding/TabbyMascot";
 import type { UserProfile } from "@/features/auth/types";
@@ -21,21 +25,32 @@ interface SidebarProps {
 }
 
 const communityLinks = [
-  { href: "/dashboard", icon: House, label: "Dashboard" },
-  { href: "/cases", icon: PawPrint, label: "Rescue Feed" },
-  { href: "/volunteer", icon: Heart, label: "Volunteer" },
-  { href: "/report", icon: Plus, label: "Report" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/cases", icon: ClipboardList, label: "Rescue Feed" },
+  { href: "/volunteer", icon: HandHeart, label: "Volunteer" },
+  { href: "/report", icon: TriangleAlert, label: "Report" },
   { href: "/donate", icon: HandCoins, label: "Donate" },
-  { href: "/foster", icon: Home, label: "My Foster" },
-  { href: "/adopt", icon: Heart, label: "Adopt" },
+  { href: "/foster", icon: HouseHeart, label: "My Foster" },
+  { href: "/adopt", icon: PawPrint, label: "Adopt" },
 ];
 
 const vetLinks = [
   { href: "/vet", icon: Stethoscope, label: "Vet Dashboard" },
 ];
 
-const adminLinks = [
-  { href: "/admin", icon: ShieldCheck, label: "Admin" },
+const normalAdminLinks = [
+  { href: "/admin", icon: ShieldCheck, label: "Admin Operations" },
+];
+
+const adminSectionLinks = [
+  { href: "/admin", icon: LayoutDashboard, label: "Admin Dashboard" },
+  { href: "/admin/cases", icon: ClipboardList, label: "Case Management" },
+  { href: "/admin/moderation", icon: TriangleAlert, label: "Case Moderation" },
+  { href: "/admin/vets", icon: Stethoscope, label: "Veterinarians" },
+  { href: "/admin/users", icon: Users, label: "Community Users" },
+  { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+  { href: "/admin/activity", icon: History, label: "Platform Activity" },
+  { href: "/dashboard", icon: LogOut, label: "Exit Admin" },
 ];
 
 /**
@@ -46,24 +61,30 @@ export function Sidebar({ profile }: SidebarProps) {
   const pathname = usePathname();
   const showVet = profile.role === "vet";
   const showAdmin = profile.role === "admin";
+  const isAdminPath = pathname.startsWith("/admin");
 
   function isActive(href: string) {
-    if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/dashboard" && !isAdminPath) return pathname === "/dashboard";
+    if (href === "/admin") return pathname === "/admin";
     return pathname === href || pathname.startsWith(href + "/");
   }
+
+  const activeLinks = isAdminPath ? adminSectionLinks : communityLinks;
 
   return (
     <aside className="hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 border-r border-[#A788FA]/10 bg-white">
       <div className="flex flex-col flex-1 px-4 py-5">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2.5 px-3 mb-6">
+        <Link href={isAdminPath ? "/admin" : "/dashboard"} className="flex items-center gap-2.5 px-3 mb-6">
           <PawPrint size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
-          <span className="font-heading text-lg font-bold text-[#6C5CE7]">TabbyFund</span>
+          <span className="font-heading text-lg font-bold text-[#6C5CE7]">
+            {isAdminPath ? "TabbyAdmin" : "TabbyFund"}
+          </span>
         </Link>
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1">
-          {communityLinks.map((link) => (
+          {activeLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -78,7 +99,7 @@ export function Sidebar({ profile }: SidebarProps) {
             </Link>
           ))}
 
-          {showVet && (
+          {!isAdminPath && showVet && (
             <>
               <div className="my-3 h-px bg-[#A788FA]/10" />
               {vetLinks.map((link) => (
@@ -98,10 +119,10 @@ export function Sidebar({ profile }: SidebarProps) {
             </>
           )}
 
-          {showAdmin && (
+          {!isAdminPath && showAdmin && (
             <>
               <div className="my-3 h-px bg-[#A788FA]/10" />
-              {adminLinks.map((link) => (
+              {normalAdminLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -121,8 +142,10 @@ export function Sidebar({ profile }: SidebarProps) {
 
         {/* Bottom mascot */}
         <div className="mt-auto flex flex-col items-center gap-2 px-3 py-4">
-          <TabbyMascot variant="wave" size="md" />
-          <p className="text-[11px] text-[#2D3748]/40 text-center">Every cat deserves a chance</p>
+          <TabbyMascot variant="sleep" size="md" />
+          <p className="text-[11px] text-[#2D3748]/40 text-center">
+            {isAdminPath ? "Operations Center" : "Every cat deserves a chance"}
+          </p>
         </div>
       </div>
     </aside>

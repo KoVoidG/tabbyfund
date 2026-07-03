@@ -30,7 +30,7 @@ export async function verifyVet(vetId: string): Promise<AdminActionResult> {
 
   if (error) {
     console.error("[admin] Verify vet failed:", error.message);
-    return { success: false, error: "Failed to verify vet. " + error.message };
+    return { success: false, error: "Failed to verify vet. Please try again." };
   }
 
   revalidatePath("/admin/vets");
@@ -55,7 +55,7 @@ export async function rejectVet(vetId: string): Promise<AdminActionResult> {
 
   if (error) {
     console.error("[admin] Reject vet failed:", error.message);
-    return { success: false, error: "Failed to reject vet. " + error.message };
+    return { success: false, error: "Failed to reject vet. Please try again." };
   }
 
   revalidatePath("/admin/vets");

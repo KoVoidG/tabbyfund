@@ -17,12 +17,14 @@ export interface RescueDraft {
     condition: string;
     reasoning: string;
     firstAid: string[];
+    urgency?: string;
+    estimatedRecovery?: string;
+    recommendedAction?: string;
+    recoveryConfidence?: number;
   };
   location?: {
     lat: number;
     lng: number;
-    fuzzedLat: number;
-    fuzzedLng: number;
     address: string;
   };
   details?: {
