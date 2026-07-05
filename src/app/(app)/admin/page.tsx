@@ -128,7 +128,7 @@ export default async function AdminPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-heading text-2xl font-bold text-[#2D3748]">Admin Operations Center</h1>
+              <h1 className="text-2xl font-bold text-[#2D3748]">Admin Operations Center</h1>
               <span className="flex items-center gap-1 rounded-full bg-[#6C5CE7]/10 px-2 py-0.5 text-[10px] font-semibold text-[#6C5CE7]">
                 <ShieldCheck size={11} /> Admin
               </span>

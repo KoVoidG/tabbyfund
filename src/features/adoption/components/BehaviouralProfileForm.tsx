@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { PawPrint, Save, Camera, CircleCheck, LoaderCircle, X, CheckCircle2, Circle } from "lucide-react";
 import { updateBehaviouralProfile } from "@/features/foster/actions";
 import { uploadFosterPhoto, deleteFosterPhoto } from "@/features/foster/lib/upload-foster-photo";
@@ -25,6 +25,7 @@ interface BehaviouralProfileFormProps {
  * Saves to real Supabase foster_records.
  */
 export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) {
+  const [catName, setCatName] = useState("");
   const [personality, setPersonality] = useState<string[]>([]);
   const [energy, setEnergy] = useState<"low" | "medium" | "high">("medium");
   const [goodWithChildren, setGoodWithChildren] = useState<boolean | null>(null);
@@ -39,6 +40,44 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("foster_records")
+        .select("*")
+        .eq("case_id", caseId)
+        .eq("status", "ACTIVE")
+        .maybeSingle();
+
+      if (data) {
+        if (data.cat_name) setCatName(data.cat_name);
+        if (data.personality) setPersonality(data.personality);
+        if (data.energy_level) setEnergy(data.energy_level as any);
+        if (data.good_with_children !== null) setGoodWithChildren(data.good_with_children);
+        if (data.good_with_cats !== null) setGoodWithCats(data.good_with_cats);
+        if (data.good_with_dogs !== null) setGoodWithDogs(data.good_with_dogs);
+        if (data.litter_trained !== null) setLitterTrained(data.litter_trained);
+        if (data.indoor_only !== null) setIndoorOnly(data.indoor_only);
+        if (data.observations) setObservations(data.observations);
+        if (data.foster_photos && data.foster_photos.length > 0) {
+          setPhotoItems(
+            data.foster_photos.map((url: string) => ({
+              id: Math.random().toString(36).substring(7),
+              photoUrl: url,
+              previewUrl: url,
+            }))
+          );
+        }
+        if (data.behaviour_profile_complete !== null) {
+          setMarkComplete(data.behaviour_profile_complete);
+        }
+      }
+    }
+    loadProfile();
+  }, [caseId]);
 
   function togglePersonality(tag: string) {
     setPersonality((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
@@ -131,6 +170,10 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
 
   function handleSave() {
     setError(null);
+    if (!markComplete) {
+      setError("Please check 'Mark Profile Complete' to save the profile and list this cat for adoption.");
+      return;
+    }
     startTransition(async () => {
       let finalPhotos = photoItems.map((i) => i.photoUrl).filter(Boolean) as string[];
       const pendingUploads = photoItems.filter((item) => item.file && !item.photoUrl);
@@ -162,6 +205,7 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
 
       const result = await updateBehaviouralProfile({
         caseId,
+        catName,
         personality,
         energyLevel: energy,
         goodWithChildren,
@@ -191,7 +235,7 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
     return (
       <div className="rounded-[16px] border border-emerald-200 bg-emerald-50 p-6 text-center space-y-3">
         <CircleCheck size={32} strokeWidth={1.5} className="mx-auto text-emerald-600" />
-        <h3 className="font-heading text-sm font-bold text-emerald-700">Profile Saved!</h3>
+        <h3 className="text-sm font-bold text-emerald-700">Profile Saved!</h3>
         {markComplete && (
           <p className="text-xs text-emerald-600">Behavioural profile is now complete. This cat may appear on the adoption page.</p>
         )}
@@ -214,7 +258,7 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
           <PawPrint size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div>
-          <h1 className="font-heading text-lg font-bold text-[#2D3748]">Behaviour Profile</h1>
+          <h1 className="text-lg font-bold text-[#2D3748]">Behaviour Profile</h1>
           <p className="text-xs text-[#2D3748]/60">Complete the cat&apos;s observations and personality traits</p>
         </div>
       </div>
@@ -225,6 +269,21 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
           {/* Card 1: Temperament */}
           <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-4">
             <h2 className="text-xs font-bold text-[#6C5CE7] uppercase tracking-wider">1. Temperament & Energy</h2>
+
+            {/* Cat Name Input */}
+            <div className="space-y-1.5">
+              <label htmlFor="cat-name-input" className="block text-xs font-semibold text-[#2D3748]">
+                Cat Name <span className="text-[10px] text-[#2D3748]/45 font-normal">(Optional — defaults to &quot;Rescued Cat&quot;)</span>
+              </label>
+              <input
+                id="cat-name-input"
+                type="text"
+                value={catName}
+                onChange={(e) => setCatName(e.target.value)}
+                placeholder="e.g. Som-O, Oat, Mimi..."
+                className="w-full h-11 rounded-[12px] border border-[#A788FA]/20 bg-white px-3.5 text-xs text-[#2D3748] placeholder:text-[#2D3748]/40 focus:border-[#6C5CE7] focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/10"
+              />
+            </div>
 
             {/* Personality Tags */}
             <div className="space-y-2">

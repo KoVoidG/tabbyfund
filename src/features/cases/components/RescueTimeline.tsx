@@ -150,7 +150,7 @@ export function RescueTimeline({
 
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      <h3 className="font-heading text-sm font-semibold text-[#2D3748] mb-4">Rescue Timeline</h3>
+      <h3 className="text-sm font-semibold text-[#2D3748] mb-4">Rescue Timeline</h3>
 
       <div className="space-y-0">
         {timelineSteps.map((step, i) => {

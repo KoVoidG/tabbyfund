@@ -109,7 +109,7 @@ export function DonationSheet({ caseData, open, onClose }: DonationSheetProps) {
                   strokeWidth={1.5}
                   className="text-[#6C5CE7]"
                 />
-                <h3 className="font-heading text-base font-semibold text-[#2D3748]">
+                <h3 className="text-base font-semibold text-[#2D3748]">
                   Donate to Rescue
                 </h3>
               </div>

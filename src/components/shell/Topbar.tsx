@@ -33,7 +33,7 @@ export async function Topbar({ profile }: TopbarProps) {
       {/* Left: mobile hamburger + title */}
       <div className="flex items-center gap-2">
         <MobileNav profile={profile} />
-        <span className="font-heading text-sm font-semibold text-[#6C5CE7] md:hidden">
+        <span className="text-sm font-semibold text-[#6C5CE7] md:hidden">
           TabbyFund
         </span>
       </div>

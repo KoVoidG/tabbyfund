@@ -13,7 +13,7 @@ export default function LoginPage() {
       <div className="space-y-6">
         {/* Title and Subtitle */}
         <div className="space-y-1">
-          <h2 className="font-heading text-2xl font-black text-[#25324B] tracking-tight">
+          <h2 className="text-2xl font-bold text-[#25324B] tracking-tight">
             Sign In
           </h2>
           <p className="text-xs text-[#6F7895] font-semibold leading-normal">

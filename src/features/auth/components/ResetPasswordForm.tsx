@@ -57,7 +57,7 @@ export function ResetPasswordForm() {
             <TabbyMascot variant="sad" size="sm" />
           </div>
           <div>
-            <h4 className="text-xs font-black text-[#25324B]">That reset link didn&apos;t work 😿</h4>
+            <h4 className="text-xs font-bold text-[#25324B]">That reset link didn&apos;t work 😿</h4>
             <p className="text-[11px] text-[#6F7895] font-semibold mt-0.5 leading-normal">
               {serverError}
             </p>

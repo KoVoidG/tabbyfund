@@ -17,7 +17,7 @@ export default async function AdminCasesPage() {
           <ClipboardList size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div>
-          <h1 className="font-heading text-lg font-bold text-[#2D3748]">Case Management</h1>
+          <h1 className="text-lg font-bold text-[#2D3748]">Case Management</h1>
           <p className="text-xs text-[#2D3748]/60">View, search, and monitor all platform rescue cases</p>
         </div>
       </div>

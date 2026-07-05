@@ -63,7 +63,7 @@ export function AdoptionStatusCard({ caseId, status, personality, medicalNotes, 
 
       {/* Content */}
       <div className="p-5">
-        <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-3">
           <Heart size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Adoption
         </h3>
 

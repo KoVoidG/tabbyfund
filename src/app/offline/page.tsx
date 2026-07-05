@@ -17,7 +17,7 @@ export default function OfflinePage() {
           <TabbyMascot variant="sleep" size="xl" />
         </div>
         <div className="space-y-2">
-          <h1 className="font-heading text-2xl font-bold text-[#2D3748]">
+          <h1 className="text-2xl font-bold text-[#2D3748]">
             Connection Lost
           </h1>
           <p className="text-sm text-[#2D3748]/60">

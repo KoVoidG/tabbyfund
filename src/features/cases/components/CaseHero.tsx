@@ -62,7 +62,7 @@ export function CaseHero({ photo, description, status, severity, condition, loca
           </div>
 
           {/* Title */}
-          <h1 className="font-heading text-base font-bold text-[#2D3748] leading-tight">
+          <h1 className="text-base font-bold text-[#2D3748] leading-tight">
             {condition}
           </h1>
           <p className="mt-1.5 text-sm text-[#2D3748]/70 leading-relaxed line-clamp-3">

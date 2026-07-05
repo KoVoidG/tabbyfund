@@ -15,7 +15,7 @@ export default function RegisterPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#6C5CE7]/10 text-[#6C5CE7]">
             <PawPrint size={18} strokeWidth={2.5} />
           </div>
-          <span className="font-heading text-lg font-black tracking-tight">TabbyFund</span>
+          <span className="text-lg font-bold tracking-tight">TabbyFund</span>
         </div>
 
         {/* Wizard Form Wrapper */}

@@ -52,11 +52,11 @@ export function LoginForm({ forgotPasswordSlot }: { forgotPasswordSlot?: React.R
           className="flex items-start gap-3 rounded-[16px] border border-[#FF8B7B]/30 bg-[#FFF8F2] p-4 animate-shake"
           role="alert"
         >
-          <div className="shrink-0 bg-white p-1 rounded-full shadow-sm border border-[rgba(108,92,231,.08)]">
-            <TabbyMascot variant="sad" size="sm" />
-          </div>
+          
+            <TabbyMascot variant="sad" size="md" />
+          
           <div>
-            <h4 className="text-xs font-black text-[#25324B]">That login info doesn&apos;t look right 😿</h4>
+            <h4 className="pt-3 text-xs font-bold text-[#25324B]">That login info doesn&apos;t look right</h4>
             <p className="text-[11px] text-[#6F7895] font-semibold mt-0.5 leading-normal">
               {serverError === "Invalid email or password" 
                 ? "The email or password you entered is incorrect. Please check your credentials and try again!" 

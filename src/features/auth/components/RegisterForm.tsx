@@ -92,7 +92,7 @@ export function RegisterForm() {
           }`}>
             {step > 1 ? "✓" : "1"}
           </div>
-          <span className={step >= 1 ? "text-[#25324B]" : ""}>Account Type</span>
+          <span className={`${step >= 1 ? "text-[#25324B]" : ""} hidden sm:inline`}>Account Type</span>
         </div>
         <div className="w-8 h-px bg-[rgba(37,50,75,.08)]" />
 
@@ -103,7 +103,7 @@ export function RegisterForm() {
           }`}>
             {step > 2 ? "✓" : "2"}
           </div>
-          <span className={step >= 2 ? "text-[#25324B]" : ""}>Account Info</span>
+          <span className={`${step >= 2 ? "text-[#25324B]" : ""} hidden sm:inline`}>Account Info</span>
         </div>
         
         {/* Render Clinic Info step only if Veterinarian is selected */}
@@ -116,7 +116,7 @@ export function RegisterForm() {
               }`}>
                 {step > 3 ? "✓" : "3"}
               </div>
-              <span className={step >= 3 ? "text-[#25324B]" : ""}>Clinic Info</span>
+              <span className={`${step >= 3 ? "text-[#25324B]" : ""} hidden sm:inline`}>Clinic Info</span>
             </div>
           </>
         )}
@@ -128,7 +128,7 @@ export function RegisterForm() {
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-400">
             {selectedRole === "vet" ? "4" : "3"}
           </div>
-          <span>Review</span>
+          <span className="hidden sm:inline">Review</span>
         </div>
       </div>
 
@@ -138,11 +138,11 @@ export function RegisterForm() {
           className="flex items-start gap-3 rounded-[16px] border border-red-200 bg-red-50 p-4"
           role="alert"
         >
-          <div className="shrink-0 bg-red-100 p-1.5 rounded-full">
-            <TabbyMascot variant="sad" size="sm" />
-          </div>
+          
+            <TabbyMascot variant="sad" size="md" />
+          
           <div>
-            <h4 className="text-xs font-bold text-red-800">Something went wrong 😿</h4>
+            <h4 className="mt-5.5 text-xs font-bold text-red-800">Something went wrong!</h4>
             <p className="text-[11px] text-red-700 mt-0.5 leading-normal">{serverError}</p>
           </div>
         </div>
@@ -152,7 +152,7 @@ export function RegisterForm() {
       {step === 1 && (
         <div className="space-y-6">
           <div className="text-center space-y-1">
-            <h2 className="font-heading text-xl font-black text-[#25324B] tracking-tight">Create Your Account</h2>
+            <h2 className="text-xl font-bold text-[#25324B] tracking-tight">Create Your Account</h2>
             <p className="text-xs text-[#6F7895] font-semibold">Join our rescue community and start making a difference.</p>
           </div>
 
@@ -173,7 +173,7 @@ export function RegisterForm() {
                   <div className="w-20 h-1.5 bg-[#25324B]/5 rounded-full blur-[1.5px] absolute bottom-1.5 left-8" />
                 </div>
                 <div className="space-y-3">
-                  <h3 className="text-sm font-extrabold text-[#25324B]">Community Member</h3>
+                  <h3 className="text-sm font-bold text-[#25324B]">Community Member</h3>
                   <p className="text-[10px] text-[#6F7895] font-semibold leading-relaxed">
                     Report cases, donate, foster, or adopt cats in need.
                   </p>
@@ -213,7 +213,7 @@ export function RegisterForm() {
                   <div className="w-20 h-1.5 bg-[#25324B]/5 rounded-full blur-[1.5px] absolute bottom-1.5 left-8" />
                 </div>
                 <div className="space-y-3">
-                  <h3 className="text-sm font-extrabold text-[#25324B]">Veterinarian</h3>
+                  <h3 className="text-sm font-bold text-[#25324B]">Veterinarian</h3>
                   <p className="text-[10px] text-[#6F7895] font-semibold leading-relaxed">
                     Submit treatment quotes and administer care.
                   </p>
@@ -265,7 +265,7 @@ export function RegisterForm() {
             >
               <ArrowLeft size={14} /> Back
             </button>
-            <h3 className="font-heading text-base font-black text-[#25324B]">
+            <h3 className="text-base font-bold text-[#25324B]">
               Account Details
             </h3>
             <div className="w-14" /> {/* Spacer */}
@@ -429,7 +429,7 @@ export function RegisterForm() {
             >
               <ArrowLeft size={14} /> Back
             </button>
-            <h3 className="font-heading text-base font-black text-[#25324B]">
+            <h3 className="text-base font-bold text-[#25324B]">
               Veterinarian Clinic Info
             </h3>
             <div className="w-14" /> {/* Spacer */}
@@ -446,9 +446,17 @@ export function RegisterForm() {
                   id="register-clinic-name"
                   type="text"
                   placeholder="e.g. Bangkok Pet Clinic"
-                  className="h-12 w-full rounded-[16px] border border-[rgba(108,92,231,.15)] bg-white px-4 text-sm text-[#25324B] placeholder:text-[#6F7895]/40 focus:border-[#6C5CE7] focus:outline-none"
+                  aria-invalid={!!errors.clinic_name}
+                  className={`h-12 w-full rounded-[16px] border bg-white px-4 text-sm text-[#25324B] placeholder:text-[#6F7895]/40 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/10 transition-all ${
+                    errors.clinic_name ? "border-[#FF8B7B] focus:border-[#FF8B7B]" : "border-[rgba(108,92,231,.15)] focus:border-[#6C5CE7]"
+                  }`}
                   {...register("clinic_name")}
                 />
+                {errors.clinic_name && (
+                  <p className="text-[11px] font-bold text-[#FF8B7B]" role="alert">
+                    {errors.clinic_name.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -459,9 +467,17 @@ export function RegisterForm() {
                   id="register-clinic-address"
                   type="text"
                   placeholder="e.g. 45 Sukhumvit Soi 39, Bangkok"
-                  className="h-12 w-full rounded-[16px] border border-[rgba(108,92,231,.15)] bg-white px-4 text-sm text-[#25324B] placeholder:text-[#6F7895]/40 focus:border-[#6C5CE7] focus:outline-none"
+                  aria-invalid={!!errors.clinic_address}
+                  className={`h-12 w-full rounded-[16px] border bg-white px-4 text-sm text-[#25324B] placeholder:text-[#6F7895]/40 focus:outline-none focus:ring-2 focus:ring-[#6C5CE7]/10 transition-all ${
+                    errors.clinic_address ? "border-[#FF8B7B] focus:border-[#FF8B7B]" : "border-[rgba(108,92,231,.15)] focus:border-[#6C5CE7]"
+                  }`}
                   {...register("clinic_address")}
                 />
+                {errors.clinic_address && (
+                  <p className="text-[11px] font-bold text-[#FF8B7B]" role="alert">
+                    {errors.clinic_address.message}
+                  </p>
+                )}
               </div>
               <p className="text-[10px] text-[#6F7895] leading-normal font-semibold">
                 Clinic coordinates are resolved to assist dispatch transport routing.
@@ -471,7 +487,7 @@ export function RegisterForm() {
             {/* Verification Notice matching the reference layout */}
             <div className="lg:col-span-2 bg-[#FFF8F2] border border-[rgba(108,92,231,.08)] rounded-[24px] p-5 flex flex-col justify-between items-center text-center min-h-[250px]">
               <div className="space-y-2">
-                <h4 className="text-sm font-black text-[#25324B]">Verification Notice</h4>
+                <h4 className="text-sm font-bold text-[#25324B]">Verification Notice</h4>
                 <p className="text-[11px] text-[#6F7895] font-semibold leading-relaxed">
                   Our team will review your clinic information and credentials. You&apos;ll be able to submit treatment quotes and manage cases once verified.
                 </p>

@@ -399,7 +399,7 @@ BEGIN
   -- STEP 8: Foster Records
   -- ========================================================================
 
-  INSERT INTO foster_records (id, case_id, caretaker_id, started_at, ended_at, status, personality, energy_level, good_with_children, good_with_cats, good_with_dogs, litter_trained, indoor_only, ideal_home, favourite_activities, observations, foster_photos, behaviour_profile_complete) VALUES
+  INSERT INTO foster_records (id, case_id, caretaker_id, started_at, ended_at, status, personality, energy_level, good_with_children, good_with_cats, good_with_dogs, litter_trained, indoor_only, ideal_home, favourite_activities, observations, foster_photos, behaviour_profile_complete, cat_name) VALUES
   -- Case 9: Active foster, behaviour profile COMPLETE (publicly adoptable)
   ('f0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000009', v_prawit,
    now() - interval '7 days', NULL, 'ACTIVE',
@@ -407,7 +407,7 @@ BEGIN
    ARRAY['Apartment','Indoor only','First-time owner'],
    ARRAY['Chasing toys','Window watching','Sleeping beside humans'],
    'Very friendly after recovery. Enjoys attention and adapts quickly to new people.',
-   '{}', true),
+   '{}', true, 'Som-O'),
   -- Case 10: Foster completed → adopted
   ('f0000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000010', v_thana,
    now() - interval '10 days', now() - interval '3 days', 'ADOPTED',
@@ -415,7 +415,7 @@ BEGIN
    ARRAY['Quiet home','Indoor only'],
    ARRAY['Cuddling','Sleeping','Gentle play'],
    'Excellent temperament. Quickly bonded with adopter.',
-   '{}', true);
+   '{}', true, 'Oat');
 
   -- NOTE: Case 13 intentionally has NO foster record — shows "Volunteer as Caretaker" button
 

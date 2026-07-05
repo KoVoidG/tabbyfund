@@ -6,7 +6,7 @@ interface VetFinancialOverviewProps {
 export function VetFinancialOverview({ pendingEscrow, releasedEarnings }: VetFinancialOverviewProps) {
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-slate-50/50 p-5 shadow-[0_4px_20px_rgba(108,92,231,0.04)]">
-      <h3 className="font-heading text-[10px] font-bold text-[#2D3748]/60 uppercase tracking-wider mb-3 pl-1">
+      <h3 className="text-[10px] font-bold text-[#2D3748]/60 uppercase tracking-wider mb-3 pl-1">
         Financial Overview
       </h3>
       <div className="grid grid-cols-2 gap-4 divide-x divide-[#2D3748]/5">

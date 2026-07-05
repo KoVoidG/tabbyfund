@@ -20,7 +20,7 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
   if (transporterPending) {
     return (
       <div className="rounded-[16px] border border-[#A788FA]/20 bg-slate-50 p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-        <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-2">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-2">
           <Home size={16} strokeWidth={1.5} className="text-amber-600" /> Temporary Caretaker Pending
         </h3>
         <p className="text-xs text-[#2D3748]/60 mb-4">
@@ -57,7 +57,7 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
   if (isTransporter) {
     return (
       <div className="rounded-[16px] border border-[#6C5CE7]/15 bg-gradient-to-br from-[#6C5CE7]/5 to-[#A788FA]/5 p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-        <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-2">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-2">
           <Home size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Continue as Temporary Caretaker?
         </h3>
         <p className="text-xs text-[#2D3748]/60 mb-4">
@@ -89,7 +89,7 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
 
   return (
     <div className="rounded-[16px] border border-[#6C5CE7]/15 bg-gradient-to-br from-[#6C5CE7]/5 to-[#A788FA]/5 p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-2">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-2">
         <Home size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Temporary Caretaker Needed
       </h3>
       <p className="text-xs text-[#2D3748]/60 mb-4">

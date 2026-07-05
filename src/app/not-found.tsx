@@ -37,7 +37,7 @@ export default function NotFound() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl font-heading leading-tight max-w-md">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl leading-tight max-w-md">
             Tabby lost the
             <span className="block text-[#6C5CE7] mt-0.5">rescue trail.</span>
           </h1>

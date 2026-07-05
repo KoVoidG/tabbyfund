@@ -26,7 +26,7 @@ export default async function AdoptPage() {
             <Sparkles size={14} strokeWidth={1.5} className="text-[#F3C9A6]" />
             <span className="text-[11px] font-bold text-[#6C5CE7]/70 uppercase tracking-widest">TabbyFund Adoption</span>
           </div>
-          <h1 className="font-heading text-2xl font-bold text-[#2D3748] leading-tight">
+          <h1 className="text-2xl font-bold text-[#2D3748] leading-tight">
             Find Your Forever Friend
           </h1>
           <p className="mt-1.5 text-sm text-[#2D3748]/60 leading-relaxed">

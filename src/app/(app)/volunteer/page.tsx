@@ -25,7 +25,7 @@ export default async function VolunteerPage() {
       <div className="flex items-center gap-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
         <TabbyMascot variant="wave" size="lg" />
         <div>
-          <h1 className="font-heading text-xl font-bold text-[#2D3748]">
+          <h1 className="text-xl font-bold text-[#2D3748]">
             Help Now
           </h1>
           <p className="mt-1 text-sm text-[#2D3748]/60">
@@ -37,7 +37,7 @@ export default async function VolunteerPage() {
       {/* Transport Needed */}
       <div>
         <div className="mb-2">
-          <h2 className="font-heading text-sm font-semibold text-[#2D3748]">Transport Needed</h2>
+          <h2 className="text-sm font-semibold text-[#2D3748]">Transport Needed</h2>
           <p className="text-xs text-[#2D3748]/60 mt-0.5">Help transport rescued cats safely to their assigned veterinarian.</p>
         </div>
         {transportCases.length === 0 ? (
@@ -61,7 +61,7 @@ export default async function VolunteerPage() {
       {/* Temporary Caretaker Needed */}
       <div className="pt-2">
         <div className="mb-2">
-          <h2 className="font-heading text-sm font-semibold text-[#2D3748]">Temporary Caretaker Needed</h2>
+          <h2 className="text-sm font-semibold text-[#2D3748]">Temporary Caretaker Needed</h2>
           <p className="text-xs text-[#2D3748]/60 mt-0.5">These cats have completed treatment and are waiting for temporary foster care before adoption.</p>
         </div>
         {caretakerCases.length === 0 ? (

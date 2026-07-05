@@ -41,7 +41,7 @@ export default function SettingsPage() {
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#6C5CE7]/8">
           <Settings size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
-        <h1 className="font-heading text-lg font-bold text-[#2D3748]">Settings</h1>
+        <h1 className="text-lg font-bold text-[#2D3748]">Settings</h1>
       </div>
 
       {/* Appearance */}

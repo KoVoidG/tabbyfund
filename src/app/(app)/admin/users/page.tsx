@@ -19,7 +19,7 @@ export default async function AdminUsersPage() {
           <Users size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div>
-          <h1 className="font-heading text-lg font-bold text-[#2D3748]">Community Users</h1>
+          <h1 className="text-lg font-bold text-[#2D3748]">Community Users</h1>
           <p className="text-xs text-[#2D3748]/60">Platform-wide profiles and volunteer activities</p>
         </div>
       </div>

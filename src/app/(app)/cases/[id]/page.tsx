@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { formatDistanceToNow, differenceInDays } from "date-fns";
 import { JourneyTracker } from "@/features/cases/components/JourneyTracker";
 import { CaseHero } from "@/features/cases/components/CaseHero";
@@ -17,7 +17,7 @@ import { FadeIn } from "@/features/cases/components/FadeIn";
 import { CaseDetailMap } from "@/features/cases/components/CaseDetailMap";
 import { CompactRescueSummary } from "@/features/cases/components/CompactRescueSummary";
 import { getCaseDetail, parseAIReasoning } from "@/lib/cases";
-import { getUser } from "@/lib/supabase/auth-helpers";
+import { getUser, getProfile } from "@/lib/supabase/auth-helpers";
 import { getVerifiedVetClinics } from "@/lib/vet-clinics";
 import type { CaseStatus, Severity } from "@/features/cases/types";
 
@@ -43,6 +43,17 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
   if (!c) notFound();
 
   const user = await getUser();
+  const profile = user ? await getProfile() : null;
+
+  // Only redirect to /vet/cases/[id] if the user is a verified vet and assigned to this case
+  if (
+    profile?.role === "vet" &&
+    profile?.is_verified === true &&
+    c.assigned_vet_id === profile.id
+  ) {
+    redirect(`/vet/cases/${id}`);
+  }
+
   const currentUserId = user?.id ?? null;
 
   const reportedAgo = formatDistanceToNow(new Date(c.created_at), { addSuffix: true });

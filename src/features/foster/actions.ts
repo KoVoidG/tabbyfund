@@ -180,6 +180,7 @@ export async function declineFoster(input: StartFosterInput): Promise<FosterActi
 
 interface UpdateBehaviouralProfileInput {
   caseId: string;
+  catName?: string;
   personality: string[];
   energyLevel: "low" | "medium" | "high";
   goodWithChildren: boolean | null;
@@ -236,6 +237,7 @@ export async function updateBehaviouralProfile(input: UpdateBehaviouralProfileIn
   const { error: updateError } = await serviceClient
     .from("foster_records")
     .update({
+      cat_name: input.catName || null,
       personality: input.personality,
       energy_level: input.energyLevel,
       good_with_children: input.goodWithChildren,

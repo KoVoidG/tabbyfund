@@ -102,7 +102,7 @@ export function AIAnalysisPreview({ photoDataUrl, storagePath, aiResult, onAnaly
             <LoaderCircle size={16} strokeWidth={2} className="animate-spin text-[#6C5CE7]" />
           </div>
         </div>
-        <h3 className="mt-4 font-heading text-base font-semibold text-[#2D3748]">
+        <h3 className="mt-4 text-base font-semibold text-[#2D3748]">
           Analyzing photo...
         </h3>
         <p className="mt-1 text-sm text-[#2D3748]/60">
@@ -149,7 +149,7 @@ export function AIAnalysisPreview({ photoDataUrl, storagePath, aiResult, onAnaly
       {/* Header */}
       <div className="flex flex-col items-center text-center">
         <TabbyMascot variant={mascotVariant} size="lg" />
-        <h2 className="mt-3 font-heading text-sm font-semibold text-[#2D3748]/60">AI Assessment</h2>
+        <h2 className="mt-3 text-sm font-semibold text-[#2D3748]/60">AI Assessment</h2>
         <p className="mt-1 text-xl font-bold text-[#2D3748]">🐾 {result.condition}</p>
         
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">

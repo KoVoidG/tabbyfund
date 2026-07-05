@@ -12,7 +12,7 @@ interface ReviewCardProps {
 export function ReviewCard({ draft }: ReviewCardProps) {
   return (
     <div className="space-y-5">
-      <h2 className="font-heading text-base font-semibold text-[#2D3748]">
+      <h2 className="text-base font-semibold text-[#2D3748]">
         Review Your Report
       </h2>
       <p className="text-sm text-[#2D3748]/60">

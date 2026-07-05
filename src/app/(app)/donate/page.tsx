@@ -25,7 +25,7 @@ export default async function DonatePage() {
       <div className="flex items-center gap-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
         <TabbyMascot variant="donate" size="lg" />
         <div>
-          <h1 className="font-heading text-xl font-bold text-[#2D3748]">
+          <h1 className="text-xl font-bold text-[#2D3748]">
             Fund a Rescue
           </h1>
           <p className="mt-1 text-sm text-[#2D3748]/60">

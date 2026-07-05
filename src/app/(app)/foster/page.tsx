@@ -26,7 +26,7 @@ export default async function FosterPage() {
       <div className="flex items-center gap-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
         <TabbyMascot variant="love" size="lg" />
         <div>
-          <h1 className="font-heading text-xl font-bold text-[#2D3748]">Foster Dashboard</h1>
+          <h1 className="text-xl font-bold text-[#2D3748]">Foster Dashboard</h1>
           <p className="mt-1 text-sm text-[#2D3748]/60">Care for rescued cats until they find their forever home.</p>
         </div>
       </div>
@@ -45,7 +45,7 @@ export default async function FosterPage() {
       {/* Assigned Cats */}
       {assigned.length > 0 && (
         <div className="space-y-3">
-          <h2 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748]">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748]">
             <PawPrint size={16} strokeWidth={1.5} className="text-[#6C5CE7]" />
             Assigned to Me ({assigned.length})
           </h2>
@@ -79,7 +79,7 @@ export default async function FosterPage() {
       {/* Behaviour Profiles Needed */}
       {needsProfile.length > 0 && (
         <div className="space-y-4">
-          <h2 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748]">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748]">
             <ClipboardList size={16} strokeWidth={1.5} className="text-[#6C5CE7]" />
             Profiles Needed ({needsProfile.length})
           </h2>
@@ -101,7 +101,7 @@ export default async function FosterPage() {
       {/* Ready for Adoption */}
       {readyForAdoption.length > 0 && (
         <div className="space-y-3">
-          <h2 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748]">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748]">
             <Heart size={16} strokeWidth={1.5} className="text-[#6C5CE7]" />
             Ready for Adoption ({readyForAdoption.length})
           </h2>

@@ -77,7 +77,7 @@ export function Sidebar({ profile }: SidebarProps) {
         {/* Logo */}
         <Link href={isAdminPath ? "/admin" : "/dashboard"} className="flex items-center gap-2.5 px-3 mb-6">
           <PawPrint size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
-          <span className="font-heading text-lg font-bold text-[#6C5CE7]">
+          <span className="text-lg font-bold text-[#6C5CE7]">
             {isAdminPath ? "TabbyAdmin" : "TabbyFund"}
           </span>
         </Link>

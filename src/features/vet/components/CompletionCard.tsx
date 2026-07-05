@@ -144,7 +144,7 @@ export function CompletionCard({ caseId }: CompletionCardProps) {
     return (
       <div className="rounded-[16px] border border-emerald-200 bg-emerald-50 p-6 text-center space-y-4">
         <TabbyMascot variant="celebrate" size="lg" className="mx-auto" />
-        <h3 className="font-heading text-base font-bold text-emerald-700">Treatment Complete!</h3>
+        <h3 className="text-base font-bold text-emerald-700">Treatment Complete!</h3>
         <p className="text-xs text-emerald-600">
           Escrow funds will be released to your account.
         </p>
@@ -162,7 +162,7 @@ export function CompletionCard({ caseId }: CompletionCardProps) {
 
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-4">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-4">
         <CircleCheck size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Complete Treatment
       </h3>
 

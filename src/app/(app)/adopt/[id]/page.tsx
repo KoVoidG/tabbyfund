@@ -5,6 +5,7 @@ import { BehaviouralSummaryCard } from "@/features/adoption/components/Behaviour
 import { ApplicationCTA } from "@/features/adoption/components/ApplicationCTA";
 import { HealthTags } from "@/features/adoption/components/HealthTags";
 import { getAdoptableCatByCaseId } from "@/lib/adoption";
+import { getUser } from "@/lib/supabase/auth-helpers";
 
 interface AdoptDetailPageProps {
   params: Promise<{ id: string }>;
@@ -25,6 +26,9 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
 
   if (!cat) notFound();
 
+  const user = await getUser();
+  const currentUserId = user?.id ?? null;
+
   // Build health tags
   const healthTags: string[] = [];
   if (cat.vaccinationStatus === "complete") healthTags.push("Vaccinated");
@@ -39,7 +43,7 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
     photos.push(...cat.fosterPhotos);
   }
 
-  const catName = cat.listingPersonality ?? "This Cat";
+  const catName = cat.name;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -48,7 +52,7 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
 
       {/* Name + meta */}
       <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-        <h1 className="font-heading text-2xl font-bold text-[#2D3748]">{catName}</h1>
+        <h1 className="text-2xl font-bold text-[#2D3748]">{catName}</h1>
         <p className="mt-1 text-sm text-[#2D3748]/60">
           {cat.energyLevel ?? "Medium"} energy · {cat.indoorOnly ? "Indoor only" : "Indoor/Outdoor"}
         </p>
@@ -90,7 +94,11 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
       )}
 
       {/* Application CTA */}
-      <ApplicationCTA caseId={cat.caseId} catName={catName} />
+      <ApplicationCTA
+        caseId={cat.caseId}
+        catName={catName}
+        initiallyAdopted={cat.listingStatus === "COMPLETED" && cat.matchedWith === currentUserId}
+      />
     </div>
   );
 }

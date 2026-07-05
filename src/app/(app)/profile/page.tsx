@@ -62,7 +62,7 @@ export default async function ProfilePage() {
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#6C5CE7]/10 text-2xl font-bold text-[#6C5CE7]">
           {profile.display_name.charAt(0).toUpperCase()}
         </div>
-        <h1 className="mt-3 font-heading text-xl font-bold text-[#2D3748]">{profile.display_name}</h1>
+        <h1 className="mt-3 text-xl font-bold text-[#2D3748]">{profile.display_name}</h1>
         <Badge variant="secondary" className="mt-1 bg-[#6C5CE7]/10 text-[#6C5CE7] border-0 uppercase text-[10px] font-semibold">
           {profile.role}{profile.role === "vet" && profile.is_verified ? " · verified" : ""}
         </Badge>

@@ -1,19 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
 import { PWARegistration } from "@/components/PWARegistration";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-heading",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -43,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(inter.variable, poppins.variable)}>
+    <html lang="en" className={poppins.variable}>
       <body className="min-h-dvh flex flex-col antialiased font-sans">
         {children}
         <PWARegistration />

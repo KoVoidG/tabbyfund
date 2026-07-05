@@ -31,7 +31,7 @@ export default function LandingPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#6C5CE7]/8 text-[#6C5CE7]">
             <PawPrint size={20} strokeWidth={2.5} />
           </div>
-          <span className="font-heading text-lg font-black tracking-tight text-[#25324B]">TabbyFund</span>
+          <span className="text-lg font-bold tracking-tight text-[#25324B]">TabbyFund</span>
         </div>
         
         {/* Navigation links with smooth scrolling */}
@@ -65,7 +65,7 @@ export default function LandingPage() {
             <Heart size={12} className="fill-[#6C5CE7] text-[#6C5CE7]" /> Together, we save lives
           </div>
           
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-[52px] font-black text-[#25324B] leading-[1.08] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-[52px] font-bold text-[#25324B] leading-[1.08] tracking-tight">
             Every stray <br />
             deserves <br />
             <span className="text-[#6C5CE7]">a second chance.</span>
@@ -145,7 +145,7 @@ export default function LandingPage() {
                 <PawPrint size={18} />
               </div>
               <div>
-                <p className="text-lg font-black text-[#25324B]">1,248+</p>
+                <p className="text-lg font-bold text-[#25324B]">1,248+</p>
                 <p className="text-[10px] text-[#6F7895] font-semibold mt-0.5">Injured Cats Rescued</p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function LandingPage() {
                 <Stethoscope size={18} />
               </div>
               <div>
-                <p className="text-lg font-black text-[#25324B]">312+</p>
+                <p className="text-lg font-bold text-[#25324B]">312+</p>
                 <p className="text-[10px] text-[#6F7895] font-semibold mt-0.5">Verified Vets</p>
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function LandingPage() {
                 <Home size={18} />
               </div>
               <div>
-                <p className="text-lg font-black text-[#25324B]">856+</p>
+                <p className="text-lg font-bold text-[#25324B]">856+</p>
                 <p className="text-[10px] text-[#6F7895] font-semibold mt-0.5">Fosters & Volunteers</p>
               </div>
             </div>
@@ -181,7 +181,7 @@ export default function LandingPage() {
                 <Heart size={18} className="fill-[#FF8B7B]" />
               </div>
               <div>
-                <p className="text-lg font-black text-[#25324B]">642+</p>
+                <p className="text-lg font-bold text-[#25324B]">642+</p>
                 <p className="text-[10px] text-[#6F7895] font-semibold mt-0.5">Cats Adopted</p>
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function LandingPage() {
 
         <div className="max-w-6xl w-full mx-auto px-6 space-y-12">
           <div className="text-center max-w-lg mx-auto space-y-2">
-            <h2 className="font-heading text-2xl font-black text-[#25324B]">How TabbyFund works</h2>
+            <h2 className="text-2xl font-bold text-[#25324B]">How TabbyFund works</h2>
             <p className="text-xs text-[#6F7895] font-semibold">
               Our community collaboration model helps stray cats recover and find safety.
             </p>
@@ -303,7 +303,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
               <TabbyMascot variant="wave" size="sm" />
             <div>
-              <span className="font-heading text-xs font-black text-[#25324B]">TabbyFund</span>
+              <span className="text-xs font-bold text-[#25324B]">TabbyFund</span>
               <p className="text-[10px] text-[#6F7895] mt-0.5 font-semibold leading-normal">
                 Every injured stray deserves a second chance. Partner with us today.
               </p>

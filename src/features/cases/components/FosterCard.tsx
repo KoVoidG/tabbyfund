@@ -11,7 +11,7 @@ interface FosterCardProps {
 export function FosterCard({ caretaker, days }: FosterCardProps) {
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)] transition-shadow hover:shadow-[0_8px_28px_rgba(108,92,231,0.12)]">
-      <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-4">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-4">
         <Home size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Temporary Foster Care
       </h3>
 

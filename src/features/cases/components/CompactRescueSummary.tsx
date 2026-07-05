@@ -66,7 +66,7 @@ export function CompactRescueSummary({
 
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.06)] space-y-4">
-      <h3 className="font-heading text-xs font-bold text-[#2D3748]/55 uppercase tracking-wider pl-0.5">
+      <h3 className="text-xs font-bold text-[#2D3748]/55 uppercase tracking-wider pl-0.5">
         Rescue Summary
       </h3>
 

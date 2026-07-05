@@ -63,7 +63,7 @@ export function AuthSplitLayout({
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#6C5CE7]/8 text-[#6C5CE7]">
             <PawPrint size={18} strokeWidth={2.5} />
           </div>
-          <span className="font-heading text-base font-black tracking-tight text-[#25324B]">TabbyFund</span>
+          <span className="text-base font-bold tracking-tight text-[#25324B]">TabbyFund</span>
         </div>
 
         {/* Mascot Spotlight Scene */}
@@ -85,7 +85,7 @@ export function AuthSplitLayout({
           </div>
           
           <div className="space-y-2">
-            <h2 className="font-heading text-2xl font-black leading-tight text-[#25324B]">{resolvedHeadline}</h2>
+            <h2 className="text-2xl font-bold leading-tight text-[#25324B]">{resolvedHeadline}</h2>
             <p className="text-xs sm:text-sm text-[#6F7895] leading-relaxed font-medium">
               {resolvedSubtitle}
             </p>
@@ -114,7 +114,7 @@ export function AuthSplitLayout({
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#6C5CE7]/6 text-[#6C5CE7]">
               <PawPrint size={24} strokeWidth={2} />
             </div>
-            <h1 className="font-heading text-2xl font-black text-[#25324B] tracking-tight">TabbyFund</h1>
+            <h1 className="text-2xl font-bold text-[#25324B] tracking-tight">TabbyFund</h1>
             <p className="text-xs text-[#6F7895] font-semibold mt-0.5">Community-powered cat rescue</p>
           </div>
 

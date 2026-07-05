@@ -22,7 +22,7 @@ export function DiagnosisCard() {
 
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-4">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-4">
         <Stethoscope size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Veterinary Examination
       </h3>
 

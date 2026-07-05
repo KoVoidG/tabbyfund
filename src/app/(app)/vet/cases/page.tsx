@@ -50,7 +50,7 @@ export default async function VetCasesPage({ searchParams }: VetCasesPageProps) 
           <Stethoscope size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="font-heading text-lg font-bold text-[#2D3748]">My Cases</h1>
+          <h1 className="text-lg font-bold text-[#2D3748]">My Cases</h1>
           <p className="text-xs text-[#2D3748]/60">
             {filteredCases.length} of {allCases.length} case{allCases.length !== 1 ? "s" : ""}
             {activeFilter ? ` · filtered by ${activeFilter.label}` : ""}

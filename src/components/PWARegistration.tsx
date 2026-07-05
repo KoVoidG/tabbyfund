@@ -52,7 +52,7 @@ export function PWARegistration() {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 rounded-[16px] border border-[#A788FA]/20 bg-white p-4 shadow-[0_10px_30px_rgba(108,92,231,0.15)] flex items-center justify-between sm:left-auto sm:right-4 sm:w-80">
       <div className="flex flex-col pr-4">
-        <span className="font-heading text-xs font-bold text-[#2D3748]">Install TabbyFund App</span>
+        <span className="text-xs font-bold text-[#2D3748]">Install TabbyFund App</span>
         <span className="text-[10px] text-[#2D3748]/60 mt-0.5">Access cat rescue updates instantly from your home screen.</span>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">

@@ -17,7 +17,7 @@ export default async function AdminActivityPage() {
           <History size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div>
-          <h1 className="font-heading text-lg font-bold text-[#2D3748]">Platform Activity Log</h1>
+          <h1 className="text-lg font-bold text-[#2D3748]">Platform Activity Log</h1>
           <p className="text-xs text-[#2D3748]/60">Chronological timeline audit of all rescue operations and platform events</p>
         </div>
       </div>

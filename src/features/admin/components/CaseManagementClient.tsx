@@ -5,17 +5,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   Search,
-  ClipboardList,
   Stethoscope,
-  Heart,
   HandCoins,
-  ArrowRight,
   Calendar,
   User,
   Eye,
   History,
   X,
-  Sparkles,
 } from "lucide-react";
 import type { AdminCaseItem } from "@/lib/admin";
 import { formatDistanceToNow } from "date-fns";

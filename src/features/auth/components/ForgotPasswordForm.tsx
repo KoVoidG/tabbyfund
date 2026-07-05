@@ -56,7 +56,7 @@ export function ForgotPasswordForm() {
           <div className="w-14 h-1.5 bg-[#25324B]/5 rounded-full blur-[2px] mt-1.5" />
         </div>
         <div className="space-y-1.5">
-          <h3 className="text-sm font-black text-[#25324B]">We couldn&apos;t find that email</h3>
+          <h3 className="text-sm font-bold text-[#25324B]">We couldn&apos;t find that email</h3>
           <p className="text-[11px] text-[#6F7895] font-semibold leading-relaxed">
             There is no account registered with <strong className="text-[#6C5CE7]">{emailValue}</strong>.
           </p>
@@ -84,7 +84,7 @@ export function ForgotPasswordForm() {
     return (
       <div className="space-y-6 text-center py-2">
         <div className="space-y-2">
-          <h3 className="font-heading text-xl font-black text-[#25324B]">Check your email!</h3>
+          <h3 className="text-xl font-bold text-[#25324B]">Check your email!</h3>
           
           {/* Custom Green Check Badge */}
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#35C79A]/10 text-[#35C79A]">
@@ -118,7 +118,7 @@ export function ForgotPasswordForm() {
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       {/* Title & Subtitle */}
       <div className="space-y-1 text-center">
-        <h2 className="font-heading text-xl font-black text-[#25324B] tracking-tight">
+        <h2 className="text-xl font-bold text-[#25324B] tracking-tight">
           Forgot Password?
         </h2>
         <p className="text-xs text-[#6F7895] font-semibold">

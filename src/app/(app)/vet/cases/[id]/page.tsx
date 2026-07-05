@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { JourneyTracker } from "@/features/cases/components/JourneyTracker";
 import { AIAnalysisCard } from "@/features/cases/components/AIAnalysisCard";
@@ -33,11 +33,16 @@ export async function generateMetadata({ params }: VetCaseDetailPageProps) {
  * Shows case info, AI analysis, diagnosis form, quote builder, treatment tools.
  */
 export default async function VetCaseDetailPage({ params }: VetCaseDetailPageProps) {
-  await requireRole("vet", { requireVerified: true });
+  const profile = await requireRole("vet", { requireVerified: true });
   const { id } = await params;
   const c = await getCaseDetail(id);
 
   if (!c) notFound();
+
+  // Enforce server-side check: non-assigned vets are redirected to the public detail page
+  if (c.assigned_vet_id !== profile.id) {
+    redirect(`/cases/${id}`);
+  }
 
   const status = c.status as CaseStatus;
   const severity = (c.ai_severity ?? "MEDIUM") as Severity;
@@ -74,7 +79,7 @@ export default async function VetCaseDetailPage({ params }: VetCaseDetailPagePro
         </div>
 
         <div className="flex-1 min-w-0">
-          <h1 className="font-heading text-base font-bold text-[#2D3748] leading-tight">{c.ai_condition ?? "Unknown Condition"}</h1>
+          <h1 className="text-base font-bold text-[#2D3748] leading-tight">{c.ai_condition ?? "Unknown Condition"}</h1>
           <p className="mt-1 text-xs text-[#2D3748]/65 line-clamp-2 leading-relaxed">{c.description}</p>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10px] text-[#2D3748]/50">
             <span className="flex items-center gap-1"><MapPin size={10} strokeWidth={1.5} />{location}</span>
@@ -138,7 +143,7 @@ export default async function VetCaseDetailPage({ params }: VetCaseDetailPagePro
             <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-100">
               <CircleCheck size={14} strokeWidth={1.5} className="text-blue-600" />
             </div>
-            <h3 className="font-heading text-sm font-bold text-[#2D3748]">Treatment Record</h3>
+            <h3 className="text-sm font-bold text-[#2D3748]">Treatment Record</h3>
           </div>
           <p className="text-sm text-[#2D3748]/80 leading-relaxed">{c.treatment!.treatment_summary}</p>
           <div className="mt-3 flex items-center gap-2">

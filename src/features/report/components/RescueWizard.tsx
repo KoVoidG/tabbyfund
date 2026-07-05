@@ -59,7 +59,7 @@ export function RescueWizard() {
       <div className="mx-auto max-w-lg space-y-6 text-center py-8">
         <TabbyMascot variant="think" size="lg" className="mx-auto" />
         <div>
-          <h2 className="font-heading text-lg font-semibold text-[#2D3748]">
+          <h2 className="text-lg font-semibold text-[#2D3748]">
             Continue your rescue report?
           </h2>
           <p className="mt-1 text-sm text-[#2D3748]/60">

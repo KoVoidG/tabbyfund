@@ -36,12 +36,30 @@ export const registerSchema = z
       message: "Please select an account type",
     }),
     // Optional vet clinic fields (only used when role = vet)
-    clinic_name: z.string().max(200).optional(),
-    clinic_address: z.string().max(500).optional(),
+    clinic_name: z.string().max(200).nullish(),
+    clinic_address: z.string().max(500).nullish(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",
     path: ["confirm_password"],
+  })
+  .superRefine((data, ctx) => {
+    if (data.role === "vet") {
+      if (!data.clinic_name || !data.clinic_name.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Clinic name is required for veterinarians",
+          path: ["clinic_name"],
+        });
+      }
+      if (!data.clinic_address || !data.clinic_address.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Clinic address is required for veterinarians",
+          path: ["clinic_address"],
+        });
+      }
+    }
   });
 
 export const forgotPasswordSchema = z.object({

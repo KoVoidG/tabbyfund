@@ -18,6 +18,10 @@ export interface UserProfile {
   is_verified: boolean;
   created_at: string;
   updated_at: string;
+  clinic_name: string | null;
+  clinic_address: string | null;
+  clinic_lat: number | null;
+  clinic_lng: number | null;
 }
 
 /** Standardized success response from auth server actions. */

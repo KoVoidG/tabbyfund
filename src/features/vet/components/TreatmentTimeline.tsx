@@ -20,7 +20,7 @@ export function TreatmentTimeline({ updates }: TreatmentTimelineProps) {
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-heading text-sm font-semibold text-[#2D3748]">Treatment Progress</h3>
+        <h3 className="text-sm font-semibold text-[#2D3748]">Treatment Progress</h3>
         <button className="flex items-center gap-1 rounded-[8px] bg-[#6C5CE7]/8 px-2.5 py-1.5 text-[10px] font-medium text-[#6C5CE7] hover:bg-[#6C5CE7]/15 transition">
           <Plus size={11} strokeWidth={1.5} /> Add Update
         </button>

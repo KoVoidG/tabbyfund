@@ -23,7 +23,7 @@ export function AdoptionCard({ cat }: AdoptionCardProps) {
   const personalityTags = cat.personality?.slice(0, 3) ?? [];
   const description = cat.observations ?? cat.description ?? cat.treatmentSummary ?? "";
   const hasPhoto = !!cat.photoUrl && !cat.photoUrl.includes("placehold.co") && !cat.photoUrl.includes("placeholder");
-  const name = cat.listingPersonality ?? "Rescue Cat";
+  const name = cat.name;
   const energy = cat.energyLevel ?? "Medium";
 
   return (

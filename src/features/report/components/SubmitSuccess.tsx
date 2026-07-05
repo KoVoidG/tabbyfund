@@ -16,7 +16,7 @@ export function SubmitSuccess({ caseId }: SubmitSuccessProps) {
       <TabbyMascot variant="celebrate" size="xl" className="mx-auto" />
 
       <div>
-        <h2 className="font-heading text-xl font-bold text-[#2D3748]">
+        <h2 className="text-xl font-bold text-[#2D3748]">
           Rescue Reported Successfully!
         </h2>
         <p className="mt-2 text-sm text-[#2D3748]/60 flex items-center justify-center gap-1">

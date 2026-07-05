@@ -15,7 +15,7 @@ export function DashboardSection({ title, viewAllHref, children }: DashboardSect
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-base font-semibold text-[#2D3748]">{title}</h2>
+        <h2 className="text-base font-semibold text-[#2D3748]">{title}</h2>
         {viewAllHref && (
           <Link
             href={viewAllHref}

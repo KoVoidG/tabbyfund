@@ -16,7 +16,7 @@ export function DonationReceipt({ amount, caseTitle, onClose }: DonationReceiptP
       <TabbyMascot variant="donate" size="lg" />
 
       <div>
-        <h3 className="font-heading text-lg font-bold text-[#2D3748]">
+        <h3 className="text-lg font-bold text-[#2D3748]">
           Thank you for donating!
         </h3>
         <p className="mt-1 text-sm text-[#2D3748]/60 flex items-center justify-center gap-1">

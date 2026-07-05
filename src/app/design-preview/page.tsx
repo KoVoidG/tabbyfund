@@ -60,7 +60,7 @@ export default function DesignPreviewPage() {
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#6C5CE7]/10">
             <PawPrint size={28} className="text-[#6C5CE7]" strokeWidth={1.5} />
           </div>
-          <h1 className="font-heading text-3xl font-bold text-[#6C5CE7] md:text-4xl">
+          <h1 className="text-3xl font-bold text-[#6C5CE7] md:text-4xl">
             TabbyFund
           </h1>
           <p className="mt-1 text-sm text-[#2D3748]/70">
@@ -70,7 +70,7 @@ export default function DesignPreviewPage() {
 
         {/* COLOR PALETTE */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Color Palette</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Color Palette</h2>
           <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6">
             {[
               { color: "#6C5CE7", name: "Primary Purple" },
@@ -91,19 +91,19 @@ export default function DesignPreviewPage() {
 
         {/* TYPOGRAPHY */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Typography</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Typography</h2>
           <div className="mt-4 space-y-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
             <div>
               <span className="text-[11px] font-medium text-[#A788FA]">H1 — Bold 24-28px</span>
-              <h1 className="font-heading text-[26px] font-bold text-[#6C5CE7]">Every Cat Deserves a Chance</h1>
+              <h1 className="text-[26px] font-bold text-[#6C5CE7]">Every Cat Deserves a Chance</h1>
             </div>
             <div>
               <span className="text-[11px] font-medium text-[#A788FA]">H2 — SemiBold 18px</span>
-              <h2 className="font-heading text-lg font-semibold text-[#2D3748]">Rescue Case Details</h2>
+              <h2 className="text-lg font-semibold text-[#2D3748]">Rescue Case Details</h2>
             </div>
             <div>
               <span className="text-[11px] font-medium text-[#A788FA]">Body — Regular 14-16px</span>
-              <p className="text-[15px] text-[#2D3748]">Found an injured cat near Sukhumvit. The cat appears unable to stand.</p>
+              <p className="text-base text-[#2D3748]">Found an injured cat near Sukhumvit. The cat appears unable to stand.</p>
             </div>
             <div>
               <span className="text-[11px] font-medium text-[#A788FA]">Caption — 12-14px muted</span>
@@ -114,7 +114,7 @@ export default function DesignPreviewPage() {
 
         {/* ICON LIBRARY */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Icons (Lucide React)</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Icons (Lucide React)</h2>
           <p className="mt-1 text-xs text-[#2D3748]/70">Outline only · strokeWidth 1.5 · Consistent sizes</p>
           <div className="mt-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
             <div className="grid grid-cols-4 gap-4 sm:grid-cols-6 md:grid-cols-8">
@@ -173,7 +173,7 @@ export default function DesignPreviewPage() {
 
         {/* BUTTONS */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Buttons</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Buttons</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="space-y-3 rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
               <p className="text-xs font-medium text-[#2D3748]/60">Primary</p>
@@ -235,7 +235,7 @@ export default function DesignPreviewPage() {
 
         {/* INPUTS */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Inputs</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Inputs</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="space-y-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
               <div>
@@ -287,7 +287,7 @@ export default function DesignPreviewPage() {
 
         {/* CARDS */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Cards</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Cards</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* Rescue Case Card */}
             <div className="overflow-hidden rounded-[16px] border border-[#A788FA]/15 bg-white shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
@@ -380,7 +380,7 @@ export default function DesignPreviewPage() {
 
         {/* MESSAGES & BADGES */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Messages</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Messages</h2>
           <div className="mt-4 space-y-3">
             <div className="flex items-start gap-3 rounded-[12px] border border-red-200 bg-red-50 px-4 py-3">
               <CircleAlert size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-red-600" />
@@ -403,7 +403,7 @@ export default function DesignPreviewPage() {
 
         {/* SEVERITY BADGES */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Severity Badges</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Severity Badges</h2>
           <p className="mt-1 text-xs text-[#2D3748]/70">Icon + color + text for accessibility. Color-blind safe via icon differentiation.</p>
           <div className="mt-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
             <div className="flex flex-wrap gap-3">
@@ -426,7 +426,7 @@ export default function DesignPreviewPage() {
 
         {/* CASE STATUS BADGES */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Case Status Badges</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Case Status Badges</h2>
           <p className="mt-1 text-xs text-[#2D3748]/70">Workflow-based colors. Title Case. Icon + label for clarity.</p>
           <div className="mt-4 rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
             <div className="flex flex-wrap gap-2">
@@ -473,7 +473,7 @@ export default function DesignPreviewPage() {
 
         {/* NAVIGATION */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Navigation</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Navigation</h2>
           <div className="mt-4 space-y-4">
             {/* Top Nav */}
             <div className="rounded-[16px] border border-[#A788FA]/15 bg-white px-5 py-3 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
@@ -484,7 +484,7 @@ export default function DesignPreviewPage() {
                   </button>
                   <div className="flex items-center gap-2">
                     <PawPrint size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
-                    <span className="font-heading text-base font-bold text-[#6C5CE7]">TabbyFund</span>
+                    <span className="text-base font-bold text-[#6C5CE7]">TabbyFund</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -541,7 +541,7 @@ export default function DesignPreviewPage() {
               <div className="w-52 bg-white border-r border-[#A788FA]/10 p-4 space-y-1">
                 <div className="flex items-center gap-2 px-3 mb-4">
                   <PawPrint size={18} strokeWidth={1.5} className="text-[#6C5CE7]" />
-                  <span className="font-heading text-sm font-bold text-[#6C5CE7]">TabbyFund</span>
+                  <span className="text-sm font-bold text-[#6C5CE7]">TabbyFund</span>
                 </div>
                 <div className="flex items-center gap-2.5 rounded-[8px] bg-[#6C5CE7]/8 px-3 py-2 text-sm font-medium text-[#6C5CE7]">
                   <House size={16} strokeWidth={1.5} /> Dashboard
@@ -571,7 +571,7 @@ export default function DesignPreviewPage() {
 
         {/* DIALOGS */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Dialogs</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Dialogs</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
               <div className="flex items-center gap-2 mb-3">
@@ -608,7 +608,7 @@ export default function DesignPreviewPage() {
 
         {/* LOADING */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Loading States</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Loading States</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
               <p className="text-xs font-medium text-[#2D3748]/60 mb-3">Skeleton</p>
@@ -641,7 +641,7 @@ export default function DesignPreviewPage() {
 
         {/* MASCOT USAGE */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Mascot Usage</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Mascot Usage</h2>
           <p className="mt-1 text-xs text-[#2D3748]/70">
             The mascot is the ONLY illustrated element. Everything else uses Lucide icons.
             Gray-and-white tabby, soft and friendly. Used like Duolingo uses Duo.
@@ -693,7 +693,7 @@ export default function DesignPreviewPage() {
 
         {/* LAYOUT EXAMPLES */}
         <section>
-          <h2 className="font-heading text-lg font-semibold text-[#6C5CE7]">Layout Examples</h2>
+          <h2 className="text-lg font-semibold text-[#6C5CE7]">Layout Examples</h2>
           <div className="mt-4 grid gap-6 sm:grid-cols-2">
             {/* Mobile */}
             <div>
@@ -703,7 +703,7 @@ export default function DesignPreviewPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-1.5">
                       <PawPrint size={14} strokeWidth={1.5} className="text-[#6C5CE7]" />
-                      <span className="font-heading text-xs font-bold text-[#6C5CE7]">TabbyFund</span>
+                      <span className="text-xs font-bold text-[#6C5CE7]">TabbyFund</span>
                     </div>
                     <Bell size={14} strokeWidth={1.5} className="text-[#2D3748]/40" />
                   </div>

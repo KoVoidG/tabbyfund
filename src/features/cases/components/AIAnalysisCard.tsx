@@ -43,7 +43,7 @@ export function AIAnalysisCard({ condition, confidence, reasoning, firstAid, sev
         <TabbyMascot variant={mascotVariant} size="md" className="shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-bold text-[#6C5CE7]/70 uppercase tracking-wider mb-0.5">AI Analysis</p>
-          <h3 className="font-heading text-base font-bold text-[#2D3748] truncate">{condition}</h3>
+          <h3 className="text-base font-bold text-[#2D3748] truncate">{condition}</h3>
           <div className="flex items-center gap-2 mt-1.5">
             <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${confColor}`}>
               {confidence}% confidence

@@ -26,7 +26,7 @@ export function CaseDetailMap({ fuzzedLat, fuzzedLng, preciseLat, preciseLng }: 
 
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-5 shadow-[0_4px_20px_rgba(108,92,231,0.08)]">
-      <h3 className="flex items-center gap-2 font-heading text-sm font-semibold text-[#2D3748] mb-3">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2D3748] mb-3">
         <MapPin size={16} strokeWidth={1.5} className="text-[#6C5CE7]" /> Rescue Location
       </h3>
       <div className="relative h-64 w-full overflow-hidden rounded-[12px] border border-[#A788FA]/10">

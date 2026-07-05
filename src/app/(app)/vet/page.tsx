@@ -25,7 +25,7 @@ export default async function VetDashboardPage() {
       <div className="mx-auto max-w-md space-y-6 py-12 text-center">
         <TabbyMascot variant="think" size="lg" className="mx-auto" />
         <div>
-          <h1 className="font-heading text-2xl font-bold text-[#2D3748]">
+          <h1 className="text-2xl font-bold text-[#2D3748]">
             Verification Pending
           </h1>
           <p className="mt-2 text-sm text-[#2D3748]/60">
@@ -88,42 +88,68 @@ export default async function VetDashboardPage() {
       {/* ── Hero / Greeting ── */}
       <div className="relative overflow-hidden rounded-[20px] border border-[#A788FA]/15 bg-white shadow-[0_4px_24px_rgba(108,92,231,0.08)]">
         <div className="absolute inset-0 bg-gradient-to-br from-[#6C5CE7]/[0.03] via-transparent to-[#FFF3E0]/15 pointer-events-none" />
-        <div className="relative flex items-start gap-4 p-5 sm:p-6">
-          <TabbyMascot variant="happy" size="lg" className="shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h1 className="font-heading text-lg font-bold text-[#2D3748]">
-                {greeting}, {displayName}
-              </h1>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                <BadgeCheck size={10} strokeWidth={2} /> Verified Vet
-              </span>
-            </div>
-            <p className="text-xs text-[#2D3748]/55 mb-3">Here&apos;s your patient overview for today.</p>
+        <div className="relative p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <TabbyMascot variant="happy" size="lg" className="shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h1 className="text-lg font-bold text-[#2D3748]">
+                  {greeting}, {displayName}
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                  <BadgeCheck size={10} strokeWidth={2} /> Verified Vet
+                </span>
+              </div>
+              <p className="text-xs text-[#2D3748]/55 mb-0 sm:mb-3">Here&apos;s your patient overview for today.</p>
 
-            {/* Inline stat chips */}
-            <div className="flex flex-wrap gap-2">
-              {stats.waiting > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200/60 px-2.5 py-1 text-[11px] font-semibold text-orange-700">
-                  <Clock size={11} strokeWidth={2} />
-                  {stats.waiting} waiting
+              {/* Desktop-only badges */}
+              <div className="hidden sm:flex flex-wrap gap-2">
+                {stats.waiting > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200/60 px-2.5 py-1 text-[11px] font-semibold text-orange-700">
+                    <Clock size={11} strokeWidth={2} />
+                    {stats.waiting} waiting
+                  </span>
+                )}
+                {stats.inTreatment > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/60 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                    <HeartPulse size={11} strokeWidth={2} />
+                    {stats.inTreatment} in treatment
+                  </span>
+                )}
+                {stats.waiting === 0 && stats.inTreatment === 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                    All clear — no urgent cases
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#6C5CE7]/8 border border-[#A788FA]/20 px-2.5 py-1 text-[11px] font-semibold text-[#6C5CE7]">
+                  ฿{stats.pendingEscrow.toLocaleString()} in escrow
                 </span>
-              )}
-              {stats.inTreatment > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/60 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
-                  <HeartPulse size={11} strokeWidth={2} />
-                  {stats.inTreatment} in treatment
-                </span>
-              )}
-              {stats.waiting === 0 && stats.inTreatment === 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                  All clear — no urgent cases
-                </span>
-              )}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#6C5CE7]/8 border border-[#A788FA]/20 px-2.5 py-1 text-[11px] font-semibold text-[#6C5CE7]">
-                ฿{stats.pendingEscrow.toLocaleString()} in escrow
-              </span>
+              </div>
             </div>
+          </div>
+
+          {/* Mobile-only badges: renders below mascot + greeting block */}
+          <div className="flex sm:hidden flex-wrap gap-2 mt-4 justify-start">
+            {stats.waiting > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200/60 px-2.5 py-1 text-[11px] font-semibold text-orange-700">
+                <Clock size={11} strokeWidth={2} />
+                {stats.waiting} waiting
+              </span>
+            )}
+            {stats.inTreatment > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/60 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
+                <HeartPulse size={11} strokeWidth={2} />
+                {stats.inTreatment} in treatment
+              </span>
+            )}
+            {stats.waiting === 0 && stats.inTreatment === 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                All clear — no urgent cases
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#6C5CE7]/8 border border-[#A788FA]/20 px-2.5 py-1 text-[11px] font-semibold text-[#6C5CE7]">
+              ฿{stats.pendingEscrow.toLocaleString()} in escrow
+            </span>
           </div>
         </div>
       </div>
@@ -138,7 +164,7 @@ export default async function VetDashboardPage() {
 
       {/* ── Quick Actions ── */}
       <div className="space-y-3">
-        <h2 className="font-heading text-sm font-bold text-[#2D3748]/60 uppercase tracking-wider px-0.5">Quick Actions</h2>
+        <h2 className="text-sm font-bold text-[#2D3748]/60 uppercase tracking-wider px-0.5">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -168,7 +194,7 @@ export default async function VetDashboardPage() {
       <div id="patients-waiting" className="scroll-mt-32 sm:scroll-mt-20 space-y-3">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${waiting.length > 0 ? "bg-orange-500 animate-pulse" : "bg-[#A788FA]/40"}`} />
-          <h2 className="font-heading text-sm font-bold text-[#2D3748]">
+          <h2 className="text-sm font-bold text-[#2D3748]">
             Patients Waiting <span className="text-[#2D3748]/40 font-normal">({waiting.length})</span>
           </h2>
         </div>
@@ -180,7 +206,7 @@ export default async function VetDashboardPage() {
             <p className="text-[10px] text-[#2D3748]/40">Patients appear here once transported to your clinic.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {waiting.map((c) => <VetCaseCard key={c.id} vetCase={c} />)}
           </div>
         )}
@@ -190,7 +216,7 @@ export default async function VetDashboardPage() {
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${quoted.length > 0 ? "bg-[#6C5CE7] animate-pulse" : "bg-[#A788FA]/40"}`} />
-          <h2 className="font-heading text-sm font-bold text-[#2D3748]">
+          <h2 className="text-sm font-bold text-[#2D3748]">
             Quotes &amp; Active Campaigns <span className="text-[#2D3748]/40 font-normal">({quoted.length})</span>
           </h2>
         </div>
@@ -201,7 +227,7 @@ export default async function VetDashboardPage() {
             <p className="text-xs font-medium text-[#2D3748]/70">No active fundraising campaigns right now.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {quoted.map((c) => <VetCaseCard key={c.id} vetCase={c} />)}
           </div>
         )}
@@ -211,7 +237,7 @@ export default async function VetDashboardPage() {
       <div id="in-treatment" className="scroll-mt-32 sm:scroll-mt-20 space-y-3">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${inTreatment.length > 0 ? "bg-blue-500 animate-pulse" : "bg-[#A788FA]/40"}`} />
-          <h2 className="font-heading text-sm font-bold text-[#2D3748]">
+          <h2 className="text-sm font-bold text-[#2D3748]">
             In Treatment <span className="text-[#2D3748]/40 font-normal">({inTreatment.length})</span>
           </h2>
         </div>
@@ -222,7 +248,7 @@ export default async function VetDashboardPage() {
             <p className="text-xs font-medium text-[#2D3748]/70">No cats are currently undergoing active treatment.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {inTreatment.map((c) => <VetCaseCard key={c.id} vetCase={c} />)}
           </div>
         )}
@@ -231,8 +257,8 @@ export default async function VetDashboardPage() {
       {/* ── Completed Treatments ── */}
       <div id="completed-treatments" className="scroll-mt-32 sm:scroll-mt-20 space-y-3">
         <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${waiting.length > 0 ? "bg-emerald-400 animate-pulse" : "bg-[#A788FA]/40"}`} />
-          <h2 className="font-heading text-sm font-bold text-[#2D3748]">
+          <span className={`h-2 w-2 rounded-full ${completed.length > 0 ? "bg-emerald-500 animate-pulse" : "bg-[#A788FA]/40"}`} />
+          <h2 className="text-sm font-bold text-[#2D3748]">
             Completed Treatments <span className="text-[#2D3748]/40 font-normal">({completed.length})</span>
           </h2>
         </div>
@@ -243,7 +269,7 @@ export default async function VetDashboardPage() {
             <p className="text-[10px] text-[#2D3748]/40">Treated and recovered patient cases will be archived here.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {completed.map((c) => <VetCaseCard key={c.id} vetCase={c} />)}
           </div>
         )}

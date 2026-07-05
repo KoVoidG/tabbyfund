@@ -81,7 +81,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
           <PawPrint size={20} strokeWidth={1.5} className="text-[#6C5CE7]" />
         </div>
         <div>
-          <h1 className="font-heading text-xl font-bold text-[#2D3748]">Rescue Feed</h1>
+          <h1 className="text-xl font-bold text-[#2D3748]">Rescue Feed</h1>
           <p className="text-xs text-[#2D3748]/60">
             {activeCases.length} active rescue case{activeCases.length !== 1 ? "s" : ""} · {endedCases.length} closed
           </p>
@@ -122,7 +122,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
       {/* Active Rescues Section */}
       {allCasesRaw.length > 0 && filteredCases.length > 0 && (
         <div className="space-y-4">
-          <h2 className="font-heading text-sm font-bold text-[#2D3748] flex items-center gap-2">
+          <h2 className="text-sm font-bold text-[#2D3748] flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-[#6C5CE7] animate-pulse" />
             Active Rescues ({activeCases.length})
           </h2>
@@ -157,7 +157,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
       {/* Ended / Closed Section */}
       {endedCases.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-[#2D3748]/5">
-          <h2 className="mt-5 font-heading text-sm font-bold text-[#2D3748]/40">
+          <h2 className="mt-5 text-sm font-bold text-[#2D3748]/40">
             Ended / Closed Cases ({endedCases.length})
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

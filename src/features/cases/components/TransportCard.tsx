@@ -136,7 +136,7 @@ export function TransportCard({
   return (
     <div className="rounded-[16px] border border-[#A788FA]/15 bg-white p-6 shadow-[0_4px_20px_rgba(108,92,231,0.08)] space-y-6">
       <div className="flex items-center justify-between border-b border-[#2D3748]/5 pb-3">
-        <h3 className="flex items-center gap-2 font-heading text-sm font-bold text-[#2D3748]">
+        <h3 className="flex items-center gap-2 text-sm font-bold text-[#2D3748]">
           <Truck size={18} strokeWidth={2} className="text-[#6C5CE7]" /> Transport Dispatch
         </h3>
         <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${config.bg} ${config.color}`}>

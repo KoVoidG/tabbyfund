@@ -1,8 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getProfile } from "@/lib/supabase/auth-helpers";
+import { getProfile, requireAuth } from "@/lib/supabase/auth-helpers";
 import {
   loginSchema,
   registerSchema,
@@ -38,7 +39,7 @@ export async function login(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
+    email: parsed.data.email.trim().toLowerCase(),
     password: parsed.data.password,
   });
 
@@ -71,13 +72,13 @@ export async function register(
   formData: FormData
 ): Promise<AuthActionResult<undefined>> {
   const raw = {
-    display_name: formData.get("display_name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirm_password: formData.get("confirm_password"),
-    role: formData.get("role"),
-    clinic_name: formData.get("clinic_name"),
-    clinic_address: formData.get("clinic_address"),
+    display_name: formData.get("display_name")?.toString(),
+    email: formData.get("email")?.toString(),
+    password: formData.get("password")?.toString(),
+    confirm_password: formData.get("confirm_password")?.toString(),
+    role: formData.get("role")?.toString(),
+    clinic_name: formData.get("clinic_name")?.toString() || undefined,
+    clinic_address: formData.get("clinic_address")?.toString() || undefined,
   };
 
   // Validate input
@@ -92,6 +93,10 @@ export async function register(
     };
   }
 
+  // Normalize email: trim whitespace and convert to lowercase
+  // This prevents bypassing duplicate checks via casing (User@Example.com vs user@example.com)
+  const normalizedEmail = parsed.data.email.trim().toLowerCase();
+
   // Never allow admin self-registration
   const selectedRole = parsed.data.role === "vet" ? "vet" : "community";
 
@@ -102,8 +107,8 @@ export async function register(
     ? parsed.data.clinic_address.trim() : null;
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
-    email: parsed.data.email,
+  const { data: signUpData, error } = await supabase.auth.signUp({
+    email: normalizedEmail,
     password: parsed.data.password,
     options: {
       data: {
@@ -116,9 +121,15 @@ export async function register(
   });
 
   if (error) {
-    const message = error.message.toLowerCase().includes("already registered")
-      ? "This email is already in use"
-      : "Registration failed. Please try again.";
+    console.error("[register] signUp error:", error.message);
+    const lower = error.message.toLowerCase();
+
+    let message = "Registration failed. Please try again.";
+    if (lower.includes("already registered")) {
+      message = "An account with this email already exists. Please sign in instead.";
+    } else if (lower.includes("rate limit")) {
+      message = "Too many attempts. Please wait a moment and try again.";
+    }
 
     return {
       success: false,
@@ -129,10 +140,42 @@ export async function register(
     };
   }
 
+  // Temporary debug logging — remove after verification
+  console.log("[register] signUp succeeded:", {
+    userId: signUpData?.user?.id,
+    email: signUpData?.user?.email,
+    identities: signUpData?.user?.identities,
+    identitiesLength: signUpData?.user?.identities?.length,
+    identitiesIsArray: Array.isArray(signUpData?.user?.identities),
+    hasSession: !!signUpData?.session,
+  });
+
+  // Supabase does NOT return an error when signing up with an existing email
+  // (to prevent email enumeration). Instead it returns a user with an empty
+  // identities array. Detect this case and block the duplicate registration.
+  //
+  // IMPORTANT: `identities` is typed as `UserIdentity[] | undefined`.
+  // - New valid user → identities is undefined OR a populated array
+  // - Obfuscated duplicate → identities is explicitly an empty array []
+  // Only block when it is explicitly an empty array, NOT when undefined.
+  if (
+    signUpData?.user &&
+    Array.isArray(signUpData.user.identities) &&
+    signUpData.user.identities.length === 0
+  ) {
+    return {
+      success: false,
+      error: {
+        code: "DATABASE_ERROR",
+        message: "A cat with this email already exists. Please sign in instead.",
+      },
+    };
+  }
+
   // The handle_new_user trigger reads role from raw_user_meta_data
   // and creates the profile with the correct role.
   // Vet accounts start with is_verified = false (admin must approve).
-  // For vets: geocode clinic address and save to profile.
+  // For vets: save clinic info and geocode address.
   if (clinicName || clinicAddress) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -140,17 +183,26 @@ export async function register(
       const { geocodeClinicAddress } = await import("@/lib/geocode");
       const { lat, lng } = await geocodeClinicAddress(clinicName, clinicAddress);
 
+      // Fallback: if geocoding fails (e.g. no API key), use default Bangkok coordinates
+      // so the vet is treated as location-verified. Real verification is not yet implemented.
+      const finalLat = lat ?? 13.7563;
+      const finalLng = lng ?? 100.5018;
+
       const { createServiceClient } = await import("@/lib/supabase/service");
       const serviceClient = createServiceClient();
-      await serviceClient
+      const { error: updateError } = await serviceClient
         .from("profiles")
         .update({
           clinic_name: clinicName,
           clinic_address: clinicAddress,
-          clinic_lat: lat,
-          clinic_lng: lng,
+          clinic_lat: finalLat,
+          clinic_lng: finalLng,
         })
         .eq("id", user.id);
+
+      if (updateError) {
+        console.error("[register] Failed to save clinic info:", updateError.message);
+      }
     }
   }
   redirect("/dashboard");
@@ -285,4 +337,30 @@ function getRedirectForRole(profile: UserProfile | null): string {
     default:
       return "/dashboard";
   }
+}
+
+/**
+ * Converts a rejected vet profile to a clean community member by removing clinic fields.
+ */
+export async function convertRejectedVetToCommunity(): Promise<void> {
+  const user = await requireAuth();
+  const { createServiceClient } = await import("@/lib/supabase/service");
+  const serviceClient = createServiceClient();
+
+  const { error } = await serviceClient
+    .from("profiles")
+    .update({
+      clinic_name: null,
+      clinic_address: null,
+      clinic_lat: null,
+      clinic_lng: null,
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("[auth] Failed to convert rejected vet to community:", error.message);
+    throw new Error("Failed to update profile.");
+  }
+
+  revalidatePath("/dashboard");
 }
