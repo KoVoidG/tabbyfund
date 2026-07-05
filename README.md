@@ -42,17 +42,42 @@ TabbyFund is a mobile-first progressive web app for managing the full rescue lif
 
 ## Preview
 
-### Landing Page
-![TabbyFund Landing Page](documentation/screenshots/landing.jpg)
+<p align="center">
+  <img src="documentation/screenshots/landing.jpg" alt="TabbyFund Landing Page" width="100%">
+</p>
 
-### Community Dashboard
-![TabbyFund Community Page](documentation/screenshots/dashboard.jpg)
+<p align="center">
+  <em>TabbyFund — connecting every rescue from report to forever home.</em>
+</p>
 
-### Vet Dashboard
-![TabbyFund Vet Page](documentation/screenshots/vet-dashboard.jpg)
+---
 
-### Admin Dashboard
-![TabbyFund Admin Page](documentation/screenshots/admin-dashboard.jpg)
+<table>
+  <tr>
+    <td>
+      <img src="documentation/screenshots/dashboard.jpg" alt="Community Dashboard" width="100%">
+      <br>
+      <strong>Community Dashboard</strong>
+    </td>
+    <td>
+      <img src="documentation/screenshots/vet-dashboard.jpg" alt="Vet Dashboard" width="100%">
+      <br>
+      <strong>Vet Dashboard</strong>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="documentation/screenshots/admin-dashboard.jpg" alt="Admin Dashboard" width="100%">
+      <br>
+      <strong>Admin Dashboard</strong>
+    </td>
+    <td>
+      <img src="documentation/screenshots/register.jpg" alt="Register Page" width="100%">
+      <br>
+      <strong>Register Page</strong>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -75,20 +100,44 @@ TabbyFund provides a single platform connecting the entire rescue chain. Every p
 ## Rescue Workflow
 
 ```mermaid
-flowchart LR
-    A[Reported] --> B[Transport Accepted]
-    B --> C[Delivered to Verified Vet]
-    C --> D[Vet Quote Created]
-    D --> E[Community Funding]
-    D --> F[Treatment]
-    E --> G{Funding Complete?}
-    F --> H{Treatment Complete?}
-    G --> I[Escrow Released]
-    H --> I
-    I --> J[Temporary Caretaker]
-    J --> K[Behavioural Profile]
-    K --> L[Adoption Listing]
-    L --> M[Forever Home]
+flowchart TD
+    A[Community Reports Cat] --> B{Can Reporter Transport?}
+
+    B -->|Yes| C[Reporter Self-Transports]
+    B -->|No| D[Transport Request Opens]
+
+    D --> E[Volunteer Claims Transport]
+    C --> F[Delivered to Assigned Verified Vet]
+    E --> F
+
+    F --> G[Vet Examines Cat]
+    G --> H[Vet Creates Treatment Quote]
+
+    H --> I[Funding Opens]
+    H --> J[Treatment Starts]
+
+    I --> K{Funding Goal Reached?}
+    J --> L{Treatment Completed?}
+
+    K --> M[Escrow Ready]
+    L --> M
+
+    M --> N[Escrow Released]
+    N --> O{Vet Marks Ready for Adoption?}
+
+    O -->|No| P[Case Closed: Sheltered/Not Adoptable]
+    O -->|Yes| Q[Transporter Invited to Become Caretaker]
+
+    Q -->|Accepts| R[Transporter Becomes Temporary Caretaker]
+    Q -->|Declines| S[Foster Volunteer Request Opens]
+
+    S --> T[Volunteer Claims Caretaker Role]
+    R --> U[Behaviour Profile Completed]
+    T --> U
+
+    U --> V[Adoption Listing Opens]
+    V --> W[Adopter Selected]
+    W --> X[Forever Home ]
 ```
 
 `
@@ -159,12 +208,11 @@ There are only three database roles. Transporter, donor, foster, and adopter are
 | Geocoding | Geoapify (server-side) |
 | Forms | React Hook Form + Zod |
 | Charts | Recharts |
-| Animation | Framer Motion |
 | PWA | Service Worker + Web App Manifest |
 
 ---
 
-## Live Demo
+## 🚀 Live Demo
 
 Website:
 [TabbyFund](https://)
@@ -335,19 +383,6 @@ After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo
 - **Notifications** are created by server actions during workflow events. No real-time push or WebSocket.
 - **Adoption application** is not formally persisted (no applications table in schema).
 - This is a hackathon MVP — production deployment would require additional hardening.
-
-## Future Improvements
-
-- Real payment integration (PromptPay QR, Stripe)
-- Push notifications via Web Push API
-- Redis or database-backed production rate limiting
-- Formal adoption application workflow with status tracking
-- Multi-language support (Thai and English)
-- Real GPS geolocation with user permission
-- Vet appointment scheduling
-- Before/after treatment photo gallery
-- Community discussion threads per case
-- Mobile native app wrapper (Capacitor or Expo)
 
 ---
 
