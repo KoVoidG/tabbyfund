@@ -45,6 +45,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # agent & local tool caches
 .agents/
@@ -52,3 +53,11 @@ graphify-out/
 
 # IDEs
 .vscode/
+
+# Playwright
+playwright-report/
+test-results/
+
+# AI instructions
+CLAUDE.md
+AGENTS.md
