@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { CircleCheck, X, LoaderCircle } from "lucide-react";
 import { verifyVet, rejectVet } from "../actions";
 import type { VetProfile } from "@/lib/admin";
@@ -15,8 +15,12 @@ interface VetVerificationListProps {
  */
 export function VetVerificationList({ pendingVets }: VetVerificationListProps) {
   const [isPending, startTransition] = useTransition();
+  const [activeVetId, setActiveVetId] = useState<string | null>(null);
+  const [activeAction, setActiveAction] = useState<"approve" | "reject" | null>(null);
 
   function handleVerify(vetId: string) {
+    setActiveVetId(vetId);
+    setActiveAction("approve");
     startTransition(async () => {
       const result = await verifyVet(vetId);
       if (!result.success) alert(result.error);
@@ -24,6 +28,8 @@ export function VetVerificationList({ pendingVets }: VetVerificationListProps) {
   }
 
   function handleReject(vetId: string) {
+    setActiveVetId(vetId);
+    setActiveAction("reject");
     startTransition(async () => {
       const result = await rejectVet(vetId);
       if (!result.success) alert(result.error);
@@ -64,14 +70,24 @@ export function VetVerificationList({ pendingVets }: VetVerificationListProps) {
                   disabled={isPending}
                   className="flex h-8 items-center gap-1 rounded-[8px] bg-emerald-500 px-3 text-xs font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-50"
                 >
-                  {isPending ? <LoaderCircle size={12} className="animate-spin" /> : <CircleCheck size={12} strokeWidth={2} />} Approve
+                  {isPending && activeVetId === v.id && activeAction === "approve" ? (
+                    <LoaderCircle size={12} className="animate-spin" />
+                  ) : (
+                    <CircleCheck size={12} strokeWidth={2} />
+                  )}
+                  Approve
                 </button>
                 <button
                   onClick={() => handleReject(v.id)}
                   disabled={isPending}
                   className="flex h-8 items-center gap-1 rounded-[8px] border border-red-200 px-3 text-xs font-medium text-red-600 hover:bg-red-50 transition disabled:opacity-50"
                 >
-                  <X size={12} strokeWidth={2} /> Reject
+                  {isPending && activeVetId === v.id && activeAction === "reject" ? (
+                    <LoaderCircle size={12} className="animate-spin" />
+                  ) : (
+                    <X size={12} strokeWidth={2} />
+                  )}
+                  Reject
                 </button>
               </div>
             </div>

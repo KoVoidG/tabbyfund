@@ -255,7 +255,7 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
     { label: "Choose personality tags", done: personality.length > 0 },
     { label: "Define energy level", done: !!energy },
     { label: "Answer compatibility checks", done: goodWithChildren !== null && goodWithCats !== null && goodWithDogs !== null && litterTrained !== null },
-    { label: "Write daily observations", done: observations.trim().length >= 10 },
+    { label: "Write daily observations", done: observations.trim().length > 0 },
     { label: "Upload foster photos", done: photoItems.length > 0 },
   ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { Home, LoaderCircle, Heart } from "lucide-react";
 import { startFoster, declineFoster } from "@/features/foster/actions";
 
@@ -16,6 +16,7 @@ interface CaretakerVolunteerCardProps {
  */
 export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPending }: CaretakerVolunteerCardProps) {
   const [isPending, startTransition] = useTransition();
+  const [actionType, setActionType] = useState<"accept" | "decline" | null>(null);
 
   if (transporterPending) {
     return (
@@ -37,6 +38,7 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
   }
 
   function handleVolunteer() {
+    setActionType("accept");
     startTransition(async () => {
       const result = await startFoster({ caseId });
       if (!result.success) {
@@ -46,6 +48,7 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
   }
 
   function handleDecline() {
+    setActionType("decline");
     startTransition(async () => {
       const result = await declineFoster({ caseId });
       if (!result.success) {
@@ -69,7 +72,7 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
             disabled={isPending}
             className="flex-1 flex h-10 items-center justify-center gap-2 rounded-[12px] bg-[#6C5CE7] text-sm font-semibold text-white transition hover:bg-[#A788FA] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isPending ? (
+            {isPending && actionType === "accept" ? (
               <><LoaderCircle size={14} strokeWidth={2} className="animate-spin" /> Accepting...</>
             ) : (
               <><Heart size={14} strokeWidth={1.5} /> Accept Role</>
@@ -80,7 +83,11 @@ export function CaretakerVolunteerCard({ caseId, isTransporter, transporterPendi
             disabled={isPending}
             className="flex-1 flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#2D3748]/10 bg-white text-sm font-semibold text-[#2D3748]/75 transition hover:bg-slate-50 disabled:opacity-60"
           >
-            Decline
+            {isPending && actionType === "decline" ? (
+              <><LoaderCircle size={14} strokeWidth={2} className="animate-spin" /> Declining...</>
+            ) : (
+              "Decline"
+            )}
           </button>
         </div>
       </div>
