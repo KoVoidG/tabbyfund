@@ -76,7 +76,7 @@ export async function getVetCases(vetId: string): Promise<VetCaseRow[]> {
   const isAdmin = profile?.role === "admin";
 
   let query = (serviceClient
-    .from("cases") as any)
+    .from("cases") as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     .select(`
       id, photo_url, description, status,
       ai_severity, ai_condition, ai_confidence, ai_reasoning, ai_first_aid,
@@ -101,11 +101,12 @@ export async function getVetCases(vetId: string): Promise<VetCaseRow[]> {
 
   if (error || !casesData) return [];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return casesData.map((c: any) => {
-    const goal = (c.vet_quote as any)?.quoted_amount ?? 0;
+    const goal = c.vet_quote?.quoted_amount ?? 0;
     
     // Sum donations with status HELD_IN_ESCROW or RELEASED
-    const donationsList = (c.donations as any[]) ?? [];
+    const donationsList = (c.donations as { amount: number; status: string }[]) ?? [];
     
     const totalReleased = donationsList
       .filter((d) => d.status === "RELEASED")
@@ -122,8 +123,8 @@ export async function getVetCases(vetId: string): Promise<VetCaseRow[]> {
     const percentFunded = goal > 0 ? Math.min(Math.round((totalRaised / goal) * 100), 100) : 0;
 
     const treatmentCompleted = !!(
-      (c.treatment as any)?.outcome === "RECOVERED" &&
-      (c.treatment as any)?.confirmed_at
+      c.treatment?.outcome === "RECOVERED" &&
+      c.treatment?.confirmed_at
     );
 
     let escrowStatus: VetCaseRow["escrowStatus"] = "Waiting for Funding";

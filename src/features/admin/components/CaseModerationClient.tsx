@@ -93,9 +93,9 @@ export function CaseModerationClient({ initialCases }: CaseModerationClientProps
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setSelectedTab(tab.id as any)}
+            onClick={() => setSelectedTab(tab.id as "all" | "new" | "flagged" | "approved")}
             className={`rounded-full border px-4 py-1.5 text-xs font-semibold whitespace-nowrap transition-all ${getTabStyle(
-              tab.id as any
+              tab.id as "all" | "new" | "flagged" | "approved"
             )}`}
           >
             {tab.label}

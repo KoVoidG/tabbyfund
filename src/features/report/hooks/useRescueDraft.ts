@@ -59,6 +59,7 @@ export function useRescueDraft() {
       if (stored) {
         const parsed = JSON.parse(stored) as RescueDraft;
         if (parsed.currentStep > 0 || parsed.photoUrl) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setDraft(parsed);
           setHasSavedDraft(true);
         }

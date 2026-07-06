@@ -264,8 +264,8 @@ export async function requestPasswordReset(
     });
 
     return { success: true };
-  } catch (err: any) {
-    console.error("[auth-actions] Unexpected reset error:", err.message);
+  } catch (err: unknown) {
+    console.error("[auth-actions] Unexpected reset error:", err instanceof Error ? err.message : err);
     return {
       success: false,
       error: {

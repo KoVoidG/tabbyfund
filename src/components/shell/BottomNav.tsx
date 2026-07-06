@@ -6,7 +6,7 @@ import { House, PawPrint, Plus, Heart, HandCoins, ShieldCheck, ClipboardList, Tr
 
 interface NavItem {
   href: string;
-  icon: any;
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
   label: string;
   primary?: boolean;
 }

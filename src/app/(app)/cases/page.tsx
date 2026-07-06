@@ -33,7 +33,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
   const allCasesRaw = await getPublicCases();
 
   // 1. Filter
-  let filteredCases = allCasesRaw.filter((c) => {
+  const filteredCases = allCasesRaw.filter((c) => {
     if (search) {
       const desc = c.description?.toLowerCase() || "";
       const cond = c.ai_condition?.toLowerCase() || "";
@@ -70,8 +70,6 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
 
   const activeCases = filteredCases.filter((c) => c.status && !TERMINAL_STATUSES.includes(c.status));
   const endedCases = filteredCases.filter((c) => c.status && TERMINAL_STATUSES.includes(c.status));
-
-  const totalFilteredCount = filteredCases.length;
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">

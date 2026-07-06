@@ -29,6 +29,7 @@ export function PhotoUploader({ photoUrl, storagePath, previewUrl, onPhotoUpload
   // Sync with incoming draft values if any (e.g. on restoration)
   useEffect(() => {
     if (previewUrl || photoUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalPreview(previewUrl || photoUrl || null);
     } else {
       setLocalPreview(null);

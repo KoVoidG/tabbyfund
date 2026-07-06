@@ -183,7 +183,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
       assigned_vet_id,
       reporter:profiles!cases_reporter_id_fkey(display_name),
       assigned_vet:profiles!cases_assigned_vet_id_fkey(display_name, clinic_name)
-    `) as any)
+    `) as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     .eq("id", id)
     .single();
 
@@ -267,6 +267,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
     .eq("id", id)
     .maybeSingle();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c = caseData as any;
 
   return {

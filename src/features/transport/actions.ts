@@ -134,9 +134,9 @@ export async function deliverTransport(caseId: string, vetId: string): Promise<T
   const { error: caseError } = await serviceClient
     .from("cases")
     .update({
-      status: "AT_VET",
+      status: "AT_VET" as const,
       assigned_vet_id: vetId,
-    } as any)
+    })
     .eq("id", caseId)
     .eq("status", "IN_TRANSIT");
 

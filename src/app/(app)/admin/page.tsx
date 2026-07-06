@@ -98,7 +98,7 @@ export default async function AdminPage() {
     }
   }
 
-  function SparkleIcon(props: any) {
+  function SparkleIcon(props: { className?: string }) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"

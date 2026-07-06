@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 
 export function PWARegistration() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<(Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> }) | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function PWARegistration() {
     // 2. Capture Install Prompt Event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> });
       setIsVisible(true);
     };
 

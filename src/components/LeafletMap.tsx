@@ -104,6 +104,7 @@ export default function LeafletMap({
   // Sync state if center prop updates
   useEffect(() => {
     if (mode === "picker") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPickerPosition(center);
     }
   }, [center, mode]);
@@ -131,7 +132,7 @@ export default function LeafletMap({
 
   const eventHandlers = useMemo(
     () => ({
-      dragend(e: any) {
+      dragend(e: L.LeafletEvent) {
         const marker = e.target;
         const pos = marker.getLatLng();
         setPickerPosition([pos.lat, pos.lng]);

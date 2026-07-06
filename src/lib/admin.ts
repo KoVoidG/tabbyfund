@@ -72,7 +72,7 @@ export interface PlatformActivityItem {
   description: string;
   timestamp: string;
   caseId?: string;
-  meta?: any;
+  meta?: Record<string, unknown>;
 }
 
 /**
@@ -282,6 +282,7 @@ export async function getAdminCases(): Promise<AdminCaseItem[]> {
     donationMap.set(d.case_id, (donationMap.get(d.case_id) || 0) + Number(d.amount));
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (cases as any[]).map((c) => {
     const goal = quoteMap.get(c.id) || 0;
     const total_raised = donationMap.get(c.id) || 0;
@@ -357,6 +358,7 @@ export async function getCommunityUsers(currentAdminId?: string): Promise<Commun
   adoptions?.forEach((a) => trackActivity(a.matched_with!, a.listed_at));
   quotes?.forEach((q) => trackActivity(q.vet_id, q.quoted_at));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const countMap = (list: any[] | null, key: string) => {
     const counts: Record<string, number> = {};
     list?.forEach((item) => {
@@ -457,58 +459,61 @@ export async function getPlatformActivities(): Promise<PlatformActivityItem[]> {
     });
   });
 
-  quotes?.forEach((q: any) => {
+  quotes?.forEach((q: unknown) => {
+    const quote = q as { id: string; case_id: string; quoted_amount: number; quoted_at: string; profiles?: { display_name: string } };
     items.push({
-      id: `quote-${q.id}`,
+      id: `quote-${quote.id}`,
       type: "quote_created",
       title: "Vet Quote Submitted",
-      description: `Quote of ฿${q.quoted_amount} submitted by "${q.profiles?.display_name || 'Vet'}"`,
-      timestamp: q.quoted_at,
-      caseId: q.case_id,
+      description: `Quote of ฿${quote.quoted_amount} submitted by "${quote.profiles?.display_name || 'Vet'}"`,
+      timestamp: quote.quoted_at,
+      caseId: quote.case_id,
     });
   });
 
-  donations?.forEach((d: any) => {
+  donations?.forEach((d: unknown) => {
+    const donation = d as { id: string; case_id: string; amount: number; created_at: string; profiles?: { display_name: string } };
     items.push({
-      id: `donation-${d.id}`,
+      id: `donation-${donation.id}`,
       type: "donation_received",
       title: "Donation Received",
-      description: `฿${d.amount} donated by "${d.profiles?.display_name || 'Anonymous'}"`,
-      timestamp: d.created_at,
-      caseId: d.case_id,
+      description: `฿${donation.amount} donated by "${donation.profiles?.display_name || 'Anonymous'}"`,
+      timestamp: donation.created_at,
+      caseId: donation.case_id,
     });
   });
 
-  statusHistory?.forEach((s: any) => {
+  statusHistory?.forEach((s: unknown) => {
+    const status = s as { id: string; case_id: string; previous_status: string; new_status: string; changed_at: string; cases?: { ai_condition: string | null } };
     let type = "status_change";
     let title = "Case Stage Transition";
-    let description = `Case "${s.cases?.ai_condition || 'Rescue'}" transitioned to ${s.new_status}`;
+    let description = `Case "${status.cases?.ai_condition || 'Rescue'}" transitioned to ${status.new_status}`;
 
-    if (s.new_status === "FUNDED") {
+    if (status.new_status === "FUNDED") {
       type = "funding_completed";
       title = "Funding Completed";
-      description = `Case "${s.cases?.ai_condition || 'Rescue'}" is now fully funded!`;
-    } else if (s.new_status === "TREATED") {
+      description = `Case "${status.cases?.ai_condition || 'Rescue'}" is now fully funded!`;
+    } else if (status.new_status === "TREATED") {
       type = "treatment_completed";
       title = "Treatment Completed";
-      description = `Treatment completed for case "${s.cases?.ai_condition || 'Rescue'}"`;
-    } else if (s.new_status === "IN_FOSTER") {
+      description = `Treatment completed for case "${status.cases?.ai_condition || 'Rescue'}"`;
+    } else if (status.new_status === "IN_FOSTER") {
       type = "foster_assigned";
       title = "Foster Placed";
-      description = `Case "${s.cases?.ai_condition || 'Rescue'}" is now placed with a foster caretaker`;
-    } else if (s.new_status === "ADOPTED") {
+      description = `Case "${status.cases?.ai_condition || 'Rescue'}" is now placed with a foster caretaker`;
+    } else if (status.new_status === "ADOPTED") {
       type = "adoption_completed";
       title = "Adoption Completed";
-      description = `Case "${s.cases?.ai_condition || 'Rescue'}" has been successfully adopted!`;
+      description = `Case "${status.cases?.ai_condition || 'Rescue'}" has been successfully adopted!`;
     }
 
     items.push({
-      id: `history-${s.id}`,
+      id: `history-${status.id}`,
       type,
       title,
       description,
-      timestamp: s.changed_at,
-      caseId: s.case_id,
+      timestamp: status.changed_at,
+      caseId: status.case_id,
     });
   });
 

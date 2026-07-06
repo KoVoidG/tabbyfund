@@ -55,7 +55,7 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
       if (data) {
         if (data.cat_name) setCatName(data.cat_name);
         if (data.personality) setPersonality(data.personality);
-        if (data.energy_level) setEnergy(data.energy_level as any);
+        if (data.energy_level) setEnergy(data.energy_level as "low" | "medium" | "high");
         if (data.good_with_children !== null) setGoodWithChildren(data.good_with_children);
         if (data.good_with_cats !== null) setGoodWithCats(data.good_with_cats);
         if (data.good_with_dogs !== null) setGoodWithDogs(data.good_with_dogs);

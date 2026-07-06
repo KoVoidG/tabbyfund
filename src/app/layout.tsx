@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     "A transparent, community-driven platform that helps rescue injured stray cats by connecting community members, verified veterinarians, and administrators through one complete rescue lifecycle.",
   keywords: ["cat rescue", "stray cats", "Thailand", "crowdfunding", "animal welfare"],
   manifest: "/manifest.json",
+  icons: {
+    icon: "/mascot/tabby-default-final1.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

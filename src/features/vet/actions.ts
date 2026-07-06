@@ -294,7 +294,7 @@ export async function completeTreatment(input: CompleteTreatmentInput): Promise<
   const now = new Date().toISOString();
 
   // Update treatment record
-  const updateData: any = {
+  const updateData = {
     outcome: input.outcome,
     vaccination_status: input.vaccinationStatus || null,
     is_neutered: input.isNeutered,
@@ -302,11 +302,8 @@ export async function completeTreatment(input: CompleteTreatmentInput): Promise<
     ready_for_adoption: input.readyForAdoption,
     ready_for_adoption_at: input.readyForAdoption ? now : null,
     confirmed_at: now,
+    ...(input.photoUrl ? { photo_urls: [input.photoUrl] } : {}),
   };
-
-  if (input.photoUrl) {
-    updateData.photo_urls = [input.photoUrl];
-  }
 
   const { error: updateError } = await supabase
     .from("treatment_records")

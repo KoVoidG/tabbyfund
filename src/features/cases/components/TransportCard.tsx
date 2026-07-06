@@ -71,6 +71,7 @@ export function TransportCard({
 
   useEffect(() => {
     if (nearestClinics && nearestClinics.length > 0 && !selectedClinicId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedClinicId(nearestClinics[0].vetId);
     }
   }, [nearestClinics, selectedClinicId]);

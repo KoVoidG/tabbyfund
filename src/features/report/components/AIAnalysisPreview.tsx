@@ -60,6 +60,7 @@ export function AIAnalysisPreview({ photoDataUrl, storagePath, aiResult, onAnaly
 
   useEffect(() => {
     if (aiResult) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAnalyzing(false);
       return;
     }

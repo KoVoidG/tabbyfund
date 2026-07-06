@@ -53,7 +53,7 @@ export default async function DashboardPage() {
 
   const myCaseIds = (myTransports ?? []).map((t) => t.case_id);
 
-  let pendingFosterDecisions: any[] = [];
+  let pendingFosterDecisions: { id: string; status: string; ai_condition: string | null; photo_url: string | null }[] = [];
   if (myCaseIds.length > 0) {
     const { data: candidateCases } = await supabase
       .from("cases")
