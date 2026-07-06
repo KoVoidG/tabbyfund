@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { redactLocationFromDescription } from "@/lib/cases";
 
 /** An adoptable cat from the public_adoptable_cats view + case photo */
 export interface AdoptableCatRow {
@@ -77,7 +78,7 @@ export async function getAdoptableCats(): Promise<AdoptableCatRow[]> {
     caseId: d.case_id ?? "",
     photoUrl: casePhotos[d.case_id ?? ""] ?? "https://placehold.co/600x800/F7F7FB/A788FA?text=Cat",
     name: d.cat_name || "Rescued Cat",
-    description: d.description,
+    description: redactLocationFromDescription(d.description),
     treatmentSummary: d.treatment_summary,
     vaccinationStatus: d.vaccination_status,
     isNeutered: d.is_neutered,
@@ -212,7 +213,7 @@ export async function getAdoptableCatByCaseId(caseId: string): Promise<Adoptable
     caseId: data.case_id ?? "",
     photoUrl: caseData?.photo_url ?? "https://placehold.co/600x800/F7F7FB/A788FA?text=Cat",
     name: data.cat_name || "Rescued Cat",
-    description: data.description,
+    description: redactLocationFromDescription(data.description),
     treatmentSummary: data.treatment_summary,
     vaccinationStatus: data.vaccination_status,
     isNeutered: data.is_neutered,

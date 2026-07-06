@@ -72,7 +72,6 @@ export interface CaseDetail {
   adoption: {
     status: Enums<"adoption_status">;
     personality: string | null;
-    medical_notes: string | null;
   } | null;
 }
 
@@ -166,7 +165,10 @@ export async function getPublicCases(): Promise<PublicCase[]> {
     return [];
   }
 
-  return (data ?? []) as PublicCase[];
+  return ((data ?? []) as PublicCase[]).map((c) => ({
+    ...c,
+    description: redactLocationFromDescription(c.description),
+  }));
 }
 
 /**
@@ -269,11 +271,10 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
     .maybeSingle();
 
   // Public adoption listing fields.
-  // medical_notes are intentionally visible to authenticated users through RLS.
   // Do not use the service-role client here.
   const { data: adoption } = await supabase
     .from("adoption_listings")
-    .select("status, personality, medical_notes")
+    .select("status, personality")
     .eq("case_id", id)
     .maybeSingle();
 
@@ -293,7 +294,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
     id: c.id,
     reporter_id: c.reporter_id,
     photo_url: c.photo_url,
-    description: c.description,
+    description: redactLocationFromDescription(c.description),
     status: c.status,
     ai_severity: c.ai_severity,
     ai_condition: c.ai_condition,
@@ -348,8 +349,16 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
       ? {
           status: adoption.status,
           personality: adoption.personality,
-          medical_notes: adoption.medical_notes,
         }
       : null,
   };
+}
+
+export function redactLocationFromDescription(description: string | null): string {
+  if (!description) return "";
+  return description
+    .split("\n")
+    .filter((line) => !line.trim().toLowerCase().startsWith("location:"))
+    .join("\n")
+    .trim();
 }

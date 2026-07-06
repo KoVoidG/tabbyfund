@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatDistanceToNow } from "date-fns";
+import { redactLocationFromDescription } from "@/lib/cases";
 
 export interface TransportNeededCase {
   id: string;
@@ -52,7 +53,7 @@ export async function getTransportNeeded(): Promise<TransportNeededCase[]> {
   return cases.map((c) => ({
     id: c.id,
     photo: c.photo_url,
-    description: c.description,
+    description: redactLocationFromDescription(c.description),
     severity: c.ai_severity ?? "MEDIUM",
     location: `${c.fuzzed_lat.toFixed(3)}°N, ${c.fuzzed_lng.toFixed(3)}°E`,
     timeAgo: formatDistanceToNow(new Date(c.created_at), { addSuffix: true }),
@@ -135,7 +136,7 @@ export async function getCaretakerNeeded(): Promise<CaretakerNeededCase[]> {
     id: c.id,
     photo: c.photo_url,
     condition: c.ai_condition ?? "Recovered Cat",
-    description: c.description,
+    description: redactLocationFromDescription(c.description),
     timeAgo: formatDistanceToNow(new Date(c.created_at), { addSuffix: true }),
   }));
 }

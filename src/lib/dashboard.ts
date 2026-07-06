@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatDistanceToNow } from "date-fns";
+import { redactLocationFromDescription } from "@/lib/cases";
 
 export interface DashboardStats {
   catsReported: number;
@@ -110,7 +111,7 @@ export async function getCasesNeedingTransport(): Promise<DashboardTransportCase
   return data.map((c) => ({
     id: c.id,
     photo: c.photo_url,
-    description: c.description,
+    description: redactLocationFromDescription(c.description),
     severity: (c.ai_severity ?? "MEDIUM") as DashboardTransportCase["severity"],
     location: `${c.fuzzed_lat.toFixed(3)}°N, ${c.fuzzed_lng.toFixed(3)}°E`,
     reportedAgo: formatDistanceToNow(new Date(c.created_at), { addSuffix: true }),

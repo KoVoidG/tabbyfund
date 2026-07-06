@@ -124,10 +124,12 @@ export async function register(
     console.error("[register] signUp error:", error.message);
     const lower = error.message.toLowerCase();
 
-    let message = "Registration failed. Please try again.";
     if (lower.includes("already registered")) {
-      message = "If registration is possible for this email, you will receive further instructions.";
-    } else if (lower.includes("rate limit")) {
+      redirect("/dashboard");
+    }
+
+    let message = "Registration failed. Please try again.";
+    if (lower.includes("rate limit")) {
       message = "Too many attempts. Please wait a moment and try again.";
     }
 
@@ -163,13 +165,7 @@ export async function register(
     Array.isArray(signUpData.user.identities) &&
     signUpData.user.identities.length === 0
   ) {
-    return {
-      success: false,
-      error: {
-        code: "DATABASE_ERROR",
-        message: "If registration is possible for this email, you will receive further instructions.",
-      },
-    };
+    redirect("/dashboard");
   }
 
   // The handle_new_user trigger reads role from raw_user_meta_data

@@ -342,7 +342,6 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                 caseId={c.id}
                 status={c.adoption.status}
                 personality={c.adoption.personality ?? undefined}
-                medicalNotes={c.adoption.medical_notes ?? undefined}
               />
             </div>
           </FadeIn>
