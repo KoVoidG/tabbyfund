@@ -252,7 +252,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
     .maybeSingle();
 
   // Fetch adoption listing
-  const { data: adoption } = await caseReader
+  const { data: adoption } = await supabase
     .from("adoption_listings")
     .select("status, personality, medical_notes")
     .eq("case_id", id)
