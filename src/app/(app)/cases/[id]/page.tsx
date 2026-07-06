@@ -55,6 +55,17 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
   }
 
   const currentUserId = user?.id ?? null;
+  const hasPreciseAccess = !!(
+    currentUserId && (
+      profile?.role === "admin" ||
+      c.reporter_id === currentUserId ||
+      c.assigned_vet_id === currentUserId ||
+      c.transport?.claimed_by === currentUserId
+    )
+  );
+
+  const preciseLat = hasPreciseAccess ? c.precise_lat : null;
+  const preciseLng = hasPreciseAccess ? c.precise_lng : null;
 
   const reportedAgo = formatDistanceToNow(new Date(c.created_at), { addSuffix: true });
   const reporterName = c.reporter?.display_name ?? "Anonymous";
@@ -163,8 +174,8 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
             <CaseDetailMap
               fuzzedLat={c.fuzzed_lat}
               fuzzedLng={c.fuzzed_lng}
-              preciseLat={c.precise_lat}
-              preciseLng={c.precise_lng}
+              preciseLat={preciseLat}
+              preciseLng={preciseLng}
             />
           </div>
         </FadeIn>
@@ -206,8 +217,8 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                 isAssignedTransporter={currentUserId != null && c.transport.claimed_by === currentUserId}
                 fuzzedLat={c.fuzzed_lat}
                 fuzzedLng={c.fuzzed_lng}
-                preciseLat={c.precise_lat}
-                preciseLng={c.precise_lng}
+                preciseLat={preciseLat}
+                preciseLng={preciseLng}
                 assignedVetName={c.assigned_vet?.display_name}
                 assignedVetClinic={c.assigned_vet?.clinic_name}
               />
@@ -316,7 +327,15 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
         })()}
 
         {/* Adoption */}
-        {c.adoption && (c.foster?.behaviour_profile_complete || status === "ADOPTED" || status === "REUNITED") && (
+        {c.adoption && (
+          status === "ADOPTED" ||
+          status === "REUNITED" ||
+          c.adoption.status === "COMPLETED" ||
+          c.adoption.status === "CLOSED" ||
+          (c.adoption.status === "OPEN" &&
+            c.foster?.behaviour_profile_complete &&
+            c.treatment?.ready_for_adoption)
+        ) && (
           <FadeIn delay={400}>
             <div id="section-forever-home" className="scroll-mt-32 sm:scroll-mt-20">
               <AdoptionStatusCard
@@ -389,6 +408,17 @@ async function TransportCardWithClinics(props: {
     clinicLng: c.clinicLng,
   }));
 
+  // Reverse geocode precise coordinates to an exact address for assigned roles/transporter only
+  let preciseAddress: string | null = null;
+  if (props.preciseLat != null && props.preciseLng != null) {
+    try {
+      const { reverseGeocode } = await import("@/lib/geocode");
+      preciseAddress = await reverseGeocode(props.preciseLat, props.preciseLng);
+    } catch (err) {
+      console.error("[TransportCardWithClinics] Failed to reverse geocode:", err);
+    }
+  }
+
   return (
     <TransportCard
       caseId={props.caseId}
@@ -399,6 +429,7 @@ async function TransportCardWithClinics(props: {
       lat={originLat}
       lng={originLng}
       isPrecise={!!props.preciseLat}
+      preciseAddress={preciseAddress}
       assignedVetName={props.assignedVetName}
       assignedVetClinic={props.assignedVetClinic}
     />

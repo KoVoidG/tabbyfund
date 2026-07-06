@@ -38,10 +38,15 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
   if (!cat.specialNeeds) healthTags.push("Recovered");
 
   // Build photo gallery
-  const photos: string[] = [cat.photoUrl];
+  const rawPhotos: string[] = [cat.photoUrl];
   if (cat.fosterPhotos && cat.fosterPhotos.length > 0) {
-    photos.push(...cat.fosterPhotos);
+    rawPhotos.push(...cat.fosterPhotos);
   }
+  const photos = rawPhotos.filter((photo) => {
+    if (typeof photo !== "string") return false;
+    const trimmed = photo.trim();
+    return trimmed && trimmed.length <= 2048 && isSafePhotoUrl(trimmed);
+  });
 
   const catName = cat.name;
 
@@ -101,4 +106,21 @@ export default async function AdoptDetailPage({ params }: AdoptDetailPageProps) 
       />
     </div>
   );
+}
+
+function isSafePhotoUrl(urlStr: string): boolean {
+  const supabaseUrlStr = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrlStr) return false;
+
+  try {
+    const supabaseHost = new URL(supabaseUrlStr).host;
+    const url = new URL(urlStr);
+    return (
+      url.protocol === "https:" &&
+      url.host === supabaseHost &&
+      url.pathname.startsWith("/storage/v1/object/public/")
+    );
+  } catch (e) {
+    return false;
+  }
 }

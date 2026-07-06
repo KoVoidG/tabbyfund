@@ -8,6 +8,7 @@ import { requireAuth } from "@/lib/supabase/auth-helpers";
 export interface FosterActionResult {
   success: boolean;
   error?: string;
+  message?: string;
 }
 
 // ============================================================
@@ -248,7 +249,7 @@ export async function updateBehaviouralProfile(input: UpdateBehaviouralProfileIn
       ideal_home: input.idealHome || [],
       favourite_activities: input.favouriteActivities || [],
       observations: input.observations || null,
-      foster_photos: input.fosterPhotos || [],
+      foster_photos: sanitizeFosterPhotos(input.fosterPhotos),
       behaviour_profile_complete: input.markComplete,
     })
     .eq("id", fosterRecord.id);
@@ -259,29 +260,55 @@ export async function updateBehaviouralProfile(input: UpdateBehaviouralProfileIn
   }
 
   if (input.markComplete) {
-    // Check if listing already exists
-    const { data: existingListing } = await supabase
-      .from("adoption_listings")
-      .select("id")
+    // Check if the cat is marked ready for adoption by the vet
+    const { data: treatmentRecord } = await supabase
+      .from("treatment_records")
+      .select("ready_for_adoption")
       .eq("case_id", input.caseId)
       .maybeSingle();
 
-    if (!existingListing) {
-      const { error: listingError } = await serviceClient
+    const isReadyForAdoption = treatmentRecord?.ready_for_adoption === true;
+
+    if (isReadyForAdoption) {
+      // Check if listing already exists
+      const { data: existingListing } = await supabase
         .from("adoption_listings")
-        .insert({
-          case_id: input.caseId,
-          status: "OPEN",
-        });
-      if (listingError) {
-        console.error("[foster] Failed to create adoption listing:", listingError.message);
+        .select("id")
+        .eq("case_id", input.caseId)
+        .maybeSingle();
+
+      if (!existingListing) {
+        const { error: listingError } = await serviceClient
+          .from("adoption_listings")
+          .insert({
+            case_id: input.caseId,
+            status: "OPEN",
+          });
+        if (listingError) {
+          console.error("[foster] Failed to create adoption listing:", listingError.message);
+        }
+      } else {
+        // If it exists, update its status to OPEN
+        await serviceClient
+          .from("adoption_listings")
+          .update({ status: "OPEN" })
+          .eq("case_id", input.caseId);
       }
     } else {
-      // If it exists, update its status to OPEN
+      // If ready_for_adoption is false or missing, do not list for adoption, set/keep case in SHELTERED status
       await serviceClient
-        .from("adoption_listings")
-        .update({ status: "OPEN" })
-        .eq("case_id", input.caseId);
+        .from("cases")
+        .update({ status: "SHELTERED" })
+        .eq("id", input.caseId);
+
+      revalidatePath(`/cases/${input.caseId}`);
+      revalidatePath("/foster");
+      revalidatePath("/adopt");
+
+      return {
+        success: true,
+        message: "The behavioural profile was saved but the cat will not be listed for adoption because the vet has not marked it ready."
+      };
     }
   }
 
@@ -290,4 +317,43 @@ export async function updateBehaviouralProfile(input: UpdateBehaviouralProfileIn
   revalidatePath("/adopt");
 
   return { success: true };
+}
+
+function sanitizeFosterPhotos(photos: unknown): string[] {
+  if (!Array.isArray(photos)) return [];
+
+  const supabaseUrlStr = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrlStr) {
+    console.warn("[sanitizeFosterPhotos] NEXT_PUBLIC_SUPABASE_URL is not configured.");
+    return [];
+  }
+
+  let supabaseHost = "";
+  try {
+    supabaseHost = new URL(supabaseUrlStr).host;
+  } catch (e) {
+    console.error("[sanitizeFosterPhotos] Invalid NEXT_PUBLIC_SUPABASE_URL:", supabaseUrlStr);
+    return [];
+  }
+
+  const sanitized: string[] = [];
+
+  for (const photo of photos) {
+    if (typeof photo !== "string") continue;
+    const trimmed = photo.trim();
+    if (!trimmed || trimmed.length > 2048) continue;
+
+    try {
+      const url = new URL(trimmed);
+      if (url.protocol !== "https:") continue;
+      if (url.host !== supabaseHost) continue;
+      if (!url.pathname.startsWith("/storage/v1/object/public/")) continue;
+
+      sanitized.push(trimmed);
+    } catch (e) {
+      // Invalid URL
+    }
+  }
+
+  return sanitized.slice(0, 6);
 }

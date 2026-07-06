@@ -38,6 +38,7 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [markComplete, setMarkComplete] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -220,6 +221,9 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
 
       if (result.success) {
         setSaved(true);
+        if (result.message) {
+          setSavedMessage(result.message);
+        }
         photoItems.forEach((item) => {
           if (item.file) {
             URL.revokeObjectURL(item.previewUrl);
@@ -236,8 +240,12 @@ export function BehaviouralProfileForm({ caseId }: BehaviouralProfileFormProps) 
       <div className="rounded-[16px] border border-emerald-200 bg-emerald-50 p-6 text-center space-y-3">
         <CircleCheck size={32} strokeWidth={1.5} className="mx-auto text-emerald-600" />
         <h3 className="text-sm font-bold text-emerald-700">Profile Saved!</h3>
-        {markComplete && (
-          <p className="text-xs text-emerald-600">Behavioural profile is now complete. This cat may appear on the adoption page.</p>
+        {savedMessage ? (
+          <p className="text-xs text-amber-700 font-medium">{savedMessage}</p>
+        ) : (
+          markComplete && (
+            <p className="text-xs text-emerald-600">Behavioural profile is now complete. This cat may appear on the adoption page.</p>
+          )
         )}
       </div>
     );

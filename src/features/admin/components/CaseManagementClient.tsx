@@ -344,7 +344,7 @@ function CaseManagementContent({ initialCases }: CaseManagementClientProps) {
                 <div className="relative h-44 w-full bg-slate-100 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={c.photo_url}
+                    src={isSafePhotoUrl(c.photo_url) ? c.photo_url : "/mascot/tabby-default-final1.png"}
                     alt={c.ai_condition || "Rescue case"}
                     className="h-full w-full object-cover"
                   />
@@ -440,4 +440,22 @@ export function CaseManagementClient({ initialCases }: CaseManagementClientProps
       <CaseManagementContent initialCases={initialCases} />
     </Suspense>
   );
+}
+
+function isSafePhotoUrl(urlStr: string | null | undefined): boolean {
+  if (!urlStr) return false;
+  const supabaseUrlStr = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrlStr) return false;
+
+  try {
+    const supabaseHost = new URL(supabaseUrlStr).host;
+    const url = new URL(urlStr);
+    return (
+      url.protocol === "https:" &&
+      url.host === supabaseHost &&
+      url.pathname.startsWith("/storage/v1/object/public/")
+    );
+  } catch (e) {
+    return false;
+  }
 }

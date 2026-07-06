@@ -147,9 +147,16 @@ export async function submitRescueReport(
   const serviceClient = createServiceClient();
 
   // 2. Validate photo URL
-  if (!input.photoUrl) {
-    return { success: false, error: "Photo is required. Please upload a photo first." };
+  if (
+    !input.photoUrl ||
+    typeof input.photoUrl !== "string" ||
+    !input.photoUrl.trim() ||
+    input.photoUrl.trim().length > 2048 ||
+    !isSafePhotoUrl(input.photoUrl.trim())
+  ) {
+    return { success: false, error: "Invalid photo upload. Please upload the photo again." };
   }
+  const validatedPhotoUrl = input.photoUrl.trim();
 
   // 3. Generate fuzzed coordinates on the server (approx. 400m fuzz)
   const fuzzOffset = () => (Math.random() - 0.5) * 0.008;
@@ -158,11 +165,26 @@ export async function submitRescueReport(
 
   // 4. Serialize extra Gemini fields into the ai_reasoning text column
   const serializedReasoning = JSON.stringify({
-    reasoning: input.aiResult.reasoning,
-    urgency: input.aiResult.urgency || "Monitor",
-    estimatedRecovery: input.aiResult.estimatedRecovery || "Unknown",
-    recommendedAction: input.aiResult.recommendedAction || "No action specified.",
-    recoveryConfidence: input.aiResult.recoveryConfidence ?? 50
+    reasoning:
+      typeof input.aiResult.reasoning === "string" && input.aiResult.reasoning.trim()
+        ? input.aiResult.reasoning.trim()
+        : "No reasoning provided.",
+    urgency:
+      typeof input.aiResult.urgency === "string" && input.aiResult.urgency.trim()
+        ? input.aiResult.urgency.trim()
+        : "Monitor",
+    estimatedRecovery:
+      typeof input.aiResult.estimatedRecovery === "string" && input.aiResult.estimatedRecovery.trim()
+        ? input.aiResult.estimatedRecovery.trim()
+        : "Unknown",
+    recommendedAction:
+      typeof input.aiResult.recommendedAction === "string" && input.aiResult.recommendedAction.trim()
+        ? input.aiResult.recommendedAction.trim()
+        : "No action specified.",
+    recoveryConfidence:
+      typeof input.aiResult.recoveryConfidence === "number"
+        ? input.aiResult.recoveryConfidence
+        : 50
   });
 
   // 5. Insert case row using authenticated client (RLS validates reporter_id = auth.uid())
@@ -173,7 +195,7 @@ export async function submitRescueReport(
     .from("cases")
     .insert({
       reporter_id: userId,
-      photo_url: input.photoUrl,
+      photo_url: validatedPhotoUrl,
       description: buildDescription(input),
       status: initialCaseStatus,
       precise_lat: input.location.lat,
@@ -257,7 +279,27 @@ function buildDescription(input: SubmitReportInput): string {
   if (input.details.visibleInjuries) parts.push(`Visible injuries: ${input.details.visibleInjuries}`);
   if (input.details.behaviour) parts.push(`Behaviour: ${input.details.behaviour}`);
   if (input.details.approximateAge) parts.push(`Approximate age: ${input.details.approximateAge}`);
-  if (input.location.address) parts.push(`Location: ${input.location.address}`);
+
+  // Note: Exact location address is intentionally excluded from the shared/public description
+  // because it is only shown to authorized/assigned responders.
+
   return parts.join(". ") || "Rescue case reported.";
+}
+
+function isSafePhotoUrl(urlStr: string): boolean {
+  const supabaseUrlStr = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrlStr) return false;
+
+  try {
+    const supabaseHost = new URL(supabaseUrlStr).host;
+    const url = new URL(urlStr);
+    return (
+      url.protocol === "https:" &&
+      url.host === supabaseHost &&
+      url.pathname.startsWith("/storage/v1/object/public/")
+    );
+  } catch (e) {
+    return false;
+  }
 }
 

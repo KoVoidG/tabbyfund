@@ -40,6 +40,7 @@ interface TransportCardProps {
   lat?: number;
   lng?: number;
   isPrecise?: boolean;
+  preciseAddress?: string | null;
   assignedVetName?: string | null;
   assignedVetClinic?: string | null;
 }
@@ -59,6 +60,7 @@ export function TransportCard({
   lat,
   lng,
   isPrecise,
+  preciseAddress,
   assignedVetName,
   assignedVetClinic,
 }: TransportCardProps) {
@@ -185,6 +187,11 @@ export function TransportCard({
                   <p className="text-[#2D3748]/65 mt-0.5">
                     {isPrecise ? "Precise location unlocked for rescue transit." : "Approximate location displayed to protect privacy."}
                   </p>
+                  {isPrecise && preciseAddress && (
+                    <p className="mt-1.5 font-medium text-[#6C5CE7] bg-[#6C5CE7]/5 px-2.5 py-1.5 rounded-[8px] border border-[#6C5CE7]/10 inline-block">
+                      📍 {preciseAddress}
+                    </p>
+                  )}
                 </div>
               </div>
 

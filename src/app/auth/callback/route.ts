@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next") ?? "/dashboard";
 
   // Ensure redirect target is a relative path (prevent open redirect)
-  const redirectTo = next.startsWith("/") ? next : "/dashboard";
+  const isSafeRelativePath = next.startsWith("/") && !next.startsWith("//");
+  const redirectTo = isSafeRelativePath ? next : "/dashboard";
 
   if (!code) {
     // No code provided — nothing to exchange

@@ -18,6 +18,7 @@ export type AiSeverity = Enums<"ai_severity">;
 /** Shape returned by getCaseDetail — case + related records */
 export interface CaseDetail {
   id: string;
+  reporter_id: string;
   photo_url: string;
   description: string;
   status: CaseStatus;
@@ -57,6 +58,7 @@ export interface CaseDetail {
     outcome: Enums<"treatment_outcome">;
     vet_profile: { display_name: string } | null;
     photo_urls: string[] | null;
+    ready_for_adoption: boolean;
   } | null;
   foster: {
     caretaker_profile: { display_name: string } | null;
@@ -101,11 +103,26 @@ export function parseAIReasoning(rawReasoning: string | null): ParsedAIReasoning
     if (rawReasoning.trim().startsWith("{")) {
       const parsed = JSON.parse(rawReasoning);
       return {
-        reasoning: parsed.reasoning || "",
-        urgency: parsed.urgency || "Monitor",
-        estimatedRecovery: parsed.estimatedRecovery || "Determined by vet",
-        recommendedAction: parsed.recommendedAction || "Monitor the cat and provide basic care.",
-        recoveryConfidence: typeof parsed.recoveryConfidence === "number" ? parsed.recoveryConfidence : 50,
+        reasoning:
+          typeof parsed.reasoning === "string" && parsed.reasoning.trim()
+            ? parsed.reasoning.trim()
+            : "",
+        urgency:
+          typeof parsed.urgency === "string" && parsed.urgency.trim()
+            ? parsed.urgency.trim()
+            : "Monitor",
+        estimatedRecovery:
+          typeof parsed.estimatedRecovery === "string" && parsed.estimatedRecovery.trim()
+            ? parsed.estimatedRecovery.trim()
+            : "Determined by vet",
+        recommendedAction:
+          typeof parsed.recommendedAction === "string" && parsed.recommendedAction.trim()
+            ? parsed.recommendedAction.trim()
+            : "Monitor the cat and provide basic care.",
+        recoveryConfidence:
+          typeof parsed.recoveryConfidence === "number"
+            ? parsed.recoveryConfidence
+            : 50,
       };
     }
   } catch (e) {
@@ -177,7 +194,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
   const { data: caseData, error: caseError } = await (caseReader
     .from("cases")
     .select(`
-      id, photo_url, description, status,
+      id, reporter_id, photo_url, description, status,
       ai_severity, ai_condition, ai_confidence, ai_reasoning, ai_first_aid,
       fuzzed_lat, fuzzed_lng, created_at, updated_at,
       assigned_vet_id,
@@ -233,7 +250,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
   const { data: treatment } = await caseReader
     .from("treatment_records")
     .select(`
-      treatment_summary, outcome, photo_urls,
+      treatment_summary, outcome, photo_urls, ready_for_adoption,
       vet_profile:profiles!treatment_records_vet_id_fkey(display_name)
     `)
     .eq("case_id", id)
@@ -272,6 +289,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
 
   return {
     id: c.id,
+    reporter_id: c.reporter_id,
     photo_url: c.photo_url,
     description: c.description,
     status: c.status,
@@ -310,6 +328,7 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
           outcome: treatment.outcome,
           vet_profile: treatment.vet_profile as { display_name: string } | null,
           photo_urls: treatment.photo_urls,
+          ready_for_adoption: treatment.ready_for_adoption,
         }
       : null,
     foster: foster

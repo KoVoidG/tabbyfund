@@ -32,23 +32,42 @@ export async function adoptCat(caseId: string): Promise<AdoptionActionResult> {
     return { success: false, error: "Case not found." };
   }
 
+  // Verify that treatment record shows ready_for_adoption = true
+  const { data: treatmentRecord, error: treatmentError } = await supabase
+    .from("treatment_records")
+    .select("ready_for_adoption")
+    .eq("case_id", caseId)
+    .maybeSingle();
+
+  if (treatmentError || !treatmentRecord || !treatmentRecord.ready_for_adoption) {
+    return { success: false, error: "This cat is not ready for adoption." };
+  }
+
   // Find active foster record
   const { data: fosterRecord } = await supabase
     .from("foster_records")
-    .select("id")
+    .select("id, behaviour_profile_complete")
     .eq("case_id", caseId)
     .eq("status", "ACTIVE")
     .maybeSingle();
 
+  if (fosterRecord && !fosterRecord.behaviour_profile_complete) {
+    return { success: false, error: "Behavioural profile is not complete." };
+  }
+
   // Find adoption listing
   const { data: adoptionListing } = await supabase
     .from("adoption_listings")
-    .select("id")
+    .select("id, status")
     .eq("case_id", caseId)
     .maybeSingle();
 
   if (!adoptionListing) {
     return { success: false, error: "Adoption listing not found for this case." };
+  }
+
+  if (adoptionListing.status !== "OPEN") {
+    return { success: false, error: "Adoption listing is not open." };
   }
 
   const now = new Date().toISOString();

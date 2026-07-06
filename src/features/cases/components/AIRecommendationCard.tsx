@@ -48,8 +48,8 @@ function getRecommendationFallback(severity: Severity) {
   }
 }
 
-function getUrgencyBadgeColor(urgencyStr: string, severity: Severity): string {
-  const lower = urgencyStr.toLowerCase();
+function getUrgencyBadgeColor(urgencyStr: unknown, severity: Severity): string {
+  const lower = typeof urgencyStr === "string" ? urgencyStr.toLowerCase() : "monitor";
   if (lower.includes("emergency") || lower.includes("critical") || severity === "CRITICAL") {
     return "bg-red-100 text-red-700 border border-red-200";
   }

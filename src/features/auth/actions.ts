@@ -167,7 +167,7 @@ export async function register(
       success: false,
       error: {
         code: "DATABASE_ERROR",
-        message: "A cat with this email already exists. Please sign in instead.",
+        message: "If registration is possible for this email, you will receive further instructions.",
       },
     };
   }
