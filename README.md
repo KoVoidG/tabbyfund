@@ -21,7 +21,7 @@ TabbyFund is a mobile-first progressive web app for managing the full rescue lif
 - [Key Features](#key-features)
 - [User Roles](#user-roles)
 - [Tech Stack](#tech-stack)
-- [Demo Links](#demo-links)
+- [Live Demo](#🚀-live-demo)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Environment Variables](#environment-variables)
@@ -140,9 +140,8 @@ flowchart TD
     W --> X[Forever Home ]
 ```
 
-`
-Reported → Transport → Vet → Quote → Funding → Treatment → Foster → Adoption → Forever Home
-`
+`Reported → Transport → Vet → Quote → Funding → Treatment → Foster → Adoption → Forever Home`
+
 ---
 
 ## Key Features
@@ -187,28 +186,28 @@ Reported → Transport → Vet → Quote → Funding → Treatment → Foster �
 
 ## User Roles
 
-| Role | Description |
-|------|-------------|
+| Role          | Description                                                                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Community** | Reports cats, volunteers to transport, donates, fosters, adopts. All functional responsibilities (reporter, transporter, donor, caretaker, adopter) are performed by community users. |
-| **Vet** | Creates treatment quotes, manages assigned cases, confirms treatment outcomes. Requires admin verification. |
-| **Admin** | Approves/rejects vet applications, moderates cases, manages users, views platform analytics. |
+| **Vet**       | Creates treatment quotes, manages assigned cases, confirms treatment outcomes. Requires admin verification.                                                                           |
+| **Admin**     | Approves/rejects vet applications, moderates cases, manages users, views platform analytics.                                                                                          |
 
 There are only three database roles. Transporter, donor, foster, and adopter are **responsibilities** — not separate account types.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router, Server Components, Server Actions) |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS 4, Radix UI, shadcn/ui |
-| Auth and Database | Supabase (Auth, PostgreSQL, RLS, Storage) |
-| AI | Google Gemini Vision (cat condition triage) |
-| Maps | Leaflet / React-Leaflet |
-| Geocoding | Geoapify (server-side) |
-| Forms | React Hook Form + Zod |
-| Charts | Recharts |
-| PWA | Service Worker + Web App Manifest |
+| Layer             | Technology                                                 |
+| ----------------- | ---------------------------------------------------------- |
+| Framework         | Next.js 16 (App Router, Server Components, Server Actions) |
+| Language          | TypeScript 5                                               |
+| Styling           | Tailwind CSS 4, Radix UI, shadcn/ui                        |
+| Auth and Database | Supabase (Auth, PostgreSQL, RLS, Storage)                  |
+| AI                | Google Gemini Vision (cat condition triage)                |
+| Maps              | Leaflet / React-Leaflet                                    |
+| Geocoding         | Geoapify (server-side)                                     |
+| Forms             | React Hook Form + Zod                                      |
+| Charts            | Recharts                                                   |
+| PWA               | Service Worker + Web App Manifest                          |
 
 ---
 
@@ -231,6 +230,7 @@ https://
 - Modern browser (Chrome, Firefox, Safari, Edge)
 
 Optional (only for local Supabase):
+
 - Docker Desktop
 - Supabase CLI (`npm install -g supabase`)
 
@@ -242,22 +242,24 @@ cd tabbyfund
 npm install
 cp .env.example .env.local
 ```
+
 After copying .env.example to .env.local, fill in the required environment variables before running the application.
 
 Then fill in your real values in `.env.local` (see Environment Variables below).
 
 ## Environment Variables
 
-| Variable | Scope | Description | Source |
-|----------|-------|-------------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Public | Supabase project URL | Dashboard → Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public | Supabase anonymous key (respects RLS) | Dashboard → Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only | Bypasses RLS for system writes | Dashboard → Settings → API |
-| `GEMINI_API_KEY` | Server-only | Google Gemini for AI photo triage | [Google AI Studio](https://ai.google.dev/) |
-| `GEOAPIFY_API_KEY` | Server-only | Geocoding for vet clinic locations | [geoapify.com](https://www.geoapify.com/) |
-| `NEXT_PUBLIC_SITE_URL` | Public | Site URL for password reset links | Your deployment URL |
+| Variable                        | Scope       | Description                           | Source                                     |
+| ------------------------------- | ----------- | ------------------------------------- | ------------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Public      | Supabase project URL                  | Dashboard → Settings → API                 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public      | Supabase anonymous key (respects RLS) | Dashboard → Settings → API                 |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server-only | Bypasses RLS for system writes        | Dashboard → Settings → API                 |
+| `GEMINI_API_KEY`                | Server-only | Google Gemini for AI photo triage     | [Google AI Studio](https://ai.google.dev/) |
+| `GEOAPIFY_API_KEY`              | Server-only | Geocoding for vet clinic locations    | [geoapify.com](https://www.geoapify.com/)  |
+| `NEXT_PUBLIC_SITE_URL`          | Public      | Site URL for password reset links     | Your deployment URL                        |
 
 ⚠️ **Security:**
+
 - `SUPABASE_SERVICE_ROLE_KEY` must NEVER be exposed in client code or prefixed with `NEXT_PUBLIC_`.
 - `GEMINI_API_KEY` and `GEOAPIFY_API_KEY` are server-only — they run exclusively in Server Actions.
 - Never commit `.env.local` with real secrets.
@@ -293,31 +295,31 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run test:e2e` | Run Playwright smoke tests |
+| Script              | Description                          |
+| ------------------- | ------------------------------------ |
+| `npm run dev`       | Start development server             |
+| `npm run build`     | Production build                     |
+| `npm run start`     | Start production server              |
+| `npm run lint`      | Run ESLint                           |
+| `npm run test:e2e`  | Run Playwright smoke tests           |
 | `npm run gen:types` | Regenerate Supabase TypeScript types |
-| `npm run db:push` | Push migrations to Supabase |
+| `npm run db:push`   | Push migrations to Supabase          |
 
 ## Demo Accounts
 
 Create these users in Supabase Dashboard → Authentication → Users (check "Auto Confirm"):
 
-| Role | Email | Password | Purpose |
-|------|-------|----------|---------|
-| Community | somchai@example.com | password123 | Report, transport, donate, foster, adopt |
-| Community | nattaya@example.com | password123 | Report, donate |
-| Community | prawit@example.com | password123 | Transport volunteer, temporary caretaker |
-| Community | kannika@example.com | password123 | Reporter, donor, adopter |
-| Community | thana@example.com | password123 | Reporter, donor |
-| Verified Vet | dr.siriporn@example.com | password123 | Create quotes, manage treatment |
-| Verified Vet | dr.anuwat@example.com | password123 | Create quotes, manage treatment |
-| Pending Vet | dr.newvet@example.com | password123 | Test vet verification flow |
-| Admin | admin@tabbyfund.com | password123 | Approve vets, moderate cases, analytics |
+| Role         | Email                   | Password    | Purpose                                  |
+| ------------ | ----------------------- | ----------- | ---------------------------------------- |
+| Community    | somchai@example.com     | password123 | Report, transport, donate, foster, adopt |
+| Community    | nattaya@example.com     | password123 | Report, donate                           |
+| Community    | prawit@example.com      | password123 | Transport volunteer, temporary caretaker |
+| Community    | kannika@example.com     | password123 | Reporter, donor, adopter                 |
+| Community    | thana@example.com       | password123 | Reporter, donor                          |
+| Verified Vet | dr.siriporn@example.com | password123 | Create quotes, manage treatment          |
+| Verified Vet | dr.anuwat@example.com   | password123 | Create quotes, manage treatment          |
+| Pending Vet  | dr.newvet@example.com   | password123 | Test vet verification flow               |
+| Admin        | admin@tabbyfund.com     | password123 | Approve vets, moderate cases, analytics  |
 
 After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo cases.
 
@@ -339,15 +341,15 @@ After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo
 
 ### Pre-Seeded Cases for Quick Testing
 
-| Case | Status | What to Test |
-|------|--------|-------------|
-| 1 | AWAITING_TRANSPORT | Claim transport |
-| 3 | AT_VET (no quote) | Vet creates quote |
-| 4–6 | FUNDING_OPEN | Donate |
-| 7 | IN_TREATMENT | Complete treatment |
-| 9 | IN_FOSTER (adoptable) | View on /adopt |
-| 13 | TREATED (needs caretaker) | Volunteer as caretaker |
-| 15 | DECEASED | Terminal case display |
+| Case | Status                    | What to Test           |
+| ---- | ------------------------- | ---------------------- |
+| 1    | AWAITING_TRANSPORT        | Claim transport        |
+| 3    | AT_VET (no quote)         | Vet creates quote      |
+| 4–6  | FUNDING_OPEN              | Donate                 |
+| 7    | IN_TREATMENT              | Complete treatment     |
+| 9    | IN_FOSTER (adoptable)     | View on /adopt         |
+| 13   | TREATED (needs caretaker) | Volunteer as caretaker |
+| 15   | DECEASED                  | Terminal case display  |
 
 ## Admin / Vet Approval Flow
 

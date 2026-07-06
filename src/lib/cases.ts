@@ -268,7 +268,9 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
     .limit(1)
     .maybeSingle();
 
-  // Fetch adoption listing
+  // Public adoption listing fields.
+  // medical_notes are intentionally visible to authenticated users through RLS.
+  // Do not use the service-role client here.
   const { data: adoption } = await supabase
     .from("adoption_listings")
     .select("status, personality, medical_notes")

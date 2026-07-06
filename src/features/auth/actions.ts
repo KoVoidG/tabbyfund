@@ -126,7 +126,7 @@ export async function register(
 
     let message = "Registration failed. Please try again.";
     if (lower.includes("already registered")) {
-      message = "An account with this email already exists. Please sign in instead.";
+      message = "If registration is possible for this email, you will receive further instructions.";
     } else if (lower.includes("rate limit")) {
       message = "Too many attempts. Please wait a moment and try again.";
     }
