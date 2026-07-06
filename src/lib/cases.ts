@@ -356,9 +356,14 @@ export async function getCaseDetail(id: string): Promise<CaseDetail | null> {
 
 export function redactLocationFromDescription(description: string | null): string {
   if (!description) return "";
+
   return description
-    .split("\n")
-    .filter((line) => !line.trim().toLowerCase().startsWith("location:"))
-    .join("\n")
+    // Remove whole lines that start with Location:
+    .replace(/^.*\bLocation:\s*.*$/gim, "")
+    // Remove inline Location: fragments until newline or sentence boundary
+    .replace(/\s*\bLocation:\s*[^.\n\r]*(?:[.\n\r]|$)/gi, " ")
+    // Clean up extra blank lines/spaces
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
     .trim();
 }
