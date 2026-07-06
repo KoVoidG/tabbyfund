@@ -217,7 +217,7 @@ Website:
 [TabbyFund](https://tabbyfund.vercel.app/)
 
 Video Demonstration:
-https://
+Included in hackathon submission portal.
 
 ---
 
@@ -323,6 +323,9 @@ Create these users in Supabase Dashboard → Authentication → Users (check "Au
 
 After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo cases.
 
+> [!WARNING]
+> These are demo-only credentials for the seeded hackathon environment. Do not use these credentials in production.
+
 ## Recommended Demo Flow
 
 1. **Sign in as community** (somchai@example.com) → `/dashboard`
@@ -365,16 +368,15 @@ After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo
 
 ## Security
 
-- **Supabase RLS** protects all database tables with row-level policies
-- **Server-side route guards** (`requireAuth`, `requireRole`) protect `/vet/*` and `/admin/*`
-- **`protect_profile_fields` trigger** prevents users from modifying their own `role` or `is_verified`
-- **Service role** is only used server-side for system writes where RLS intentionally blocks
-- **Cases SELECT RLS** restricts direct reads; public queries use service_role with allowlisted fields (no precise coordinates exposed)
-- **AI rate limiting** — Gemini triage requests are rate-limited per user (max 5 per 10 minutes)
-- **Password reset** avoids email enumeration (consistent response regardless of email existence)
-- **Server actions** return safe client-facing error messages without exposing internal details
-- **Vet actions** require `requireRole("vet", { requireVerified: true })`
-- **Admin actions** require `requireRole("admin")` with authenticated session context
+- **Supabase RLS** protects database access.
+- **Server-side route guards** protect role-specific routes.
+- **Server Actions** validate sensitive operations.
+- **Service role** is server-only and only used for protected system operations.
+- **Exact rescue locations** are not exposed through public/shared case descriptions.
+- **Password reset and registration flows** avoid explicit email-existence disclosure in public-facing error messages.
+- **Aikido Security scan** issues were fixed and retested successfully.
+
+For full details, see [documentation/Security_Report.md](documentation/Security_Report.md).
 
 ## MVP Limitations
 
@@ -412,7 +414,8 @@ public/
 └── mascot/               # TabbyFund cat mascot assets
 
 documentation/
-└── Testing_Report.md     # Full testing documentation
+├── Testing_Report.md     # Full testing documentation
+└── Security_Report.md    # Security scan & remediation report
 ```
 
 ## Testing

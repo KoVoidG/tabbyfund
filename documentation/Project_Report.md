@@ -1,7 +1,15 @@
 # HackTheKitty 2026 Project Report
 
-### Project Name-  **TabbyFund**,
-Reference ID - **3DH2EH7W**
+**Project Name:** TabbyFund  
+**Reference ID:** 3DH2EH7W
+
+## Submission Links
+
+- **Live App:** [https://tabbyfund.vercel.app/](https://tabbyfund.vercel.app/)
+- **GitHub Repository:** [KoVoidG/tabbyfund](https://github.com/KoVoidG/tabbyfund)
+- **Demo Video:** Included in hackathon submission portal
+- **Security Report:** [Security_Report.md](Security_Report.md)
+- **Testing Report:** [Testing_Report.md](Testing_Report.md)
 
 ## 1. Executive Summary
 
@@ -49,51 +57,52 @@ Although inspired by real rescue challenges in Thailand, the workflow is designe
 
 ## 3. Key Features
 
-| Category | Feature | Description |
-|----------|---------|-------------|
-| Community | Rescue Reporting | Multi-step wizard: photo upload → AI triage → location → details → transport preference |
-| Community | Volunteer Transport | Claim open transport missions or self-transport as reporter |
-| Community | Escrow-based Donation System | Currently simulated for the MVP |
-| Community | Temporary Caretaker | Volunteer to foster recovered cats and complete behavioural profiles |
-| Community | Adoption Discovery | Browse adoptable cats (visible only when all conditions met) |
-| Vet | Treatment Quotes | Line-item quote builder creating funding goals |
-| Vet | Treatment Management | Start, update, complete treatment with outcome recording |
-| Vet | Adoption Approval | Medical clearance checkbox before adoption eligibility |
-| Admin | Vet Verification | Approve/reject pending vet applications with clinic geocoding status |
-| Admin | Case Moderation | Triage queue with AI confidence indicators |
-| Admin | User Management | View, suspend, manage community/vet/admin profiles |
-| AI | Gemini Vision Triage | Server-side photo analysis for condition/severity/first-aid |
-| AI | Graceful Fallback | Fallback assessment if API is unavailable |
-| Automation | Auto-Caretaker | Transporter auto-assigned as caretaker after recovery |
-| Automation | Auto-Fund Transition | Case advances to FUNDED when donations reach quote goal |
-| Platform | PWA | Installable with service worker and offline page |
-| Platform | Notifications | In-app notification system with unread badges |
-| Platform | Rejected Vet Handling | Clear rejection screen with community continuation option |
-| Platform | Adoption Celebration | Success screen with "Rescue More Cats" prompt |
+| Category   | Feature                      | Description                                                                             |
+| ---------- | ---------------------------- | --------------------------------------------------------------------------------------- |
+| Community  | Rescue Reporting             | Multi-step wizard: photo upload → AI triage → location → details → transport preference |
+| Community  | Volunteer Transport          | Claim open transport missions or self-transport as reporter                             |
+| Community  | Escrow-based Donation System | Currently simulated for the MVP                                                         |
+| Community  | Temporary Caretaker          | Volunteer to foster recovered cats and complete behavioural profiles                    |
+| Community  | Adoption Discovery           | Browse adoptable cats (visible only when all conditions met)                            |
+| Vet        | Treatment Quotes             | Line-item quote builder creating funding goals                                          |
+| Vet        | Treatment Management         | Start, update, complete treatment with outcome recording                                |
+| Vet        | Adoption Approval            | Medical clearance checkbox before adoption eligibility                                  |
+| Admin      | Vet Verification             | Approve/reject pending vet applications with clinic geocoding status                    |
+| Admin      | Case Moderation              | Triage queue with AI confidence indicators                                              |
+| Admin      | User Management              | View, suspend, manage community/vet/admin profiles                                      |
+| AI         | Gemini Vision Triage         | Server-side photo analysis for condition/severity/first-aid                             |
+| AI         | Graceful Fallback            | Fallback assessment if API is unavailable                                               |
+| Automation | Auto-Caretaker               | Transporter auto-assigned as caretaker after recovery                                   |
+| Automation | Auto-Fund Transition         | Case advances to FUNDED when donations reach quote goal                                 |
+| Platform   | PWA                          | Installable with service worker and offline page                                        |
+| Platform   | Notifications                | In-app notification system with unread badges                                           |
+| Platform   | Rejected Vet Handling        | Clear rejection screen with community continuation option                               |
+| Platform   | Adoption Celebration         | Success screen with "Rescue More Cats" prompt                                           |
 
 ---
 
 ## 4. Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Frontend Framework | Next.js 16 (App Router) | Builds the application using Server Components, Client Components, Server Actions, and file-based routing. |
-| Programming Language | TypeScript 5 | Provides static type safety and improves maintainability across the application. |
-| UI & Styling | Tailwind CSS 4 | Utility-first CSS framework for responsive, mobile-first design. |
-| UI Components | shadcn/ui + Radix UI | Accessible, reusable, and consistent user interface components. |
-| Forms & Validation | React Hook Form + Zod | Form management and runtime validation for user input. |
-| Backend Platform | Supabase | Backend-as-a-Service providing authentication, PostgreSQL database, storage, and realtime capabilities. |
-| Authentication | Supabase Auth | Secure email/password authentication with role-based access control. |
-| Database | PostgreSQL (Supabase) | Stores rescue cases, user profiles, donations, treatment records, foster records, and adoption data. |
-| Database Security | Supabase Row Level Security (RLS) | Enforces secure database access policies directly at the data layer. |
-| File Storage | Supabase Storage | Stores rescue photos, treatment images, and foster documentation securely. |
-| Artificial Intelligence | Google Gemini Vision API | Analyses rescue photos to generate preliminary condition assessments and first-aid guidance. |
-| Maps & Geolocation | Leaflet, React Leaflet, Geoapify API | Displays rescue locations, veterinary clinics, and performs address geocoding. |
-| Data Visualization | Recharts | Visualises platform statistics and dashboard analytics. |
-| Progressive Web App | Service Worker + Web App Manifest | Enables installation, offline support, and an app-like experience across devices. |
-| Testing | Playwright | Performs end-to-end testing of critical user workflows. |
-| Deployment | Vercel | Hosts and deploys the production-ready application. |
-| Version Control | Git & GitHub | Source code management, version tracking, and collaboration. |
+| Layer                   | Technology                           | Purpose                                                                                                    |
+| ----------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Frontend Framework      | Next.js 16 (App Router)              | Builds the application using Server Components, Client Components, Server Actions, and file-based routing. |
+| Programming Language    | TypeScript 5                         | Provides static type safety and improves maintainability across the application.                           |
+| UI & Styling            | Tailwind CSS 4                       | Utility-first CSS framework for responsive, mobile-first design.                                           |
+| UI Components           | shadcn/ui + Radix UI                 | Accessible, reusable, and consistent user interface components.                                            |
+| Forms & Validation      | React Hook Form + Zod                | Form management and runtime validation for user input.                                                     |
+| Backend Platform        | Supabase                             | Backend-as-a-Service providing authentication, PostgreSQL database, storage, and realtime capabilities.    |
+| Authentication          | Supabase Auth                        | Secure email/password authentication with role-based access control.                                       |
+| Database                | PostgreSQL (Supabase)                | Stores rescue cases, user profiles, donations, treatment records, foster records, and adoption data.       |
+| Database Security       | Supabase Row Level Security (RLS)    | Enforces secure database access policies directly at the data layer.                                       |
+| File Storage            | Supabase Storage                     | Stores rescue photos, treatment images, and foster documentation securely.                                 |
+| Artificial Intelligence | Google Gemini Vision API             | Analyses rescue photos to generate preliminary condition assessments and first-aid guidance.               |
+| Maps & Geolocation      | Leaflet, React Leaflet, Geoapify API | Displays rescue locations, veterinary clinics, and performs address geocoding.                             |
+| Data Visualization      | Recharts                             | Visualises platform statistics and dashboard analytics.                                                    |
+| Progressive Web App     | Service Worker + Web App Manifest    | Enables installation, offline support, and an app-like experience across devices.                          |
+| Testing                 | Playwright                           | Performs end-to-end testing of critical user workflows.                                                    |
+| Deployment              | Vercel                               | Hosts and deploys the production-ready application.                                                        |
+| Version Control         | Git & GitHub                         | Source code management, version tracking, and collaboration.                                               |
+
 ---
 
 ## 5. Technical Architecture
@@ -276,6 +285,7 @@ flowchart TD
 ```
 
 ### Rescue Workflow
+
 ```mermaid
 flowchart TD
     A[Community Reports Cat] --> B{Can Reporter Transport?}
@@ -319,77 +329,83 @@ flowchart TD
 
 ---
 
-### 6. Testing Matrix
+## 6. Testing Matrix
 
-| Feature / Flow | Steps | Expected Result | Actual Result | Status |
-|----------------|-------|-----------------|---------------|--------|
-| Community Registration | Register with email, select Community role | Account created, redirected to /dashboard | Works as expected | ✅ Pass |
-| Vet Registration | Register with Vet role, add clinic info | Account created, clinic geocoded, redirected to /vet pending | Works as expected | ✅ Pass |
-| Login (Community) | Enter community credentials, submit | Redirect to /dashboard with personal stats | Works as expected | ✅ Pass |
-| Login (Vet) | Enter verified vet credentials | Redirect to /vet with case dashboard | Works as expected | ✅ Pass |
-| Login (Admin) | Enter admin credentials | Redirect to /admin with platform stats | Works as expected | ✅ Pass |
-| Report Rescue | Complete 5-step wizard with photo | Case created, photo uploaded, transport request created | Works as expected | ✅ Pass |
-| AI Photo Analysis | Upload cat photo in report wizard | Gemini returns condition/severity/first-aid | Works (fallback if API unavailable) | ✅ Pass |
-| Self-Transport | Check "I can transport" in report | Case = IN_TRANSIT, reporter = transporter | Works as expected | ✅ Pass |
-| Volunteer Transport Claim | Click "Volunteer to Transport" on open case | Transport CLAIMED, case IN_TRANSIT | Works as expected | ✅ Pass |
-| Mark Delivered | Transporter clicks "Mark Delivered to Vet" | Transport DELIVERED, case AT_VET | Works as expected | ✅ Pass |
-| Vet Quote Creation | Fill quote builder, submit | Quote created, case advances to FUNDING_OPEN | Works as expected | ✅ Pass |
-| Donation | Select amount, confirm payment | Donation row created (HELD_IN_ESCROW) | Works as expected | ✅ Pass |
-| Full Funding | Donate enough to meet quote goal | Case auto-advances to FUNDED | Works as expected | ✅ Pass |
-| Treatment Completion | Vet marks RECOVERED + approve adoption | Case TREATED, adoption listing created, caretaker assigned | Works as expected | ✅ Pass |
-| Behavioural Profile | Caretaker fills personality form, marks complete | `behaviour_profile_complete = true` | Works as expected | ✅ Pass |
-| Adoption Visibility | All 3 conditions met | Cat appears on /adopt page | Works as expected | ✅ Pass |
-| Adoption Success | Complete adoption flow | Celebration screen with "Rescue More Cats" | Works as expected | ✅ Pass |
-| Admin Vet Approval | Admin clicks Approve on pending vet | `is_verified = true`, vet gains access | Works as expected | ✅ Pass |
-| Admin Vet Rejection | Admin clicks Reject | Role downgraded to community, rejection screen shown | Works as expected | ✅ Pass |
-| RLS: Community → /admin | Community user navigates to /admin | Redirected to /dashboard | Works as expected | ✅ Pass |
-| RLS: Community → /vet | Community user navigates to /vet | Redirected to /dashboard | Works as expected | ✅ Pass |
-| Password Reset | Request reset, receive email, set new password | Password updated, redirected to login | Works as expected | ✅ Pass |
-| PWA Installation | Open in mobile Chrome, install prompt | App installs to home screen | Works as expected | ✅ Pass |
-| Responsive Layout | View on mobile/tablet/desktop | Layout adapts (sidebar on desktop, bottom nav on mobile) | Works as expected | ✅ Pass |
-| Notifications | Perform actions, check bell dropdown | Unread count updates, dropdown shows recent | Works as expected | ✅ Pass |
+| Feature / Flow            | Steps                                            | Expected Result                                              | Actual Result                       | Status  |
+| ------------------------- | ------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------- | ------- |
+| Community Registration    | Register with email, select Community role       | Account created, redirected to /dashboard                    | Works as expected                   | ✅ Pass |
+| Vet Registration          | Register with Vet role, add clinic info          | Account created, clinic geocoded, redirected to /vet pending | Works as expected                   | ✅ Pass |
+| Login (Community)         | Enter community credentials, submit              | Redirect to /dashboard with personal stats                   | Works as expected                   | ✅ Pass |
+| Login (Vet)               | Enter verified vet credentials                   | Redirect to /vet with case dashboard                         | Works as expected                   | ✅ Pass |
+| Login (Admin)             | Enter admin credentials                          | Redirect to /admin with platform stats                       | Works as expected                   | ✅ Pass |
+| Report Rescue             | Complete 5-step wizard with photo                | Case created, photo uploaded, transport request created      | Works as expected                   | ✅ Pass |
+| AI Photo Analysis         | Upload cat photo in report wizard                | Gemini returns condition/severity/first-aid                  | Works (fallback if API unavailable) | ✅ Pass |
+| Self-Transport            | Check "I can transport" in report                | Case = IN_TRANSIT, reporter = transporter                    | Works as expected                   | ✅ Pass |
+| Volunteer Transport Claim | Click "Volunteer to Transport" on open case      | Transport CLAIMED, case IN_TRANSIT                           | Works as expected                   | ✅ Pass |
+| Mark Delivered            | Transporter clicks "Mark Delivered to Vet"       | Transport DELIVERED, case AT_VET                             | Works as expected                   | ✅ Pass |
+| Vet Quote Creation        | Fill quote builder, submit                       | Quote created, case advances to FUNDING_OPEN                 | Works as expected                   | ✅ Pass |
+| Donation                  | Select amount, confirm payment                   | Donation row created (HELD_IN_ESCROW)                        | Works as expected                   | ✅ Pass |
+| Full Funding              | Donate enough to meet quote goal                 | Case auto-advances to FUNDED                                 | Works as expected                   | ✅ Pass |
+| Treatment Completion      | Vet marks RECOVERED + approve adoption           | Case TREATED, adoption listing created, caretaker assigned   | Works as expected                   | ✅ Pass |
+| Behavioural Profile       | Caretaker fills personality form, marks complete | `behaviour_profile_complete = true`                          | Works as expected                   | ✅ Pass |
+| Adoption Visibility       | All 3 conditions met                             | Cat appears on /adopt page                                   | Works as expected                   | ✅ Pass |
+| Adoption Success          | Complete adoption flow                           | Celebration screen with "Rescue More Cats"                   | Works as expected                   | ✅ Pass |
+| Admin Vet Approval        | Admin clicks Approve on pending vet              | `is_verified = true`, vet gains access                       | Works as expected                   | ✅ Pass |
+| Admin Vet Rejection       | Admin clicks Reject                              | Role downgraded to community, rejection screen shown         | Works as expected                   | ✅ Pass |
+| RLS: Community → /admin   | Community user navigates to /admin               | Redirected to /dashboard                                     | Works as expected                   | ✅ Pass |
+| RLS: Community → /vet     | Community user navigates to /vet                 | Redirected to /dashboard                                     | Works as expected                   | ✅ Pass |
+| Password Reset            | Request reset, receive email, set new password   | Password updated, redirected to login                        | Works as expected                   | ✅ Pass |
+| PWA Installation          | Open in mobile Chrome, install prompt            | App installs to home screen                                  | Works as expected                   | ✅ Pass |
+| Responsive Layout         | View on mobile/tablet/desktop                    | Layout adapts (sidebar on desktop, bottom nav on mobile)     | Works as expected                   | ✅ Pass |
+| Notifications             | Perform actions, check bell dropdown             | Unread count updates, dropdown shows recent                  | Works as expected                   | ✅ Pass |
 
----
+## 7. Security Review
 
-## 7. Future Improvements
+TabbyFund was scanned with Aikido Security before submission. The scan identified issues related to access control, sensitive data exposure, input validation, open redirects, business logic bypasses, and unsafe external image loading. These issues were fixed and retested successfully. The Security Report contains screenshots of the scan results and a summary of the remediations.
 
-| Priority | Improvement | Rationale |
-|----------|-------------|-----------|
-| High | Real payment integration (PromptPay QR, Stripe) | Replace the simulated escrow system with secure real-world payment processing for veterinary bills. |
-| High | AI Cat Care Assistant | An AI chatbot trained specifically for TabbyFund that can answer questions about the platform, explain the rescue workflow, and provide educational guidance on cat behaviour, health, nutrition, first-aid, and responsible pet ownership. |
-| High | Push Notifications | Notify volunteers, veterinarians, donors, and adopters immediately when important case updates occur without requiring manual refreshes. |
-| Medium | Formal Adoption Application Workflow | Introduce adoption applications, applicant reviews, interviews, approval tracking, and adoption history. |
-| Medium | Redis or Database-backed Rate Limiting | Replace the current in-memory rate limiting with a distributed solution suitable for production deployments. |
-| Medium | Multi-language Support | Support both Thai and English to better serve the primary target audience while remaining accessible to international users. |
-| Medium | Real-time Collaboration | Use Supabase Realtime so rescue status updates, donations, treatment progress, and notifications appear instantly across all connected users. |
-| Low | GPS & Navigation Integration | Automatically detect the reporter's location and provide navigation to nearby verified veterinary clinics. |
-| Low | Vet Appointment & Capacity Management | Allow veterinary clinics to manage availability, operating hours, and case capacity before accepting new rescue requests. |
-| Low | Recovery Timeline Gallery | Allow vets and foster carers to upload before-and-after recovery photos, giving donors greater transparency and documenting each rescue journey. |
-| Low | Community Discussion & Volunteer Coordination | Provide dedicated discussion spaces for each rescue case so volunteers can coordinate transport, foster care, and adoption more effectively. |
+For registration security, duplicate-email signup attempts no longer display a specific "account already exists" error; the register action follows the same initial post-registration redirect path and relies on the normal authentication guard afterward.
 
 ---
 
-## 8. Tools Used
+## 8. Future Improvements
 
-| Tool | Purpose |
-|------|---------|
-| ChatGPT | Project planning, workflow design, architecture discussions, documentation review, security analysis, and technical guidance. |
-| Claude | Code generation, refactoring, debugging, UI implementation, and feature development. |
-|Google Gemini API| AI-powered rescue photo analysis to help assess a cat's visible condition and estimate treatment urgency. |
-| Google Gemini | Generated mascot illustrations and UI concept artwork used throughout the application. |
-| Figma | Refined AI-generated assets, UI polishing, layout adjustments, and design iteration. |
-| Kiro IDE | Primary development environment. |
-| Git & GitHub | Version control, source code management, and repository hosting. |
-| Supabase  | Backend platform providing PostgreSQL, Authentication, Storage, SQL migrations, Row Level Security, and Realtime services. |
-|Vercel|Application deployment, hosting, and production environment.|
-| Chrome DevTools | Responsive testing, debugging, performance inspection, and accessibility checks. |
-| Playwright | End-to-end smoke testing and workflow verification. |
-| OBS Studio | Screen recording for the project demonstration video. |
-| CapCut | Video editing, captions, transitions, and final presentation production. |
+| Priority | Improvement                                     | Rationale                                                                                                                                                                                                                                   |
+| -------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| High     | Real payment integration (PromptPay QR, Stripe) | Replace the simulated escrow system with secure real-world payment processing for veterinary bills.                                                                                                                                         |
+| High     | AI Cat Care Assistant                           | An AI chatbot trained specifically for TabbyFund that can answer questions about the platform, explain the rescue workflow, and provide educational guidance on cat behaviour, health, nutrition, first-aid, and responsible pet ownership. |
+| High     | Push Notifications                              | Notify volunteers, veterinarians, donors, and adopters immediately when important case updates occur without requiring manual refreshes.                                                                                                    |
+| Medium   | Formal Adoption Application Workflow            | Introduce adoption applications, applicant reviews, interviews, approval tracking, and adoption history.                                                                                                                                    |
+| Medium   | Redis or Database-backed Rate Limiting          | Replace the current in-memory rate limiting with a distributed solution suitable for production deployments.                                                                                                                                |
+| Medium   | Multi-language Support                          | Support both Thai and English to better serve the primary target audience while remaining accessible to international users.                                                                                                                |
+| Medium   | Real-time Collaboration                         | Use Supabase Realtime so rescue status updates, donations, treatment progress, and notifications appear instantly across all connected users.                                                                                               |
+| Low      | GPS & Navigation Integration                    | Automatically detect the reporter's location and provide navigation to nearby verified veterinary clinics.                                                                                                                                  |
+| Low      | Vet Appointment & Capacity Management           | Allow veterinary clinics to manage availability, operating hours, and case capacity before accepting new rescue requests.                                                                                                                   |
+| Low      | Recovery Timeline Gallery                       | Allow vets and foster carers to upload before-and-after recovery photos, giving donors greater transparency and documenting each rescue journey.                                                                                            |
+| Low      | Community Discussion & Volunteer Coordination   | Provide dedicated discussion spaces for each rescue case so volunteers can coordinate transport, foster care, and adoption more effectively.                                                                                                |
 
 ---
 
-## 9. Learnings & Takeaways
+## 9. Tools Used
+
+| Tool              | Purpose                                                                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| ChatGPT           | Project planning, workflow design, architecture discussions, documentation review, security analysis, and technical guidance. |
+| Claude            | Code generation, refactoring, debugging, UI implementation, and feature development.                                          |
+| Google Gemini API | AI-powered rescue photo analysis to help assess a cat's visible condition and estimate treatment urgency.                     |
+| Google Gemini     | Generated mascot illustrations and UI concept artwork used throughout the application.                                        |
+| Figma             | Refined AI-generated assets, UI polishing, layout adjustments, and design iteration.                                          |
+| Kiro IDE          | Primary development environment.                                                                                              |
+| Git & GitHub      | Version control, source code management, and repository hosting.                                                              |
+| Supabase          | Backend platform providing PostgreSQL, Authentication, Storage, SQL migrations, Row Level Security, and Realtime services.    |
+| Vercel            | Application deployment, hosting, and production environment.                                                                  |
+| Chrome DevTools   | Responsive testing, debugging, performance inspection, and accessibility checks.                                              |
+| Playwright        | End-to-end smoke testing and workflow verification.                                                                           |
+| OBS Studio        | Screen recording for the project demonstration video.                                                                         |
+| CapCut            | Video editing, captions, transitions, and final presentation production.                                                      |
+
+---
+
+## 10. Learnings & Takeaways
 
 ### Full-Stack Application Architecture
 
@@ -411,6 +427,7 @@ Building TabbyFund reinforced the importance of designing software around comple
 
 - Learned the importance of defence-in-depth by combining authentication, authorization, Row Level Security, database triggers, route guards, and server-side validation.
 - Implemented secure handling of API keys, rate limiting, password reset protection, and generic error handling to reduce common security risks.
+- **Security Audit**: TabbyFund was reviewed with Aikido Security before submission. The scan identified several issues related to access control, sensitive data exposure, input validation, open redirect protection, and unsafe external image loading. These issues were fixed and the project was retested. The final Aikido retest confirmed that the reported issues were resolved.
 
 ### AI Integration
 
@@ -427,27 +444,27 @@ Building TabbyFund reinforced the importance of designing software around comple
 
 ---
 
-## 10. Acknowledgments
+## 11. Acknowledgments
 
-| Technology / Service | Contribution |
-|----------------------|--------------|
-| Next.js | React framework used to build the application. |
-| Supabase | Authentication, PostgreSQL database, Row Level Security, Storage, and Realtime infrastructure. |
-|Google Gemini API|Multimodal AI used for rescue photo analysis.|
-| Google Gemini | Assisted with generating mascot and illustration concepts.|
-|Vercel|Application hosting and deployment platform.|
-| Geoapify | Server-side geocoding for veterinary clinic locations. |
-| Tailwind CSS | Utility-first styling framework. |
-| shadcn/ui | Accessible reusable UI component library. |
-| Radix UI | Headless accessible UI primitives. |
-| React Hook Form | Form state management and validation. |
-| Zod | Type-safe schema validation. |
-| Leaflet & React Leaflet | Interactive mapping components. |
-| Recharts | Dashboard data visualisation. |
-| Lucide React | Icon library used throughout the application. |
-| Playwright | End-to-end testing framework. |
-| The open-source community | For creating the libraries and tools that made this project possible. |
+| Technology / Service      | Contribution                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| Next.js                   | React framework used to build the application.                                                 |
+| Supabase                  | Authentication, PostgreSQL database, Row Level Security, Storage, and Realtime infrastructure. |
+| Google Gemini API         | Multimodal AI used for rescue photo analysis.                                                  |
+| Google Gemini             | Assisted with generating mascot and illustration concepts.                                     |
+| Vercel                    | Application hosting and deployment platform.                                                   |
+| Geoapify                  | Server-side geocoding for veterinary clinic locations.                                         |
+| Tailwind CSS              | Utility-first styling framework.                                                               |
+| shadcn/ui                 | Accessible reusable UI component library.                                                      |
+| Radix UI                  | Headless accessible UI primitives.                                                             |
+| React Hook Form           | Form state management and validation.                                                          |
+| Zod                       | Type-safe schema validation.                                                                   |
+| Leaflet & React Leaflet   | Interactive mapping components.                                                                |
+| Recharts                  | Dashboard data visualisation.                                                                  |
+| Lucide React              | Icon library used throughout the application.                                                  |
+| Playwright                | End-to-end testing framework.                                                                  |
+| The open-source community | For creating the libraries and tools that made this project possible.                          |
 
 ---
 
-*Report for HackTheKitty 2026 submission.*
+_Report for HackTheKitty 2026 submission._

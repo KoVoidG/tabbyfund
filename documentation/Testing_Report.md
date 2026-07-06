@@ -129,6 +129,9 @@ Tests read credentials from `.env.local` via dotenv:
 | `E2E_VET_EMAIL` | dr.siriporn@example.com | Verified vet login |
 | `E2E_VET_PASSWORD` | password123 | Vet password |
 
+> [!WARNING]
+> These are demo-only credentials for the seeded hackathon environment. Do not use these credentials in production.
+
 ### Current Automated Results: 9 passed, 2 known timing issues
 
 | Test | Status | Notes |
@@ -170,3 +173,13 @@ tests/
 
 playwright.config.ts     # Playwright configuration (dotenv, chromium, auto dev server)
 ```
+
+---
+
+## Build & Lint Verification
+
+To ensure that security updates and refactorings did not introduce syntax errors or compilation problems, the following verification commands were run successfully after the final security fixes:
+
+- `npm run lint` — ✅ Pass (All checks complete, zero errors)
+- `npm run build` — ✅ Pass (Next.js production build succeeded with Turbopack, type-checking passed, and static routes compiled)
+
