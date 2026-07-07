@@ -32,7 +32,6 @@ TabbyFund is a mobile-first progressive web app for managing the full rescue lif
 - [Admin / Vet Approval Flow](#admin--vet-approval-flow)
 - [Security](#security)
 - [MVP Limitations](#mvp-limitations)
-- [Future Improvements](#future-improvements)
 - [Project Structure](#project-structure)
 - [Testing](#testing)
 - [Deployment](#deployment)
@@ -150,7 +149,7 @@ flowchart TD
 
 - **Rescue Reporting:** Multi-step wizard with photo upload, AI analysis, location picker, and transport preference
 - **Volunteer Transport:** Self-transport option or leave cases open for community volunteers to claim
-- **Simulated Donations:** Escrow-based funding held until vet confirms treatment completion
+- **Simulated Donations:** Escrow-based funding released only after the quote is fully funded and vet treatment is completed
 - **Temporary Caretaker:** Volunteer to foster recovered cats and complete behavioural profiles
 - **Adoption Discovery:** Browse publicly adoptable cats with personality, health, and home match info
 
@@ -172,7 +171,7 @@ flowchart TD
 
 - **Gemini Vision Triage:** Real Google Gemini API analyzes rescue photos for condition, severity, and first-aid guidance
 - **Graceful Fallback:** If AI is unavailable, the app continues with a fallback assessment — never blocks the user
-- **Auto-Caretaker Assignment:** Transporter is automatically assigned as temporary caretaker after recovery
+- **Caretaker Handoff:** Transporter is invited to become temporary caretaker after recovery; if declined, a foster volunteer request opens
 - **Auto-Fund Transition:** Case automatically advances to FUNDED when donations reach the quote goal
 
 ### PWA and Platform
@@ -217,7 +216,7 @@ Website:
 [TabbyFund](https://tabbyfund.vercel.app/)
 
 Video Demonstration:
-Included in hackathon submission portal.
+[TabbyFund Video](https://drive.google.com/file/d/1w9e5_1NfSIIAUfYhr56Fc1cV_peETZM6/view?usp=drive_link)
 
 ---
 
@@ -237,15 +236,15 @@ Optional (only for local Supabase):
 ## Installation
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/KoVoidG/tabbyfund.git
 cd tabbyfund
 npm install
 cp .env.example .env.local
 ```
 
-After copying .env.example to .env.local, fill in the required environment variables before running the application.
+After copying `.env.example` to `.env.local`, review the included environment variables.
 
-Then fill in your real values in `.env.local` (see Environment Variables below).
+For hackathon judging, `.env.example` includes free, project-scoped demo keys for Gemini and Geoapify. Supabase values are intentionally left blank.
 
 ## Environment Variables
 
@@ -257,6 +256,14 @@ Then fill in your real values in `.env.local` (see Environment Variables below).
 | `GEMINI_API_KEY`                | Server-only | Google Gemini for AI photo triage     | [Google AI Studio](https://ai.google.dev/) |
 | `GEOAPIFY_API_KEY`              | Server-only | Geocoding for vet clinic locations    | [geoapify.com](https://www.geoapify.com/)  |
 | `NEXT_PUBLIC_SITE_URL`          | Public      | Site URL for password reset links     | Your deployment URL                        |
+
+### Environment Variables for Judging
+
+This repository includes free, project-scoped demo keys for Gemini and Geoapify in `.env.example` to help judges test AI photo analysis and geocoding during local setup.
+
+Supabase project values are intentionally not included. To run locally, judges can either create their own Supabase project and apply the migrations, or use the deployed Vercel demo with the provided demo accounts.
+
+No Supabase service role key, database password, or privileged admin secret is included.
 
 ⚠️ **Security:**
 
@@ -280,7 +287,7 @@ supabase db push
 ### Option B: Manual via Dashboard
 
 1. Open Supabase Dashboard → SQL Editor
-2. Run each file in `supabase/migrations/` in filename order (001 → 018)
+2. Run each file in `supabase/migrations/` in filename order (001 → 019)
 3. After migrations, run `supabase/seed_cloud_demo.sql` for demo data
 
 ### Demo Seed
@@ -356,7 +363,7 @@ After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo
 
 ## Admin / Vet Approval Flow
 
-1. User registers and selects "Veterinarian" role (optionally provides clinic name and address)
+1. User registers and selects "Veterinarian" role (provides clinic name and address)
 2. Clinic address is geocoded via Geoapify (graceful null if unavailable)
 3. Account is created with `is_verified = false`
 4. Vet sees pending verification screen at `/vet`
@@ -414,6 +421,7 @@ public/
 └── mascot/               # TabbyFund cat mascot assets
 
 documentation/
+├── Project_Report.md    # Full project report
 ├── Testing_Report.md     # Full testing documentation
 └── Security_Report.md    # Security scan & remediation report
 ```

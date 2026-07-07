@@ -215,7 +215,7 @@ export async function logout(): Promise<never> {
 
 /**
  * Request a password reset email.
- * Checks if the email exists and returns a validation error if not found (hackathon build requirement).
+ * Requests a reset code for the specified email. Avoids disclosing email existence for security.
  */
 export async function requestPasswordReset(
   formData: FormData

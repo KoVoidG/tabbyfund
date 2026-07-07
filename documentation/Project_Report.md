@@ -7,7 +7,7 @@
 
 - **Live App:** [https://tabbyfund.vercel.app/](https://tabbyfund.vercel.app/)
 - **GitHub Repository:** [KoVoidG/tabbyfund](https://github.com/KoVoidG/tabbyfund)
-- **Demo Video:** Included in hackathon submission portal
+- **Demo Video:** [Google Drive Link](https://drive.google.com/file/d/1w9e5_1NfSIIAUfYhr56Fc1cV_peETZM6/view?usp=drive_link)
 - **Security Report:** [Security_Report.md](Security_Report.md)
 - **Testing Report:** [Testing_Report.md](Testing_Report.md)
 
@@ -57,27 +57,27 @@ Although inspired by real rescue challenges in Thailand, the workflow is designe
 
 ## 3. Key Features
 
-| Category   | Feature                      | Description                                                                             |
-| ---------- | ---------------------------- | --------------------------------------------------------------------------------------- |
-| Community  | Rescue Reporting             | Multi-step wizard: photo upload → AI triage → location → details → transport preference |
-| Community  | Volunteer Transport          | Claim open transport missions or self-transport as reporter                             |
-| Community  | Escrow-based Donation System | Currently simulated for the MVP                                                         |
-| Community  | Temporary Caretaker          | Volunteer to foster recovered cats and complete behavioural profiles                    |
-| Community  | Adoption Discovery           | Browse adoptable cats (visible only when all conditions met)                            |
-| Vet        | Treatment Quotes             | Line-item quote builder creating funding goals                                          |
-| Vet        | Treatment Management         | Start, update, complete treatment with outcome recording                                |
-| Vet        | Adoption Approval            | Medical clearance checkbox before adoption eligibility                                  |
-| Admin      | Vet Verification             | Approve/reject pending vet applications with clinic geocoding status                    |
-| Admin      | Case Moderation              | Triage queue with AI confidence indicators                                              |
-| Admin      | User Management              | View, suspend, manage community/vet/admin profiles                                      |
-| AI         | Gemini Vision Triage         | Server-side photo analysis for condition/severity/first-aid                             |
-| AI         | Graceful Fallback            | Fallback assessment if API is unavailable                                               |
-| Automation | Auto-Caretaker               | Transporter auto-assigned as caretaker after recovery                                   |
-| Automation | Auto-Fund Transition         | Case advances to FUNDED when donations reach quote goal                                 |
-| Platform   | PWA                          | Installable with service worker and offline page                                        |
-| Platform   | Notifications                | In-app notification system with unread badges                                           |
-| Platform   | Rejected Vet Handling        | Clear rejection screen with community continuation option                               |
-| Platform   | Adoption Celebration         | Success screen with "Rescue More Cats" prompt                                           |
+| Category   | Feature                      | Description                                                                                                                      |
+| ---------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Community  | Rescue Reporting             | Multi-step wizard: photo upload → AI triage → location → details → transport preference                                          |
+| Community  | Volunteer Transport          | Claim open transport missions or self-transport as reporter                                                                      |
+| Community  | Escrow-based Donation System | Currently simulated for the MVP                                                                                                  |
+| Community  | Temporary Caretaker          | Volunteer to foster recovered cats and complete behavioural profiles                                                             |
+| Community  | Adoption Discovery           | Browse adoptable cats (visible only when all conditions met)                                                                     |
+| Vet        | Treatment Quotes             | Line-item quote builder creating funding goals                                                                                   |
+| Vet        | Treatment Management         | Start, update, complete treatment with outcome recording                                                                         |
+| Vet        | Adoption Approval            | Medical clearance checkbox before adoption eligibility                                                                           |
+| Admin      | Vet Verification             | Approve/reject pending vet applications with clinic geocoding status                                                             |
+| Admin      | Case Moderation              | Triage queue with AI confidence indicators                                                                                       |
+| Admin      | User Management              | View, suspend, manage community/vet/admin profiles                                                                               |
+| AI         | Gemini Vision Triage         | Server-side photo analysis for condition/severity/first-aid                                                                      |
+| AI         | Graceful Fallback            | Fallback assessment if API is unavailable                                                                                        |
+| Automation | Caretaker Handoff            | Transporter is invited to become caretaker after recovery; if declined, another community volunteer can claim the caretaker role |
+| Automation | Auto-Fund Transition         | Case advances to FUNDED when donations reach quote goal                                                                          |
+| Platform   | PWA                          | Installable with service worker and offline page                                                                                 |
+| Platform   | Notifications                | In-app notification system with unread badges                                                                                    |
+| Platform   | Rejected Vet Handling        | Clear rejection screen with community continuation option                                                                        |
+| Platform   | Adoption Celebration         | Success screen with "Rescue More Cats" prompt                                                                                    |
 
 ---
 
