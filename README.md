@@ -71,9 +71,9 @@ TabbyFund is a mobile-first progressive web app for managing the full rescue lif
       <strong>Admin Dashboard</strong>
     </td>
     <td>
-      <img src="documentation/screenshots/register.jpg" alt="Register Page" width="100%">
+      <img src="documentation/screenshots/404.jpg" alt="404 Page" width="100%">
       <br>
-      <strong>Register Page</strong>
+      <strong>404 Page</strong>
     </td>
   </tr>
 </table>
