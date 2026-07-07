@@ -244,8 +244,6 @@ cp .env.example .env.local
 
 After copying `.env.example` to `.env.local`, review the included environment variables.
 
-For hackathon judging, `.env.example` includes free, project-scoped demo keys for Gemini and Geoapify. Supabase values are intentionally left blank.
-
 ## Environment Variables
 
 | Variable                        | Scope       | Description                           | Source                                     |
@@ -259,9 +257,9 @@ For hackathon judging, `.env.example` includes free, project-scoped demo keys fo
 
 ### Environment Variables for Judging
 
-This repository includes free, project-scoped demo keys for Gemini and Geoapify in `.env.example` to help judges test AI photo analysis and geocoding during local setup.
+`.env.example` lists the required environment variables for local setup.
 
-Supabase project values are intentionally not included. To run locally, judges can either create their own Supabase project and apply the migrations, or use the deployed Vercel demo with the provided demo accounts.
+API keys are not committed publicly. Judges can use the deployed Vercel demo with the provided demo accounts, or create their own Supabase, Gemini, and Geoapify keys when running locally.
 
 No Supabase service role key, database password, or privileged admin secret is included.
 
@@ -275,7 +273,7 @@ No Supabase service role key, database password, or privileged admin secret is i
 
 ## Database Setup
 
-The project uses 18 Supabase migrations in `supabase/migrations/`.
+The project uses 18 Supabase migrations in `supabase/migrations/`. The files are numbered up to 019 because one number is skipped.
 
 ### Option A: Supabase CLI
 
@@ -344,7 +342,7 @@ After creating auth users, run `seed_cloud_demo.sql` to set up profiles and demo
 7. **Sign in as community** → `/donate` → select case → donate full amount
 8. **Vet starts treatment** → `/vet/cases/[id]` → create treatment record
 9. **Vet completes treatment** → CompletionCard → Recovered + Approve for Adoption
-10. **Caretaker auto-assigned** (the transporter) → `/foster` → complete behavioural profile
+10. **Caretaker handoff** → transporter accepts, or declines so another community volunteer can claim → `/foster` → complete behavioural profile
 11. **Cat appears on** `/adopt` → all three conditions met
 12. **Adopt the cat** → celebration screen with "Rescue More Cats" prompt
 13. **Sign in as admin** → `/admin` → approve/reject pending vets, moderate cases, view analytics

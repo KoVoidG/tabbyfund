@@ -17,6 +17,10 @@
 /.next/
 /out/
 
+# local editor/system files
+*.swp
+*.swo
+
 # production
 /build
 
@@ -45,6 +49,10 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+.env.development
+.env.test
+.env.production
+.env.preview
 !.env.example
 
 # agent & local tool caches
